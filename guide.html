@@ -3,188 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>试玩 HTML 检测修改工具 使用说明</title>
+  <meta http-equiv="refresh" content="0; url=https://docs.google.com/document/d/1k_H63zH0p-ZkBSVhY3bbEETz-o_73RUMMH0M6V21fGA/edit?tab=t.0">
+  <title>跳转到使用说明</title>
+  <script>
+    location.replace("https://docs.google.com/document/d/1k_H63zH0p-ZkBSVhY3bbEETz-o_73RUMMH0M6V21fGA/edit?tab=t.0");
+  </script>
   <style>
-    :root {
-      --text: #14213d;
-      --muted: #5d6b82;
-      --line: #dbe3ef;
-      --panel: #ffffff;
-      --soft: #f4f7fb;
-      --accent: #2f6fec;
-    }
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
-      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      color: #14213d;
       background: #eef3f9;
       font-family: Arial, "Microsoft YaHei", sans-serif;
-      line-height: 1.65;
     }
     main {
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 36px 20px 56px;
-    }
-    header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.25;
-    }
-    .version {
-      color: var(--muted);
-      white-space: nowrap;
-      font-size: 14px;
-    }
-    section {
-      margin-top: 18px;
-      padding: 22px;
-      background: var(--panel);
-      border: 1px solid var(--line);
+      max-width: 520px;
+      padding: 28px;
+      text-align: center;
+      background: #fff;
+      border: 1px solid #dbe3ef;
       border-radius: 8px;
     }
-    h2 {
+    h1 {
       margin: 0 0 12px;
-      font-size: 20px;
-    }
-    h3 {
-      margin: 18px 0 8px;
-      font-size: 16px;
+      font-size: 22px;
     }
     p {
-      margin: 8px 0;
+      margin: 0 0 18px;
+      color: #5d6b82;
+      line-height: 1.6;
     }
-    ul, ol {
-      margin: 8px 0 8px 22px;
-      padding: 0;
-    }
-    li {
-      margin: 4px 0;
-    }
-    code {
-      padding: 2px 5px;
-      border-radius: 4px;
-      background: var(--soft);
-      font-family: Consolas, monospace;
-      font-size: .95em;
-    }
-    .note {
-      padding: 12px 14px;
-      border-left: 4px solid var(--accent);
-      background: var(--soft);
-      border-radius: 6px;
-      color: var(--muted);
-    }
-    @media (max-width: 700px) {
-      header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-      .version {
-        white-space: normal;
-      }
+    a {
+      color: #2f6fec;
+      font-weight: 700;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
   <main>
-    <header>
-      <h1>试玩 HTML 检测修改工具 使用说明</h1>
-      <div class="version">Ray · v1.0.3</div>
-    </header>
-
-    <section>
-      <h2>这个工具是做什么的</h2>
-      <p>这是一个本地 HTML 工具，用来检测和修改 playable HTML 文件。它可以帮助处理常见的试玩跳转、试玩次数、商店链接、背景、语言和覆盖文案等内容。</p>
-      <p>工具是单文件运行，不需要安装软件，不需要联网，也不会把文件上传到服务器。</p>
-    </section>
-
-    <section>
-      <h2>推荐使用环境</h2>
-      <p>推荐使用 Chrome 或 Edge 打开。</p>
-      <p>不推荐使用微信内置浏览器、企业微信内置浏览器或部分旧版浏览器。</p>
-      <div class="note">如果打开后页面异常、按钮没反应、生成失败，优先换 Chrome 或 Edge 再试。</div>
-    </section>
-
-    <section>
-      <h2>快速使用步骤</h2>
-      <ol>
-        <li>双击打开 <code>试玩参数修改工具_v1.0.3.html</code>。</li>
-        <li>把需要修改的 playable <code>.html</code> 文件拖入工具页面。</li>
-        <li>查看 <code>2. 检测结果</code>，确认工具识别到了哪些可修改项。</li>
-        <li>在 <code>3. 选择修改</code> 里勾选需要的修改项。</li>
-        <li>点击 <code>生成修改版</code>。</li>
-        <li>在下方结果区域点击 <code>下载</code>，保存生成后的 HTML。</li>
-      </ol>
-      <p>如果一次导入多个 HTML，可以点击 <code>全部下载</code>。</p>
-    </section>
-
-    <section>
-      <h2>功能说明</h2>
-      <h3>关闭跳转平台</h3>
-      <p>用于拦截常见跳转行为，例如 <code>window.open</code>、<code>mraid.open</code>、<code>OpenStore</code>、<code>InstallFullGame</code>。通常建议默认勾选。</p>
-
-      <h3>延长试玩次数</h3>
-      <p>用于把常见的步数、操作次数、完成次数、闲置时间等限制调大，适合录屏、测试、反复操作 playable。</p>
-
-      <h3>清空商店链接</h3>
-      <p>把常见的 <code>iosLink</code> / <code>androidLink</code> 改成 <code>about:blank</code>。一般不需要勾选，只有遇到特别顽固的跳转时再尝试。</p>
-
-      <h3>背景：更换背景</h3>
-      <p>支持纯色背景和图片材质背景。</p>
-      <p>注意：Unity / WebGL playable 的背景有时是在游戏画布内部渲染的，不是普通网页背景，因此背景修改不保证对所有试玩都 100% 生效。</p>
-
-      <h3>强制替换疑似背景贴图</h3>
-      <p>这是高风险选项，用于尝试替换 Unity 场景里的疑似背景贴图。只有当普通背景替换无效时再勾选，它可能误伤大尺寸图集或其他游戏贴图。</p>
-
-      <h3>文案与语言：强制语言</h3>
-      <p>用于尝试强制浏览器语言，例如 <code>en</code>、<code>zh-CN</code>、<code>ja</code> 等，适合某些会根据浏览器语言自动切换文案的 playable。</p>
-
-      <h3>添加覆盖文案</h3>
-      <p>在画面上方叠加一行自定义文字，适合录屏时快速加标题、提示语或测试文案。</p>
-
-      <h3>隐藏常见标题/文案字段</h3>
-      <p>尝试把常见文案颜色字段透明化，例如 <code>titleColor</code>、<code>TextTitleImageColor</code> 等。不是所有 playable 都有效。</p>
-    </section>
-
-    <section>
-      <h2>常见问题</h2>
-      <h3>打开工具后拖不进去文件</h3>
-      <p>请确认使用的是 Chrome 或 Edge。如果是微信或企业微信里直接打开，建议先保存到本地，再用浏览器打开。</p>
-
-      <h3>生成后的 playable 背景没有变化</h3>
-      <p>可能是该 playable 的背景在 Unity / WebGL 画布内部，或者背景不是普通网页背景。可以尝试勾选 <code>强制替换疑似背景贴图</code>。</p>
-
-      <h3>生成后的文件只有背景，没有玩法</h3>
-      <p>说明背景替换方案对这个 playable 太激进。请回到工具里取消高风险选项，例如 <code>强制替换疑似背景贴图</code>，重新生成。</p>
-
-    </section>
-
-    <section>
-      <h2>使用建议</h2>
-      <ul>
-        <li>第一次处理时，只勾选默认项生成一次。</li>
-        <li>如果只是防跳转，不要额外勾选背景和贴图替换。</li>
-        <li>如果要换背景，先用普通背景替换。</li>
-        <li>普通背景无效时，再尝试贴图替换。</li>
-        <li>每次修改后都建议自己先打开测试，再发给别人。</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>版本备注</h2>
-      <p><code>v1.0.3</code> 主要优化了背景修改的兼容性：增加 Unity 常见外层容器背景兜底，保留 canvas 透明处理，并避免过度修改 WebGL 参数导致玩法层消失。</p>
-    </section>
+    <h1>正在打开使用说明</h1>
+    <p>如果页面没有自动跳转，请点击下面的链接。</p>
+    <a href="https://docs.google.com/document/d/1k_H63zH0p-ZkBSVhY3bbEETz-o_73RUMMH0M6V21fGA/edit?tab=t.0">打开 Google 文档</a>
   </main>
 </body>
 </html>
