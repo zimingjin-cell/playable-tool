@@ -1,0 +1,1574 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>试玩 HTML 检测修改工具</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #657387;
+      --line: #d8e1ee;
+      --accent: #1d6fd4;
+      --accent-dark: #1559ad;
+      --ok: #147a4a;
+      --warn: #936100;
+      --bad: #a33131;
+      --soft: #f8fbff;
+      --shadow: 0 16px 38px rgba(24, 39, 75, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+
+    .app {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 24px 18px 34px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .version {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, .95fr) minmax(420px, 1.05fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .layout > .panel:nth-child(3) {
+      grid-column: 1 / -1;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .layout > .panel:nth-child(1),
+    .layout > .panel:nth-child(2) {
+      height: 560px;
+    }
+
+    .layout > .panel:nth-child(3) {
+      height: 820px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .panel-body {
+      padding: 16px;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .layout > .panel:nth-child(3) .panel-body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dropzone {
+      height: 250px;
+      border: 2px dashed #b8c6d9;
+      background: #fbfdff;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 20px;
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: #eef6ff;
+    }
+
+    .drop-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #cbd7e8;
+      border-radius: 8px;
+      color: var(--accent);
+      background: #fff;
+    }
+
+    .drop-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .drop-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .drop-text {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    button, .file-button, a.download {
+      appearance: none;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      line-height: 1;
+      padding: 10px 13px;
+      min-height: 38px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover, .file-button:hover, a.download:hover {
+      background: var(--accent-dark);
+    }
+
+    .file-button,
+    .file-button:visited,
+    .file-button span {
+      color: #fff;
+    }
+
+    label.file-button {
+      color: #fff !important;
+    }
+
+    button.secondary {
+      background: #eef2f8;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    button.secondary:hover {
+      background: #e2e9f3;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    input[type="file"] { display: none; }
+
+    .file-list, .result-list, .detect-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detect-list {
+      max-height: 100%;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .result-list {
+      margin-top: 14px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .file-card, .result-card, .detect-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 12px;
+    }
+
+    .file-name {
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+    }
+
+    .meta {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .detect-card {
+      background: #fff;
+      height: 104px;
+      overflow: auto;
+    }
+
+    .detect-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .detect-title {
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e9f7ef;
+      color: var(--ok);
+      white-space: nowrap;
+    }
+
+    .badge.warn {
+      background: #fff5dd;
+      color: var(--warn);
+    }
+
+    .badge.bad {
+      background: #fdecec;
+      color: var(--bad);
+    }
+
+    .badge.neutral {
+      background: #edf3fb;
+      color: var(--muted);
+    }
+
+    .detail {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 12px;
+      align-items: start;
+      overflow: auto;
+      padding-right: 4px;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .option {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr);
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      min-height: 90px;
+    }
+
+    .option input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 1px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .option strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .option span {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .option-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 480px;
+      overflow: visible;
+    }
+
+    .text-card {
+      height: 560px;
+    }
+
+    .text-card > .option:first-child {
+      min-height: 74px;
+    }
+
+    .option-card .option {
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      min-height: 0;
+      background: transparent;
+      flex: 0 0 auto;
+    }
+
+    .option-card .option + .option {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .control-box {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      display: grid;
+      gap: 11px;
+      min-height: 90px;
+    }
+
+    .operation-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+      flex: 0 0 auto;
+      margin-top: 2px;
+      min-width: 0;
+    }
+
+    .operation-panel .option {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .operation-panel .option:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .text-card .control-row {
+      grid-template-columns: 96px minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .control-row label {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input[type="color"] {
+      width: 54px;
+      height: 38px;
+      padding: 2px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      min-width: 0;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      padding: 8px 10px;
+    }
+
+    .segmented {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      width: fit-content;
+      max-width: 100%;
+      background: #fff;
+    }
+
+    .segmented label {
+      color: var(--ink);
+      font-weight: 700;
+      padding: 9px 12px;
+      cursor: pointer;
+      border-left: 1px solid var(--line);
+    }
+
+    .segmented label:first-child {
+      border-left: 0;
+    }
+
+    .segmented input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .segmented label:has(input:checked) {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .texture-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-panel {
+      display: none;
+    }
+
+    .mode-panel.active {
+      display: grid;
+      gap: 11px;
+    }
+
+    .texture-name {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .preview {
+      width: 96px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #dcecf4;
+      background-position: center;
+      background-size: cover;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+
+    .log {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      color: var(--muted);
+      line-height: 1.55;
+      height: 150px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .file-list {
+      max-height: 86px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions button {
+        flex: 1 1 160px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <h1>试玩 HTML 检测修改工具</h1>
+      <div class="version">Ray · v1.0.3 · 先检测，再修改 · 本地处理</div>
+    </div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>1. 导入文件</h2>
+          <button class="secondary" id="clearBtn" type="button">清空</button>
+        </div>
+        <div class="panel-body">
+          <div class="dropzone" id="dropzone">
+            <div>
+              <div class="drop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+              </div>
+              <div class="drop-title">拖入 playable HTML</div>
+              <div class="drop-text">工具会先扫描能改的地方，再让你选择具体修改项。</div>
+              <label class="file-button" for="fileInput">选择 HTML</label>
+              <input id="fileInput" type="file" accept=".html,.htm,text/html" multiple>
+            </div>
+          </div>
+
+          <div id="fileList" class="file-list" style="margin-top:12px">
+            <div class="file-card">
+              <div class="meta">还没有导入文件。</div>
+            </div>
+          </div>
+
+          <div id="log" class="log">等待文件。</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>2. 检测结果</h2>
+          <span class="badge neutral" id="detectCount">0 项</span>
+        </div>
+        <div class="panel-body">
+          <div id="detectList" class="detect-list">
+            <div class="detect-card">
+              <div class="detail">导入 HTML 后，这里会显示跳转、次数、背景、文案/语言等可修改点。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>3. 选择修改</h2>
+          <span class="badge neutral">应用到全部文件</span>
+        </div>
+        <div class="panel-body">
+          <div class="settings">
+            <div class="option-card">
+              <label class="option">
+                <input id="optRedirect" type="checkbox" checked>
+                <span><strong>关闭跳转平台</strong>拦截 `window.open`、`mraid.open`、`OpenStore`、`InstallFullGame`。</span>
+              </label>
+              <label class="option">
+                <input id="optCounters" type="checkbox" checked>
+                <span><strong>延长试玩次数</strong>把常见步数、操作次数、完成次数、闲置时间调到很大。</span>
+              </label>
+              <label class="option">
+                <input id="optStoreLinks" type="checkbox">
+                <span><strong>清空商店链接</strong>把 `iosLink` / `androidLink` 改成 `about:blank`，遇到顽固跳转再勾。</span>
+              </label>
+            </div>
+
+            <div class="option-card">
+              <label class="option">
+                <input id="optBackground" type="checkbox">
+                <span><strong>背景：更换背景</strong>先改 HTML/相机背景；如果检测到可能是场景背景材质，也可以启用贴图替换尝试。</span>
+              </label>
+              <div class="operation-panel">
+                <div class="control-row">
+                  <label>背景类型</label>
+                  <div class="segmented">
+                    <label><input type="radio" name="bgMode" value="color" checked>纯色</label>
+                    <label><input type="radio" name="bgMode" value="texture">图片材质</label>
+                  </div>
+                </div>
+                <div class="mode-panel active" id="bgColorPanel">
+                  <div class="control-row">
+                    <label for="bgColor">背景颜色</label>
+                    <input id="bgColor" type="color" value="#dcecf4">
+                  </div>
+                </div>
+                <div class="mode-panel" id="bgTexturePanel">
+                  <div class="control-row">
+                    <label>背景图片</label>
+                    <div class="texture-line">
+                      <label class="file-button" for="textureInput">选择图片</label>
+                      <input id="textureInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                      <span class="texture-name" id="textureName">未选择</span>
+                      <div class="preview" id="bgPreview"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <label class="option">
+                <input id="optTextureReplace" type="checkbox">
+                <span><strong>强制替换疑似背景贴图</strong>用于背景是场景材质/资源包贴图的试玩。高风险，可能误伤大尺寸图集。</span>
+              </label>
+            </div>
+
+            <div class="option-card text-card">
+              <label class="option">
+                <input id="optForceLanguage" type="checkbox">
+                <span><strong>文案与语言：强制语言</strong>用于按浏览器语言自动切换文案的试玩。需要在游戏启动前生效。</span>
+              </label>
+              <div class="operation-panel">
+                <div class="control-row">
+                  <label for="languageSelect">目标语言</label>
+                  <select id="languageSelect">
+                    <option value="en">English / en</option>
+                    <option value="zh-CN">简体中文 / zh-CN</option>
+                    <option value="zh-TW">繁体中文 / zh-TW</option>
+                    <option value="ja">日本語 / ja</option>
+                    <option value="ko">한국어 / ko</option>
+                    <option value="fr">Français / fr</option>
+                    <option value="de">Deutsch / de</option>
+                    <option value="es">Español / es</option>
+                    <option value="pt">Português / pt</option>
+                    <option value="id">Bahasa Indonesia / id</option>
+                    <option value="th">ไทย / th</option>
+                  </select>
+                </div>
+              </div>
+              <label class="option">
+                <input id="optOverlayText" type="checkbox">
+                <span><strong>添加覆盖文案</strong>在画面上方叠加一行自定义文案，适合录屏快速换标题。</span>
+              </label>
+              <div class="operation-panel">
+                <div class="control-row">
+                  <label for="overlayText">文案内容</label>
+                  <input id="overlayText" type="text" value="99% of people can't solve this!">
+                </div>
+                <div class="control-row">
+                  <label for="overlayColor">文字颜色</label>
+                  <input id="overlayColor" type="color" value="#ffffff">
+                </div>
+                <div class="control-row">
+                  <label for="overlaySize">字号</label>
+                  <input id="overlaySize" type="number" min="12" max="96" value="36">
+                </div>
+              </div>
+              <label class="option">
+                <input id="optHideTextColor" type="checkbox">
+                <span><strong>隐藏常见标题/文案字段</strong>把 `titleColor`、`TextTitleImageColor` 等常见颜色字段透明化。不是所有试玩都有效。</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generateBtn" type="button" disabled>生成修改版</button>
+            <button class="secondary" id="downloadAllBtn" type="button" disabled>全部下载</button>
+          </div>
+
+          <div id="resultList" class="result-list" style="margin-top:14px">
+            <div class="result-card">
+              <div class="meta">生成后的下载链接会显示在这里。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const textureInput = document.getElementById("textureInput");
+    const textureName = document.getElementById("textureName");
+    const bgPreview = document.getElementById("bgPreview");
+    const bgColor = document.getElementById("bgColor");
+    const bgColorPanel = document.getElementById("bgColorPanel");
+    const bgTexturePanel = document.getElementById("bgTexturePanel");
+    const fileList = document.getElementById("fileList");
+    const detectList = document.getElementById("detectList");
+    const detectCount = document.getElementById("detectCount");
+    const resultList = document.getElementById("resultList");
+    const log = document.getElementById("log");
+    const clearBtn = document.getElementById("clearBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadAllBtn = document.getElementById("downloadAllBtn");
+    const optRedirect = document.getElementById("optRedirect");
+    const optCounters = document.getElementById("optCounters");
+    const optStoreLinks = document.getElementById("optStoreLinks");
+    const optBackground = document.getElementById("optBackground");
+    const optTextureReplace = document.getElementById("optTextureReplace");
+    const optForceLanguage = document.getElementById("optForceLanguage");
+    const languageSelect = document.getElementById("languageSelect");
+    const optOverlayText = document.getElementById("optOverlayText");
+    const overlayText = document.getElementById("overlayText");
+    const overlayColor = document.getElementById("overlayColor");
+    const overlaySize = document.getElementById("overlaySize");
+    const optHideTextColor = document.getElementById("optHideTextColor");
+
+    let textureDataUrl = "";
+    const inputs = [];
+    const outputs = [];
+
+    const counterPatterns = [
+      { key: "targetStepCount", label: "目标步数", re: /"targetStepCount":\["int",\d+\]/g, replacement: '"targetStepCount":["int",999999]' },
+      { key: "cycleStepCount", label: "循环次数", re: /"cycleStepCount":\["int",\d+\]/g, replacement: '"cycleStepCount":["int",999999]' },
+      { key: "targetCompleteCount", label: "完成次数", re: /"targetCompleteCount":\["int",\d+\]/g, replacement: '"targetCompleteCount":["int",999999]' },
+      { key: "MaxIdleTime", label: "闲置时间", re: /"MaxIdleTime":\["float",[0-9.]+\]/g, replacement: '"MaxIdleTime":["float",999999]' },
+      { key: "achieveTargetCount", label: "达成目标数", re: /"achieveTargetCount":\["int",\d+\]/g, replacement: '"achieveTargetCount":["int",999999]' },
+      { key: "opCount", label: "操作次数", re: /"opCount":\["int",\d+\]/g, replacement: '"opCount":["int",999999]' },
+      { key: "deathTime", label: "结束倒计时", re: /"deathTime":\["float",[0-9.]+\]/g, replacement: '"deathTime":["float",999999]' }
+    ];
+
+    function addLog(message) {
+      const time = new Date().toLocaleTimeString();
+      log.textContent += "\n[" + time + "] " + message;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function countMatches(content, pattern) {
+      const source = pattern instanceof RegExp ? pattern : new RegExp(pattern, "g");
+      return (content.match(source) || []).length;
+    }
+
+    function findValues(content, key) {
+      const re = new RegExp('"' + key + '":\\["(?:int|float|boolean|color|enum)",([^\\]]+)\\]', "g");
+      const values = [];
+      let match;
+      while ((match = re.exec(content))) values.push(match[1]);
+      return [...new Set(values)].slice(0, 8);
+    }
+
+    function analyze(content, name) {
+      const counters = counterPatterns
+        .map(item => ({ ...item, count: countMatches(content, item.re), values: findValues(content, item.key) }))
+        .filter(item => item.count > 0);
+
+      const redirects = [
+        { label: "window.open", count: countMatches(content, /window\.open/g) },
+        { label: "mraid.open", count: countMatches(content, /mraid\.open/g) },
+        { label: "InstallFullGame", count: countMatches(content, /InstallFullGame/g) },
+        { label: "OpenStore/OpenUrl", count: countMatches(content, /OpenStore|openStore|OpenUrl|openUrl/g) }
+      ].filter(item => item.count > 0);
+
+      const storeLinks = [
+        { label: "iosLink", count: countMatches(content, /iosLink:"[^"]*"/g) },
+        { label: "androidLink", count: countMatches(content, /androidLink:"[^"]*"/g) }
+      ].filter(item => item.count > 0);
+
+      const directBackground = [
+        "MainCameraBackgroundColor",
+        "cameraBackgroundColor",
+        "backgroundColor"
+      ].map(key => ({ key, values: findValues(content, key) })).filter(item => item.values.length > 0);
+
+      const cssBlackCount = countMatches(content, /background(?:-color)?:\s*#000/g);
+      const hasCanvas = content.includes("#application-canvas") || content.includes("<canvas");
+      const hasDataBlob = content.includes("assets/bundles/-1/data.blob") || content.includes("window.blobs");
+      const likelyTextureBackground = hasDataBlob && directBackground.length === 0;
+      const textSignals = [
+        { label: "多语言文本切换", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
+        { label: "标题颜色字段", count: countMatches(content, /TextTitleImageColor|titleColor/g) },
+        { label: "文本/图片资源包", count: countMatches(content, /TextMeshPro|font|sprite|atlas/gi) }
+      ].filter(item => item.count > 0);
+
+      return { counters, redirects, storeLinks, directBackground, cssBlackCount, hasCanvas, hasDataBlob, likelyTextureBackground, textSignals };
+    }
+
+    function renderFiles() {
+      if (!inputs.length) {
+        fileList.innerHTML = '<div class="file-card"><div class="meta">还没有导入文件。</div></div>';
+        return;
+      }
+
+      fileList.innerHTML = inputs.map(item => `
+        <div class="file-card">
+          <div class="file-name">${escapeHtml(item.file.name)}</div>
+          <div class="meta">${(item.file.size / 1024).toFixed(1)} KB · 已完成检测</div>
+        </div>
+      `).join("");
+    }
+
+    function makeDetectCard(title, status, detail, tone) {
+      return `
+        <div class="detect-card">
+          <div class="detect-top">
+            <div class="detect-title">${escapeHtml(title)}</div>
+            <span class="badge ${tone || ""}">${escapeHtml(status)}</span>
+          </div>
+          <div class="detail">${detail}</div>
+        </div>
+      `;
+    }
+
+    function renderDetection() {
+      const cards = [];
+      let found = 0;
+      let anyTextureBg = false;
+      let anyRedirect = false;
+      let anyCounters = false;
+
+      for (const item of inputs) {
+        const a = item.analysis;
+        const filePrefix = inputs.length > 1 ? `<strong>${escapeHtml(item.file.name)}</strong><br>` : "";
+
+        if (a.redirects.length) {
+          anyRedirect = true;
+          found++;
+          cards.push(makeDetectCard("跳转平台", "可关闭", filePrefix + a.redirects.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), ""));
+        }
+
+        if (a.counters.length) {
+          anyCounters = true;
+          found++;
+          cards.push(makeDetectCard("试玩次数/结束条件", "可延长", filePrefix + a.counters.map(x => `${escapeHtml(x.label)} ${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("<br>"), ""));
+        }
+
+        if (a.storeLinks.length) {
+          found++;
+          cards.push(makeDetectCard("商店链接", "可清空", filePrefix + a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
+        }
+
+        if (a.directBackground.length || a.cssBlackCount || a.hasCanvas) {
+          found++;
+          const parts = [];
+          if (a.directBackground.length) parts.push("检测到 Unity/相机背景字段：" + a.directBackground.map(x => `${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("，"));
+          if (a.cssBlackCount) parts.push("检测到 HTML/CSS 黑色背景 × " + a.cssBlackCount);
+          if (a.hasCanvas) parts.push("检测到游戏画布，可尝试注入页面背景和 WebGL 清屏色。");
+          cards.push(makeDetectCard("背景颜色", a.directBackground.length ? "可直接改" : "可尝试", filePrefix + parts.join("<br>"), a.directBackground.length ? "" : "warn"));
+        }
+
+        if (a.likelyTextureBackground) {
+          anyTextureBg = true;
+          found++;
+          cards.push(makeDetectCard("场景背景贴图/材质", "可尝试替换", filePrefix + "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。可启用“强制替换疑似背景贴图”。", "warn"));
+        }
+
+        if (a.textSignals.length) {
+          found++;
+          cards.push(makeDetectCard("文案/语言", "需要拆资源", filePrefix + a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这类通常不是 DOM 文本，常见情况是多语言图集或 Unity 文本组件。", "neutral"));
+        }
+      }
+
+      optRedirect.checked = anyRedirect || inputs.length > 0;
+      optCounters.checked = anyCounters || inputs.length > 0;
+      optTextureReplace.checked = anyTextureBg;
+      if (anyTextureBg) optBackground.checked = true;
+
+      detectCount.textContent = found + " 项";
+      detectList.innerHTML = cards.length ? cards.join("") : '<div class="detect-card"><div class="detail">没有检测到常见可修改项。可以把文件发给我继续深挖。</div></div>';
+      generateBtn.disabled = inputs.length === 0;
+    }
+
+    function hexToRgb01(hex) {
+      const value = hex.replace("#", "");
+      return [0, 2, 4].map(i => Number((parseInt(value.slice(i, i + 2), 16) / 255).toFixed(6)));
+    }
+
+    function hexToRgb255(hex) {
+      const value = hex.replace("#", "");
+      return { r: parseInt(value.slice(0, 2), 16), g: parseInt(value.slice(2, 4), 16), b: parseInt(value.slice(4, 6), 16), a: 255 };
+    }
+
+    function getBgMode() {
+      const checked = document.querySelector('input[name="bgMode"]:checked');
+      return checked ? checked.value : "color";
+    }
+
+    function updateBackgroundModeUI() {
+      const mode = getBgMode();
+      if (bgColorPanel) bgColorPanel.classList.toggle("active", mode === "color");
+      if (bgTexturePanel) bgTexturePanel.classList.toggle("active", mode === "texture");
+    }
+
+    function makeRuntimePatch() {
+      return `<script id="codex-disable-playable-redirects">
+(function(){
+  function blockedRedirect(){
+    try { console.log("[no redirect] blocked store redirect"); } catch(e) {}
+    return null;
+  }
+  function assign(obj, key, value){
+    try { if (obj && key in obj) obj[key] = value; } catch(e) {}
+  }
+  function patchRedirects(){
+    try {
+      assign(window, "open", blockedRedirect);
+      if (window.mraid) assign(window.mraid, "open", blockedRedirect);
+      if (window.Utils) {
+        assign(window.Utils, "OpenStore", blockedRedirect);
+        assign(window.Utils, "openStore", blockedRedirect);
+        assign(window.Utils, "OpenUrl", blockedRedirect);
+        assign(window.Utils, "openUrl", blockedRedirect);
+      }
+      if (window.Luna && Luna.Unity && Luna.Unity.Playable) assign(Luna.Unity.Playable, "InstallFullGame", blockedRedirect);
+      if (window.UnityEngine && UnityEngine.Application) {
+        assign(UnityEngine.Application, "OpenURL", blockedRedirect);
+        assign(UnityEngine.Application, "openURL", blockedRedirect);
+      }
+    } catch(e) {}
+  }
+  patchRedirects();
+  window.addEventListener("DOMContentLoaded", patchRedirects);
+  window.addEventListener("luna:build", patchRedirects);
+  window.addEventListener("luna:start", patchRedirects);
+  window.addEventListener("luna:started", patchRedirects);
+  var attempts = 0;
+  var timer = setInterval(function(){
+    patchRedirects();
+    attempts++;
+    if (attempts > 300) clearInterval(timer);
+  }, 50);
+})();
+<\/script>`;
+    }
+
+    function makeBackgroundPatch(mode, color, texture) {
+      const background = mode === "texture" && texture ? `url("${texture}") center / cover no-repeat fixed, ${color}` : color;
+      return `<style id="codex-playable-background">
+:root {
+  --codex-bg-layer: ${background};
+}
+html {
+  background: var(--codex-bg-layer) !important;
+}
+html, body {
+  min-height: 100% !important;
+  background: var(--codex-bg-layer) !important;
+}
+#unity-container,
+#unityContainer,
+#gameContainer,
+#game-container,
+#canvas-wrap,
+.webgl-content {
+  background: var(--codex-bg-layer) !important;
+}
+#application-canvas,
+canvas {
+  background-color: transparent !important;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--codex-bg-layer) !important;
+}
+<\/style>`;
+    }
+
+    function makeWebGLBackgroundPatch(mode, color) {
+      const rgb = hexToRgb01(color);
+      const alpha = mode === "texture" ? 0 : 1;
+      return `<script id="codex-force-webgl-background">
+(function(){
+  var forced = [${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha}];
+  var transparent = ${mode === "texture" ? "true" : "false"};
+  var patchedContexts = [];
+
+  function patchContext(gl){
+    if (!gl || gl.__codexBackgroundPatched) return gl;
+    try {
+      var originalClearColor = gl.clearColor && gl.clearColor.bind(gl);
+      if (originalClearColor) {
+        gl.clearColor = function(){
+          return originalClearColor(forced[0], forced[1], forced[2], forced[3]);
+        };
+        originalClearColor(forced[0], forced[1], forced[2], forced[3]);
+      }
+      gl.__codexBackgroundPatched = true;
+      patchedContexts.push(gl);
+    } catch(e) {}
+    return gl;
+  }
+
+  function patchCanvasPrototype(){
+    try {
+      var proto = HTMLCanvasElement && HTMLCanvasElement.prototype;
+      if (!proto || proto.__codexGetContextPatched) return;
+      var originalGetContext = proto.getContext;
+      proto.getContext = function(type){
+        var args = Array.prototype.slice.call(arguments);
+        if (transparent && (type === "webgl" || type === "experimental-webgl" || type === "webgl2")) {
+          args[1] = Object.assign({}, args[1] || {}, { alpha: true });
+        }
+        var ctx = originalGetContext.apply(this, args);
+        if (type === "webgl" || type === "experimental-webgl" || type === "webgl2") {
+          patchContext(ctx);
+        }
+        return ctx;
+      };
+      proto.__codexGetContextPatched = true;
+    } catch(e) {}
+  }
+
+  function repaint(){
+    for (var i = 0; i < patchedContexts.length; i++) {
+      try { patchedContexts[i].clearColor(forced[0], forced[1], forced[2], forced[3]); } catch(e) {}
+    }
+  }
+
+  patchCanvasPrototype();
+  window.addEventListener("DOMContentLoaded", patchCanvasPrototype);
+  window.addEventListener("luna:start", patchCanvasPrototype);
+  window.addEventListener("luna:started", patchCanvasPrototype);
+  setInterval(repaint, 250);
+})();
+<\/script>`;
+    }
+
+
+    function makeTextureReplacementPatch(mode, color, texture) {
+      const fill = hexToRgb255(color);
+      const textureUrl = mode === "texture" && texture ? texture : "";
+      return `<script id="codex-replace-bg-texture">
+(function(){
+  var fillColor = ${JSON.stringify(color)};
+  var textureUrl = ${JSON.stringify(textureUrl)};
+  var fill = { r: ${fill.r}, g: ${fill.g}, b: ${fill.b}, a: 255 };
+  var textureImage = null;
+  var decisionCache = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+  var replacementCache = typeof WeakMap !== "undefined" ? new WeakMap() : null;
+  if (textureUrl) {
+    textureImage = new Image();
+    textureImage.src = textureUrl;
+  }
+  function getSize(source){
+    return { width: source && (source.videoWidth || source.naturalWidth || source.width || 0), height: source && (source.videoHeight || source.naturalHeight || source.height || 0) };
+  }
+  function getSourceIndex(args){
+    for (var i = args.length - 1; i >= 0; i--) {
+      var value = args[i];
+      if (!value || typeof value !== "object") continue;
+      if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) continue;
+      var size = getSize(value);
+      if (size.width && size.height) return i;
+    }
+    return -1;
+  }
+  function countBeige(r, g, b){
+    return r >= 120 && g >= 105 && b >= 75 && r > b + 14 && g > b + 5 && Math.abs(r - g) < 75;
+  }
+  function isBeigeStats(seen, beige, sumR, sumG, sumB){
+    if (!seen) return false;
+    var avgR = sumR / seen;
+    var avgG = sumG / seen;
+    var avgB = sumB / seen;
+    var beigeRatio = beige / seen;
+    return beigeRatio > 0.42 && avgR > 135 && avgG > 120 && avgB > 82 && avgR > avgB + 15;
+  }
+  function isBackgroundLikeSource(source){
+    if (decisionCache && decisionCache.has(source)) return decisionCache.get(source);
+    var result = false;
+    try {
+      var size = getSize(source);
+      if (size.width >= 192 && size.height >= 192) {
+        var canvas = document.createElement("canvas");
+        var sampleSize = 20;
+        canvas.width = sampleSize;
+        canvas.height = sampleSize;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(source, 0, 0, sampleSize, sampleSize);
+        var data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+        var beige = 0, seen = 0, sumR = 0, sumG = 0, sumB = 0;
+        for (var i = 0; i < data.length; i += 4) {
+          var a = data[i + 3];
+          if (a < 80) continue;
+          var r = data[i], g = data[i + 1], b = data[i + 2];
+          seen++;
+          sumR += r;
+          sumG += g;
+          sumB += b;
+          if (countBeige(r, g, b)) beige++;
+        }
+        result = isBeigeStats(seen, beige, sumR, sumG, sumB) || (seen > 320 && size.width >= 512 && size.height >= 512);
+      }
+    } catch(e) { result = false; }
+    if (decisionCache) decisionCache.set(source, result);
+    return result;
+  }
+  function drawCover(ctx, image, width, height){
+    var iw = image.naturalWidth || image.width;
+    var ih = image.naturalHeight || image.height;
+    if (!iw || !ih) return false;
+    var scale = Math.max(width / iw, height / ih);
+    var dw = iw * scale;
+    var dh = ih * scale;
+    ctx.drawImage(image, (width - dw) / 2, (height - dh) / 2, dw, dh);
+    return true;
+  }
+  function makeCanvasReplacement(source){
+    if (replacementCache && replacementCache.has(source)) return replacementCache.get(source);
+    var size = getSize(source);
+    var canvas = document.createElement("canvas");
+    canvas.width = Math.max(2, size.width || 512);
+    canvas.height = Math.max(2, size.height || 512);
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (textureImage && textureImage.complete) {
+      try { drawCover(ctx, textureImage, canvas.width, canvas.height); } catch(e) {}
+    }
+    if (replacementCache) replacementCache.set(source, canvas);
+    return canvas;
+  }
+  function channelsFor(gl, format){
+    if (format === gl.RGBA) return 4;
+    if (format === gl.RGB) return 3;
+    if (format === gl.LUMINANCE_ALPHA) return 2;
+    if (format === gl.ALPHA || format === gl.LUMINANCE) return 1;
+    return 0;
+  }
+  function isBackgroundLikePixels(gl, width, height, format, type, pixels){
+    try {
+      if (!pixels || !ArrayBuffer.isView(pixels)) return false;
+      if (type !== gl.UNSIGNED_BYTE) return false;
+      if (width < 192 || height < 192) return false;
+      var channels = channelsFor(gl, format);
+      if (channels < 3) return false;
+      if (pixels.length < width * height * channels) return false;
+      var steps = 18;
+      var beige = 0, seen = 0, sumR = 0, sumG = 0, sumB = 0;
+      for (var y = 0; y < steps; y++) {
+        var py = Math.min(height - 1, Math.floor((y + 0.5) * height / steps));
+        for (var x = 0; x < steps; x++) {
+          var px = Math.min(width - 1, Math.floor((x + 0.5) * width / steps));
+          var index = (py * width + px) * channels;
+          var r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
+          var a = channels > 3 ? pixels[index + 3] : 255;
+          if (a < 80) continue;
+          seen++;
+          sumR += r;
+          sumG += g;
+          sumB += b;
+          if (countBeige(r, g, b)) beige++;
+        }
+      }
+      return isBeigeStats(seen, beige, sumR, sumG, sumB) || (seen > 300 && width >= 512 && height >= 512);
+    } catch(e) { return false; }
+  }
+  function makePixelReplacement(gl, width, height, format, type, pixels){
+    var channels = channelsFor(gl, format);
+    var output = new pixels.constructor(pixels.length);
+    for (var i = 0; i < output.length; i += channels) {
+      output[i] = fill.r;
+      if (channels > 1) output[i + 1] = fill.g;
+      if (channels > 2) output[i + 2] = fill.b;
+      if (channels > 3) output[i + 3] = fill.a;
+    }
+    return output;
+  }
+  function patchPrototype(proto){
+    if (!proto || proto.__codexTextureReplacePatched) return;
+    var originalTexImage2D = proto.texImage2D;
+    if (originalTexImage2D) {
+      proto.texImage2D = function(){
+        var args = Array.prototype.slice.call(arguments);
+        var sourceIndex = getSourceIndex(args);
+        if (sourceIndex >= 0 && isBackgroundLikeSource(args[sourceIndex])) {
+          args[sourceIndex] = makeCanvasReplacement(args[sourceIndex]);
+        } else if (args.length >= 9 && typeof args[3] === "number" && typeof args[4] === "number" && isBackgroundLikePixels(this, args[3], args[4], args[6], args[7], args[8])) {
+          args[8] = makePixelReplacement(this, args[3], args[4], args[6], args[7], args[8]);
+        }
+        return originalTexImage2D.apply(this, args);
+      };
+    }
+    var originalTexSubImage2D = proto.texSubImage2D;
+    if (originalTexSubImage2D) {
+      proto.texSubImage2D = function(){
+        var args = Array.prototype.slice.call(arguments);
+        var sourceIndex = getSourceIndex(args);
+        if (sourceIndex >= 0 && isBackgroundLikeSource(args[sourceIndex])) {
+          args[sourceIndex] = makeCanvasReplacement(args[sourceIndex]);
+        } else if (args.length >= 9 && typeof args[4] === "number" && typeof args[5] === "number" && isBackgroundLikePixels(this, args[4], args[5], args[6], args[7], args[8])) {
+          args[8] = makePixelReplacement(this, args[4], args[5], args[6], args[7], args[8]);
+        }
+        return originalTexSubImage2D.apply(this, args);
+      };
+    }
+    proto.__codexTextureReplacePatched = true;
+  }
+  function patch(){
+    try { patchPrototype(window.WebGLRenderingContext && WebGLRenderingContext.prototype); } catch(e) {}
+    try { patchPrototype(window.WebGL2RenderingContext && WebGL2RenderingContext.prototype); } catch(e) {}
+  }
+  patch();
+  window.addEventListener("DOMContentLoaded", patch);
+  window.addEventListener("luna:start", patch);
+  window.addEventListener("luna:started", patch);
+})();
+<\/script>`;
+    }
+
+    function makeLanguagePatch(language) {
+      const lang = JSON.stringify(language);
+      const primary = JSON.stringify(language.split("-")[0]);
+      return `<script id="codex-force-language">
+(function(){
+  var forcedLanguage = ${lang};
+  var forcedPrimary = ${primary};
+  function define(target, key, getter){
+    try { Object.defineProperty(target, key, { get: getter, configurable: true }); } catch(e) {}
+  }
+  try {
+    define(Navigator.prototype, "language", function(){ return forcedLanguage; });
+    define(Navigator.prototype, "languages", function(){ return [forcedLanguage, forcedPrimary, "en"]; });
+    define(navigator, "language", function(){ return forcedLanguage; });
+    define(navigator, "languages", function(){ return [forcedLanguage, forcedPrimary, "en"]; });
+  } catch(e) {}
+  window.__codexForcedLanguage = forcedLanguage;
+})();
+<\/script>`;
+    }
+
+    function makeOverlayTextPatch(text, color, size) {
+      return `<div id="codex-overlay-text" style="
+position:fixed;
+left:50%;
+top:28px;
+transform:translateX(-50%);
+z-index:2147483647;
+max-width:92vw;
+padding:0 10px;
+color:${color};
+font-family:Arial, 'Microsoft YaHei', sans-serif;
+font-size:${Number(size) || 36}px;
+font-weight:800;
+line-height:1.12;
+text-align:center;
+letter-spacing:0;
+text-shadow:0 2px 0 rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+pointer-events:none;
+white-space:normal;
+overflow-wrap:anywhere;
+">${escapeHtml(text)}<\/div>`;
+    }
+
+    function patchTextColors(content) {
+      const transparentTitle = '"titleColor":["color",1,1,1,0]';
+      const transparentImageTitle = '"TextTitleImageColor":["color",1,1,1,0]';
+      content = content.replace(/"titleColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g, transparentTitle);
+      content = content.replace(/"TextTitleImageColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g, transparentImageTitle);
+      content = content.replace(/"textColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g, '"textColor":["color",1,1,1,0]');
+      return content;
+    }
+
+    function removePatchById(content, id) {
+      const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      content = content.replace(new RegExp("<div\\s+id=[\"']" + escaped + "[\"'][\\s\\S]*?<\\/div>", "g"), "");
+      content = content.replace(new RegExp("<style\\s+id=[\"']" + escaped + "[\"'][\\s\\S]*?<\\/style>", "g"), "");
+      content = content.replace(new RegExp("<script\\s+id=[\"']" + escaped + "[\"'][\\s\\S]*?<\\/script>", "g"), "");
+      return content;
+    }
+
+    function injectIntoHead(content, injection) {
+      const index = content.indexOf("</head>");
+      if (index >= 0) return content.slice(0, index) + injection + content.slice(index);
+      const bodyIndex = content.indexOf("<body");
+      if (bodyIndex >= 0) return content.slice(0, bodyIndex) + injection + content.slice(bodyIndex);
+      return injection + content;
+    }
+
+    function injectBeforeBody(content, injection) {
+      const index = content.lastIndexOf("</body>");
+      if (index >= 0) return content.slice(0, index) + injection + content.slice(index);
+      return content + injection;
+    }
+
+    function patchUnityBackgroundColor(content, color) {
+      const rgb = hexToRgb01(color);
+      const replacement = `"MainCameraBackgroundColor":["color",${rgb[0]},${rgb[1]},${rgb[2]},1]`;
+      const patterns = [
+        /"MainCameraBackgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g,
+        /"cameraBackgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g,
+        /"backgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g
+      ];
+      for (const pattern of patterns) content = content.replace(pattern, replacement);
+      return content;
+    }
+
+    function transform(content) {
+      const stats = [];
+
+      if (optCounters.checked) {
+        for (const item of counterPatterns) {
+          const before = content;
+          content = content.replace(item.re, item.replacement);
+          if (content !== before) stats.push("次数已延长");
+        }
+      }
+
+      if (optStoreLinks.checked) {
+        const before = content;
+        content = content
+          .replace(/iosLink:"[^"]*"/g, 'iosLink:"about:blank"')
+          .replace(/androidLink:"[^"]*"/g, 'androidLink:"about:blank"');
+        if (content !== before) stats.push("商店链接已清空");
+      }
+
+      if (optBackground.checked) {
+        const mode = getBgMode();
+        const color = bgColor.value;
+        content = removePatchById(content, "codex-playable-background");
+        content = removePatchById(content, "codex-force-webgl-background");
+        content = removePatchById(content, "codex-replace-bg-texture");
+        let injection = makeBackgroundPatch(mode, color, textureDataUrl) + makeWebGLBackgroundPatch(mode, color);
+        if (optTextureReplace.checked) injection += makeTextureReplacementPatch(mode, color, textureDataUrl);
+        content = injectIntoHead(content, injection);
+        content = patchUnityBackgroundColor(content, color);
+        content = content
+          .replace(/background:#000/g, "background:" + color)
+          .replace(/background: #000/g, "background: " + color)
+          .replace(/background-color:#000/g, "background-color:" + color)
+          .replace(/background-color: #000/g, "background-color: " + color);
+        stats.push(optTextureReplace.checked ? "背景/贴图替换已启用" : "背景已修改");
+      }
+
+      if (optForceLanguage.checked) {
+        content = removePatchById(content, "codex-force-language");
+        content = injectIntoHead(content, makeLanguagePatch(languageSelect.value));
+        stats.push("语言已强制为 " + languageSelect.value);
+      }
+
+      if (optHideTextColor.checked) {
+        const before = content;
+        content = patchTextColors(content);
+        stats.push(before === content ? "未找到可隐藏文案字段" : "常见文案颜色已透明化");
+      }
+
+      if (optOverlayText.checked && overlayText.value.trim()) {
+        content = removePatchById(content, "codex-overlay-text");
+        content = injectBeforeBody(content, makeOverlayTextPatch(overlayText.value.trim(), overlayColor.value, overlaySize.value));
+        stats.push("覆盖文案已添加");
+      }
+
+      if (optRedirect.checked) {
+        content = removePatchById(content, "codex-disable-playable-redirects");
+        content = injectIntoHead(content, makeRuntimePatch());
+        stats.push("跳转已拦截");
+      }
+
+      return { content, stats: [...new Set(stats)] };
+    }
+
+    function outputName(name) {
+      return name.replace(/(\.html?|)$/i, "_modified$1");
+    }
+
+    async function processFiles(files) {
+      const htmlFiles = [...files].filter(file => /\.html?$/i.test(file.name));
+      if (!htmlFiles.length) {
+        addLog("没有找到 HTML 文件。");
+        return;
+      }
+
+      for (const file of htmlFiles) {
+        const text = await file.text();
+        inputs.push({ file, text, analysis: analyze(text, file.name) });
+        addLog("已检测: " + file.name);
+      }
+
+      renderFiles();
+      renderDetection();
+    }
+
+    function clearOutputs() {
+      for (const item of outputs) URL.revokeObjectURL(item.url);
+      outputs.length = 0;
+      resultList.innerHTML = '<div class="result-card"><div class="meta">生成后的下载链接会显示在这里。</div></div>';
+      downloadAllBtn.disabled = true;
+    }
+
+    function renderOutputs() {
+      if (!outputs.length) {
+        resultList.innerHTML = '<div class="result-card"><div class="meta">还没有生成文件。</div></div>';
+        return;
+      }
+
+      resultList.innerHTML = outputs.map(item => `
+        <div class="result-card">
+          <div class="file-name">${escapeHtml(item.sourceName)}</div>
+          <div class="meta">输出: ${escapeHtml(item.name)} · ${(item.size / 1024).toFixed(1)} KB</div>
+          <div style="margin:8px 0">${item.stats.map(x => `<span class="badge">${escapeHtml(x)}</span>`).join(" ")}</div>
+          <a class="download" href="${item.url}" download="${escapeHtml(item.name)}">下载</a>
+        </div>
+      `).join("");
+    }
+
+    function generate() {
+      clearOutputs();
+
+      if (!inputs.length) {
+        addLog("请先导入 HTML。");
+        return;
+      }
+
+      for (const item of inputs) {
+        const result = transform(item.text);
+        const blob = new Blob([result.content], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        outputs.push({
+          sourceName: item.file.name,
+          name: outputName(item.file.name),
+          size: blob.size,
+          url,
+          stats: result.stats.length ? result.stats : ["未应用修改"]
+        });
+        addLog("已生成: " + outputName(item.file.name));
+      }
+
+      renderOutputs();
+      downloadAllBtn.disabled = outputs.length === 0;
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.classList.remove("dragover");
+      processFiles(event.dataTransfer.files);
+    });
+
+    fileInput.addEventListener("change", event => {
+      processFiles(event.target.files);
+      fileInput.value = "";
+    });
+
+    textureInput.addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        textureDataUrl = await readFileAsDataUrl(file);
+        textureName.textContent = file.name;
+        bgPreview.style.backgroundImage = `url("${textureDataUrl}")`;
+        optBackground.checked = true;
+        document.querySelector('input[name="bgMode"][value="texture"]').checked = true;
+        updateBackgroundModeUI();
+        addLog("已载入背景图片: " + file.name);
+      } catch (error) {
+        textureDataUrl = "";
+        textureName.textContent = "读取失败";
+        addLog("背景图片读取失败: " + error.message);
+      }
+    });
+
+    bgColor.addEventListener("input", () => {
+      bgPreview.style.backgroundColor = bgColor.value;
+    });
+
+    document.querySelectorAll('input[name="bgMode"]').forEach(input => {
+      input.addEventListener("change", updateBackgroundModeUI);
+    });
+
+    updateBackgroundModeUI();
+
+    optTextureReplace.addEventListener("change", () => {
+      if (optTextureReplace.checked) optBackground.checked = true;
+    });
+
+    generateBtn.addEventListener("click", generate);
+
+    downloadAllBtn.addEventListener("click", () => {
+      for (const item of outputs) {
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.download = item.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    });
+
+    clearBtn.addEventListener("click", () => {
+      inputs.length = 0;
+      clearOutputs();
+      renderFiles();
+      detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、背景、文案/语言等可修改点。</div></div>';
+      detectCount.textContent = "0 项";
+      generateBtn.disabled = true;
+      log.textContent = "等待文件。";
+    });
+  </script>
+</body>
+</html>
