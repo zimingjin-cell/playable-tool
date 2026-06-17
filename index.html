@@ -32,7 +32,7 @@
     }
 
     .app {
-      max-width: 1220px;
+      max-width: 1500px;
       margin: 0 auto;
       padding: 24px 18px 34px;
     }
@@ -80,11 +80,7 @@
 
     .layout > .panel:nth-child(1),
     .layout > .panel:nth-child(2) {
-      height: 560px;
-    }
-
-    .layout > .panel:nth-child(3) {
-      height: 820px;
+      min-height: 560px;
     }
 
     .panel-head {
@@ -104,13 +100,12 @@
     .panel-body {
       padding: 16px;
       min-height: 0;
-      overflow: auto;
+      overflow: visible;
     }
 
     .layout > .panel:nth-child(3) .panel-body {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: block;
+      overflow: visible;
     }
 
     .dropzone {
@@ -222,8 +217,166 @@
 
     .result-list {
       margin-top: 14px;
-      overflow: auto;
       padding-right: 4px;
+    }
+
+    .preview-panel {
+      --preview-w: 405px;
+      --preview-h: 720px;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .preview-panel.landscape {
+      --preview-w: 960px;
+      --preview-h: 540px;
+    }
+
+    .preview-panel.fit {
+      --preview-w: 100%;
+      --preview-h: 720px;
+    }
+
+    .preview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+      flex-wrap: wrap;
+    }
+
+    .preview-title {
+      flex: 1 1 260px;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .preview-tools button {
+      min-height: 34px;
+      padding: 8px 10px;
+    }
+
+    .preview-tools button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .preview-stage {
+      display: grid;
+      place-items: center;
+      min-height: clamp(360px, 52vh, 620px);
+      padding: 18px;
+      background: #e8eef7;
+      overflow: auto;
+    }
+
+    .preview-frame {
+      display: block;
+      width: min(var(--preview-w), 100%);
+      height: min(var(--preview-h), 62vh);
+      max-width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: #fff;
+      box-shadow: 0 14px 30px rgba(24, 39, 75, .18);
+    }
+
+    .preview-frame[hidden],
+    .preview-empty[hidden] {
+      display: none !important;
+    }
+
+    .preview-empty {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .preview-modal[hidden] {
+      display: none !important;
+    }
+
+    .preview-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: rgba(15, 23, 42, .72);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      min-width: 180px;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modal-controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+    }
+
+    .modal-controls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .modal-controls input[type="range"] {
+      width: 150px;
+    }
+
+    .modal-stage {
+      display: grid;
+      place-items: center;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .modal-frame {
+      width: min(var(--modal-preview-w, 430px), calc(100vw - 56px));
+      height: min(var(--modal-preview-h, 760px), calc(100vh - 112px));
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .34);
     }
 
     .file-card, .result-card, .detect-card {
@@ -300,13 +453,54 @@
 
     .settings {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: 1fr;
       gap: 12px;
       align-items: start;
-      overflow: auto;
+      overflow: visible;
       padding-right: 4px;
-      flex: 1 1 auto;
-      min-height: 0;
+    }
+
+    .settings-shell {
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      overflow-x: auto;
+    }
+
+    .settings-tab {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid transparent;
+      min-height: 36px;
+      padding: 9px 14px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .settings-tab:hover {
+      background: #eaf1fb;
+    }
+
+    .settings-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .settings-panel {
+      display: none;
+    }
+
+    .settings-panel.active {
+      display: block;
     }
 
     .option {
@@ -345,16 +539,19 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      height: 480px;
       overflow: visible;
     }
 
     .text-card {
-      height: 560px;
+      min-height: 0;
     }
 
     .text-card > .option:first-child {
-      min-height: 74px;
+      min-height: 58px;
+    }
+
+    .text-card .language-panel {
+      margin-top: -6px;
     }
 
     .option-card .option {
@@ -414,6 +611,19 @@
     .text-card .control-row {
       grid-template-columns: 96px minmax(0, 1fr);
       align-items: start;
+    }
+
+    .control-row.checkbox-row {
+      grid-template-columns: 96px 24px;
+      align-items: center;
+      justify-content: start;
+    }
+
+    .control-row.checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--accent);
     }
 
     .control-row label {
@@ -514,6 +724,13 @@
       justify-content: flex-end;
     }
 
+    .result-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
     .log {
       margin-top: 12px;
       padding: 12px;
@@ -557,7 +774,7 @@
   <main class="app">
     <div class="topbar">
       <h1>试玩 HTML 检测修改工具</h1>
-      <div class="version">Ray · v1.0.3 · 先检测，再修改 · 本地处理</div>
+      <div class="version">Ray · v1.1.0 · 先检测，再修改 · 本地处理</div>
     </div>
 
     <div class="layout">
@@ -613,8 +830,15 @@
           <span class="badge neutral">应用到全部文件</span>
         </div>
         <div class="panel-body">
-          <div class="settings">
-            <div class="option-card">
+          <div class="settings-shell">
+            <div class="settings-tabs" role="tablist" aria-label="修改分类">
+              <button class="settings-tab active" type="button" data-settings-tab="basic">基础设置</button>
+              <button class="settings-tab" type="button" data-settings-tab="background">背景</button>
+              <button class="settings-tab" type="button" data-settings-tab="text">文案/语言</button>
+            </div>
+            <div class="settings">
+              <div class="settings-panel active" data-settings-panel="basic">
+                <div class="option-card">
               <label class="option">
                 <input id="optRedirect" type="checkbox" checked>
                 <span><strong>关闭跳转平台</strong>拦截 `window.open`、`mraid.open`、`OpenStore`、`InstallFullGame`。</span>
@@ -627,9 +851,11 @@
                 <input id="optStoreLinks" type="checkbox">
                 <span><strong>清空商店链接</strong>把 `iosLink` / `androidLink` 改成 `about:blank`，遇到顽固跳转再勾。</span>
               </label>
-            </div>
+                </div>
+              </div>
 
-            <div class="option-card">
+              <div class="settings-panel" data-settings-panel="background">
+                <div class="option-card">
               <label class="option">
                 <input id="optBackground" type="checkbox">
                 <span><strong>背景：更换背景</strong>先改 HTML/相机背景；如果检测到可能是场景背景材质，也可以启用贴图替换尝试。</span>
@@ -662,16 +888,18 @@
               </div>
               <label class="option">
                 <input id="optTextureReplace" type="checkbox">
-                <span><strong>强制替换疑似背景贴图</strong>用于背景是场景材质/资源包贴图的试玩。高风险，可能误伤大尺寸图集。</span>
+                <span><strong>强制替换疑似背景贴图</strong>用于背景是场景材质/资源包贴图的试玩。高风险，可能误伤图集或玩法元素，建议先预览再下载。</span>
               </label>
-            </div>
+                </div>
+              </div>
 
-            <div class="option-card text-card">
+              <div class="settings-panel" data-settings-panel="text">
+                <div class="option-card text-card">
               <label class="option">
                 <input id="optForceLanguage" type="checkbox">
                 <span><strong>文案与语言：强制语言</strong>用于按浏览器语言自动切换文案的试玩。需要在游戏启动前生效。</span>
               </label>
-              <div class="operation-panel">
+              <div class="operation-panel language-panel">
                 <div class="control-row">
                   <label for="languageSelect">目标语言</label>
                   <select id="languageSelect">
@@ -690,8 +918,12 @@
                 </div>
               </div>
               <label class="option">
+                <input id="optHideTextColor" type="checkbox">
+                <span><strong>隐藏常见标题/文案字段</strong>把常见颜色字段透明化。只处理可识别字段，不会自动添加遮罩。</span>
+              </label>
+              <label class="option">
                 <input id="optOverlayText" type="checkbox">
-                <span><strong>添加覆盖文案</strong>在画面上方叠加一行自定义文案，适合录屏快速换标题。</span>
+                <span><strong>添加覆盖文案</strong>在画面上方叠加自定义文案。是否遮住旧文案由“添加顶部遮罩”单独控制。</span>
               </label>
               <div class="operation-panel">
                 <div class="control-row">
@@ -706,11 +938,27 @@
                   <label for="overlaySize">字号</label>
                   <input id="overlaySize" type="number" min="12" max="96" value="36">
                 </div>
+                <div class="control-row checkbox-row">
+                  <label for="optCenterTextInMask">文字居中</label>
+                  <input id="optCenterTextInMask" type="checkbox" checked>
+                </div>
               </div>
               <label class="option">
-                <input id="optHideTextColor" type="checkbox">
-                <span><strong>隐藏常见标题/文案字段</strong>把 `titleColor`、`TextTitleImageColor` 等常见颜色字段透明化。不是所有试玩都有效。</span>
+                <input id="optTextMask" type="checkbox">
+                <span><strong>添加顶部遮罩</strong>在画面顶部单独铺一条遮罩。可配合隐藏旧文案或覆盖文案使用，也可以单独使用。</span>
               </label>
+              <div class="operation-panel">
+                <div class="control-row">
+                  <label for="textMaskColor">遮罩颜色</label>
+                  <input id="textMaskColor" type="color" value="#527eaf">
+                </div>
+                <div class="control-row">
+                  <label for="textMaskHeight">遮罩高度</label>
+                  <input id="textMaskHeight" type="number" min="1" max="180" value="70">
+                </div>
+              </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -724,10 +972,54 @@
               <div class="meta">生成后的下载链接会显示在这里。</div>
             </div>
           </div>
+
+          <div class="preview-panel landscape" id="previewPanel">
+            <div class="preview-head">
+              <div class="preview-title" id="previewTitle">预览窗口</div>
+              <div class="preview-tools">
+                <button class="secondary viewport-btn" type="button" data-mode="portrait">竖屏 9:16</button>
+                <button class="secondary viewport-btn active" type="button" data-mode="landscape">横屏 16:9</button>
+                <button class="secondary viewport-btn" type="button" data-mode="fit">适应宽度</button>
+                <button class="secondary" id="largePreviewBtn" type="button" disabled>放大预览</button>
+                <button class="secondary" id="openPreviewBtn" type="button" disabled>新窗口打开</button>
+              </div>
+            </div>
+            <div class="preview-stage">
+              <div class="preview-empty" id="previewEmpty">生成修改版后，这里会显示预览。</div>
+              <iframe
+                id="previewFrame"
+                class="preview-frame"
+                title="生成结果预览"
+                sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups allow-downloads"
+                hidden
+              ></iframe>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   </main>
+
+  <div class="preview-modal" id="previewModal" hidden>
+    <div class="modal-bar">
+      <div class="modal-title" id="modalPreviewTitle">放大预览</div>
+      <div class="modal-controls">
+        <label>宽 <input id="modalPreviewWidth" type="range" min="320" max="1400" value="405" step="1"> <span id="modalPreviewWidthValue">405</span></label>
+        <label>高 <input id="modalPreviewHeight" type="range" min="360" max="1200" value="720" step="1"> <span id="modalPreviewHeightValue">720</span></label>
+        <button class="secondary" id="modalPortraitBtn" type="button">竖屏 9:16</button>
+        <button class="secondary" id="modalLandscapeBtn" type="button">横屏 16:9</button>
+        <button id="closePreviewModalBtn" type="button">关闭</button>
+      </div>
+    </div>
+    <div class="modal-stage">
+      <iframe
+        id="modalPreviewFrame"
+        class="modal-frame"
+        title="放大预览"
+        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups allow-downloads"
+      ></iframe>
+    </div>
+  </div>
 
   <script>
     const dropzone = document.getElementById("dropzone");
@@ -742,6 +1034,22 @@
     const detectList = document.getElementById("detectList");
     const detectCount = document.getElementById("detectCount");
     const resultList = document.getElementById("resultList");
+    const previewPanel = document.getElementById("previewPanel");
+    const previewTitle = document.getElementById("previewTitle");
+    const previewEmpty = document.getElementById("previewEmpty");
+    const previewFrame = document.getElementById("previewFrame");
+    const openPreviewBtn = document.getElementById("openPreviewBtn");
+    const largePreviewBtn = document.getElementById("largePreviewBtn");
+    const previewModal = document.getElementById("previewModal");
+    const modalPreviewTitle = document.getElementById("modalPreviewTitle");
+    const modalPreviewFrame = document.getElementById("modalPreviewFrame");
+    const modalPreviewWidth = document.getElementById("modalPreviewWidth");
+    const modalPreviewHeight = document.getElementById("modalPreviewHeight");
+    const modalPreviewWidthValue = document.getElementById("modalPreviewWidthValue");
+    const modalPreviewHeightValue = document.getElementById("modalPreviewHeightValue");
+    const modalPortraitBtn = document.getElementById("modalPortraitBtn");
+    const modalLandscapeBtn = document.getElementById("modalLandscapeBtn");
+    const closePreviewModalBtn = document.getElementById("closePreviewModalBtn");
     const log = document.getElementById("log");
     const clearBtn = document.getElementById("clearBtn");
     const generateBtn = document.getElementById("generateBtn");
@@ -756,8 +1064,12 @@
     const optOverlayText = document.getElementById("optOverlayText");
     const overlayText = document.getElementById("overlayText");
     const overlayColor = document.getElementById("overlayColor");
+    const textMaskColor = document.getElementById("textMaskColor");
+    const textMaskHeight = document.getElementById("textMaskHeight");
     const overlaySize = document.getElementById("overlaySize");
+    const optCenterTextInMask = document.getElementById("optCenterTextInMask");
     const optHideTextColor = document.getElementById("optHideTextColor");
+    const optTextMask = document.getElementById("optTextMask");
 
     let textureDataUrl = "";
     const inputs = [];
@@ -904,7 +1216,7 @@
         if (a.likelyTextureBackground) {
           anyTextureBg = true;
           found++;
-          cards.push(makeDetectCard("场景背景贴图/材质", "可尝试替换", filePrefix + "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。可启用“强制替换疑似背景贴图”。", "warn"));
+          cards.push(makeDetectCard("场景背景贴图/材质", "谨慎尝试", filePrefix + "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。贴图替换可能误伤玩法元素，请手动勾选并先看预览。", "warn"));
         }
 
         if (a.textSignals.length) {
@@ -915,7 +1227,7 @@
 
       optRedirect.checked = anyRedirect || inputs.length > 0;
       optCounters.checked = anyCounters || inputs.length > 0;
-      optTextureReplace.checked = anyTextureBg;
+      optTextureReplace.checked = false;
       if (anyTextureBg) optBackground.checked = true;
 
       detectCount.textContent = found + " 项";
@@ -987,102 +1299,333 @@
     }
 
     function makeBackgroundPatch(mode, color, texture) {
-      const background = mode === "texture" && texture ? `url("${texture}") center / cover no-repeat fixed, ${color}` : color;
+      const useTexture = mode === "texture" && !!texture;
+      const pageBaseColor = useTexture ? "#020614" : color;
+      const canvasBackground = useTexture ? "transparent" : color;
+      const textureGroupRule = useTexture ? `
+html,
+body,
+#codex-background-layer,
+.preloader,
+#application-preloader {
+  background-color: ${pageBaseColor} !important;
+  background-image: url(${JSON.stringify(texture)}) !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+}
+html,
+body {
+  background-attachment: fixed !important;
+}` : `
+html,
+body,
+#codex-background-layer,
+.preloader,
+#application-preloader {
+  background-color: ${pageBaseColor} !important;
+  background-image: none !important;
+}`;
       return `<style id="codex-playable-background">
-:root {
-  --codex-bg-layer: ${background};
-}
-html {
-  background: var(--codex-bg-layer) !important;
-}
-html, body {
+html,
+body {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
   min-height: 100% !important;
-  background: var(--codex-bg-layer) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: ${pageBaseColor} !important;
 }
+body {
+  overflow: hidden !important;
+}
+#codex-background-layer {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background-color: ${pageBaseColor} !important;
+}
+${textureGroupRule}
 #unity-container,
 #unityContainer,
 #gameContainer,
 #game-container,
 #canvas-wrap,
-.webgl-content {
-  background: var(--codex-bg-layer) !important;
+#application,
+#app,
+.webgl-content,
+.game-container,
+.playable-container {
+  background-color: ${canvasBackground} !important;
+  background-image: none !important;
 }
-#application-canvas,
-canvas {
+#application-canvas {
+  margin: 0 auto !important;
+  display: block !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+  background: ${canvasBackground} !important;
+  background-color: ${canvasBackground} !important;
+  background-image: none !important;
+}
+canvas:not(#codex-background-helper-canvas) {
+  background-color: ${canvasBackground} !important;
+  ${useTexture ? "background-image:none !important;" : ""}
+}
+.preloader__background__color__overlay,
+#application-preloader .preloader__background__color__overlay {
+  background: transparent !important;
   background-color: transparent !important;
 }
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--codex-bg-layer) !important;
-}
-<\/style>`;
-    }
-
-    function makeWebGLBackgroundPatch(mode, color) {
-      const rgb = hexToRgb01(color);
-      const alpha = mode === "texture" ? 0 : 1;
-      return `<script id="codex-force-webgl-background">
+<\/style><script id="codex-background-layer-script">
 (function(){
-  var forced = [${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha}];
-  var transparent = ${mode === "texture" ? "true" : "false"};
-  var patchedContexts = [];
-
-  function patchContext(gl){
-    if (!gl || gl.__codexBackgroundPatched) return gl;
+  function ensureBackgroundLayer(){
     try {
-      var originalClearColor = gl.clearColor && gl.clearColor.bind(gl);
-      if (originalClearColor) {
-        gl.clearColor = function(){
-          return originalClearColor(forced[0], forced[1], forced[2], forced[3]);
-        };
-        originalClearColor(forced[0], forced[1], forced[2], forced[3]);
+      if (!document.body) return;
+      var el = document.getElementById("codex-background-layer");
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "codex-background-layer";
+        document.body.insertBefore(el, document.body.firstChild || null);
+      } else if (el.parentNode !== document.body) {
+        document.body.insertBefore(el, document.body.firstChild || null);
       }
-      gl.__codexBackgroundPatched = true;
-      patchedContexts.push(gl);
     } catch(e) {}
-    return gl;
+  }
+  ensureBackgroundLayer();
+  window.addEventListener("DOMContentLoaded", ensureBackgroundLayer);
+  window.addEventListener("load", ensureBackgroundLayer);
+  window.addEventListener("luna:start", ensureBackgroundLayer);
+  window.addEventListener("luna:started", ensureBackgroundLayer);
+  setTimeout(ensureBackgroundLayer, 0);
+  setTimeout(ensureBackgroundLayer, 80);
+  var tries = 0;
+  var timer = setInterval(function(){
+    ensureBackgroundLayer();
+    tries++;
+    if (tries > 160) clearInterval(timer);
+  }, 100);
+})();
+<\/script>`;
+    }
+    function makeWebGLBackgroundPatch(mode, color, texture) {
+      const useTexture = mode === "texture" && !!texture;
+      const baseColor = useTexture ? "#000000" : color;
+      const rgb = hexToRgb01(baseColor);
+      if (useTexture) {
+        return `<script id="codex-force-webgl-background">
+(function(){
+  if (window.__codexTransparentBackgroundPatchV110) return;
+  window.__codexTransparentBackgroundPatchV110 = true;
+
+  function isWebGLType(type){
+    return type === "webgl" || type === "experimental-webgl" || type === "webgl2";
+  }
+
+  function cloneAttributes(attributes){
+    if (!attributes || typeof attributes !== "object") return {};
+    try { return Object.assign({}, attributes); } catch(e) {
+      var copy = {};
+      for (var key in attributes) {
+        try { copy[key] = attributes[key]; } catch(err) {}
+      }
+      return copy;
+    }
+  }
+
+  function patchPlaygroundOverrides(){
+    try {
+      var cfg = window.playgroundOverrides && window.playgroundOverrides.GameConfig;
+      if (!cfg) return;
+      if (cfg.MainCameraBackgroundColor) cfg.MainCameraBackgroundColor = ["color", 0, 0, 0, 0];
+      if (cfg.cameraBackgroundColor) cfg.cameraBackgroundColor = ["color", 0, 0, 0, 0];
+    } catch(e) {}
   }
 
   function patchCanvasPrototype(){
     try {
-      var proto = HTMLCanvasElement && HTMLCanvasElement.prototype;
-      if (!proto || proto.__codexGetContextPatched) return;
+      var proto = window.HTMLCanvasElement && HTMLCanvasElement.prototype;
+      if (!proto || proto.__codexTransparentGetContextV110) return;
       var originalGetContext = proto.getContext;
       proto.getContext = function(type){
         var args = Array.prototype.slice.call(arguments);
-        if (transparent && (type === "webgl" || type === "experimental-webgl" || type === "webgl2")) {
-          args[1] = Object.assign({}, args[1] || {}, { alpha: true });
+        if (isWebGLType(type)) {
+          var opts = cloneAttributes(args[1]);
+          opts.alpha = true;
+          args[1] = opts;
         }
         var ctx = originalGetContext.apply(this, args);
-        if (type === "webgl" || type === "experimental-webgl" || type === "webgl2") {
-          patchContext(ctx);
-        }
+        try {
+          if (isWebGLType(type) && this && this.style) {
+            this.style.background = "transparent";
+            this.style.backgroundColor = "transparent";
+          }
+        } catch(e) {}
         return ctx;
       };
-      proto.__codexGetContextPatched = true;
+      proto.__codexTransparentGetContextV110 = true;
     } catch(e) {}
   }
 
-  function repaint(){
-    for (var i = 0; i < patchedContexts.length; i++) {
-      try { patchedContexts[i].clearColor(forced[0], forced[1], forced[2], forced[3]); } catch(e) {}
+  function makeTransparentColor(pcRef, oldColor){
+    try {
+      if (!pcRef || !pcRef.Color) return null;
+      oldColor = oldColor || {};
+      return new pcRef.Color(Number(oldColor.r) || 0, Number(oldColor.g) || 0, Number(oldColor.b) || 0, 0);
+    } catch(e) { return null; }
+  }
+
+  function patchCameraComponent(cam){
+    try {
+      if (!cam) return;
+      var pcRef = window.pc;
+      var c = makeTransparentColor(pcRef, cam.clearColor);
+      if (c && "clearColor" in cam) cam.clearColor = c;
+      if ("clearColorBuffer" in cam) cam.clearColorBuffer = true;
+      if (cam.camera) {
+        var c2 = makeTransparentColor(pcRef, cam.camera.clearColor || cam.clearColor);
+        if (c2 && "clearColor" in cam.camera) cam.camera.clearColor = c2;
+        if ("clearColorBuffer" in cam.camera) cam.camera.clearColorBuffer = true;
+      }
+    } catch(e) {}
+  }
+
+  function patchCameras(){
+    try {
+      var pcRef = window.pc;
+      var app = pcRef && pcRef.Application && pcRef.Application.getApplication && pcRef.Application.getApplication();
+      if (!app || !app.root || !app.root.findComponents) return;
+      var cameras = app.root.findComponents("camera") || [];
+      for (var i = 0; i < cameras.length; i++) patchCameraComponent(cameras[i]);
+    } catch(e) {}
+  }
+
+  function applyPatch(){
+    patchPlaygroundOverrides();
+    patchCanvasPrototype();
+    patchCameras();
+  }
+
+  applyPatch();
+  window.addEventListener("DOMContentLoaded", applyPatch);
+  window.addEventListener("load", applyPatch);
+  window.addEventListener("luna:build", applyPatch);
+  window.addEventListener("luna:start", applyPatch);
+  window.addEventListener("luna:started", function(){
+    var frames = 0;
+    function tick(){
+      applyPatch();
+      if (++frames < 900) requestAnimationFrame(tick);
     }
+    tick();
+  });
+  var attempts = 0;
+  var timer = setInterval(function(){
+    applyPatch();
+    attempts++;
+    if (attempts > 500) clearInterval(timer);
+  }, 60);
+})();
+<\/script>`;
+      }
+
+      return `<script id="codex-force-webgl-background">
+(function(){
+  var forced = [${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 1];
+  var contexts = [];
+
+  function safeCall(fn){ try { return fn(); } catch(e) {} }
+  function isWebGLType(type){ return type === "webgl" || type === "experimental-webgl" || type === "webgl2"; }
+  function remember(gl){ if (gl && contexts.indexOf(gl) < 0) contexts.push(gl); return gl; }
+
+  function patchClearColor(gl){
+    if (!gl || gl.__codexColorClearPatchedV110) return;
+    var originalClearColor = gl.clearColor && gl.clearColor.bind(gl);
+    if (originalClearColor) {
+      gl.clearColor = function(){ return originalClearColor(forced[0], forced[1], forced[2], forced[3]); };
+      originalClearColor(forced[0], forced[1], forced[2], forced[3]);
+    }
+    var originalClearBufferfv = gl.clearBufferfv && gl.clearBufferfv.bind(gl);
+    if (originalClearBufferfv) {
+      gl.clearBufferfv = function(buffer, drawbuffer, values, srcOffset){
+        if (buffer === gl.COLOR) return originalClearBufferfv(buffer, drawbuffer, forced, 0);
+        return originalClearBufferfv.apply(gl, arguments);
+      };
+    }
+    gl.__codexColorClearPatchedV110 = true;
+  }
+
+  function patchCanvasPrototype(){
+    safeCall(function(){
+      var proto = window.HTMLCanvasElement && HTMLCanvasElement.prototype;
+      if (!proto || proto.__codexColorGetContextPatchedV110) return;
+      var originalGetContext = proto.getContext;
+      proto.getContext = function(type){
+        var ctx = originalGetContext.apply(this, arguments);
+        if (isWebGLType(type)) { remember(ctx); patchClearColor(ctx); }
+        return ctx;
+      };
+      proto.__codexColorGetContextPatchedV110 = true;
+    });
+  }
+
+  function patchCamera(cam){
+    safeCall(function(){
+      if (!cam) return;
+      var pcRef = window.pc;
+      var nextColor = pcRef && pcRef.Color ? new pcRef.Color(forced[0], forced[1], forced[2], forced[3]) : null;
+      if (nextColor && "clearColor" in cam) cam.clearColor = nextColor;
+      if ("clearColorBuffer" in cam) cam.clearColorBuffer = true;
+      if (cam.camera && nextColor && "clearColor" in cam.camera) cam.camera.clearColor = nextColor;
+      if (cam.camera && "clearColorBuffer" in cam.camera) cam.camera.clearColorBuffer = true;
+    });
+  }
+
+  function patchCameras(){
+    safeCall(function(){
+      var pcRef = window.pc;
+      var app = pcRef && pcRef.Application && pcRef.Application.getApplication && pcRef.Application.getApplication();
+      if (!app || !app.root || !app.root.findComponents) return;
+      var cameras = app.root.findComponents("camera") || [];
+      for (var i = 0; i < cameras.length; i++) patchCamera(cameras[i]);
+    });
+  }
+
+  function repaint(){
+    patchCanvasPrototype();
+    for (var i = 0; i < contexts.length; i++) patchClearColor(contexts[i]);
+    patchCameras();
   }
 
   patchCanvasPrototype();
-  window.addEventListener("DOMContentLoaded", patchCanvasPrototype);
-  window.addEventListener("luna:start", patchCanvasPrototype);
-  window.addEventListener("luna:started", patchCanvasPrototype);
-  setInterval(repaint, 250);
+  repaint();
+  window.addEventListener("DOMContentLoaded", repaint);
+  window.addEventListener("load", repaint);
+  window.addEventListener("luna:build", repaint);
+  window.addEventListener("luna:start", repaint);
+  window.addEventListener("luna:started", function(){
+    var frames = 0;
+    function tick(){ repaint(); if (++frames < 240) requestAnimationFrame(tick); }
+    tick();
+  });
+  var attempts = 0;
+  var timer = setInterval(function(){ repaint(); attempts++; if (attempts > 300) clearInterval(timer); }, 60);
 })();
 <\/script>`;
     }
-
-
     function makeTextureReplacementPatch(mode, color, texture) {
       const fill = hexToRgb255(color);
       const textureUrl = mode === "texture" && texture ? texture : "";
@@ -1122,6 +1665,23 @@ body::before {
     var beigeRatio = beige / seen;
     return beigeRatio > 0.42 && avgR > 135 && avgG > 120 && avgB > 82 && avgR > avgB + 15;
   }
+  function isPlainBackgroundStats(seen, total, light, dark, sumR, sumG, sumB, sumSqR, sumSqG, sumSqB){
+    if (!seen) return false;
+    var visibleRatio = seen / Math.max(1, total || seen);
+    if (visibleRatio < 0.55) return false;
+    var lightRatio = light / seen;
+    var darkRatio = dark / seen;
+    if (lightRatio > 0.72 || darkRatio > 0.72) return true;
+    var avgR = sumR / seen;
+    var avgG = sumG / seen;
+    var avgB = sumB / seen;
+    var varR = Math.max(0, sumSqR / seen - avgR * avgR);
+    var varG = Math.max(0, sumSqG / seen - avgG * avgG);
+    var varB = Math.max(0, sumSqB / seen - avgB * avgB);
+    var std = Math.sqrt((varR + varG + varB) / 3);
+    var chroma = Math.max(avgR, avgG, avgB) - Math.min(avgR, avgG, avgB);
+    return std < 18 && chroma < 28;
+  }
   function isBackgroundLikeSource(source){
     if (decisionCache && decisionCache.has(source)) return decisionCache.get(source);
     var result = false;
@@ -1135,8 +1695,10 @@ body::before {
         var ctx = canvas.getContext("2d");
         ctx.drawImage(source, 0, 0, sampleSize, sampleSize);
         var data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
-        var beige = 0, seen = 0, sumR = 0, sumG = 0, sumB = 0;
+        var beige = 0, light = 0, dark = 0, seen = 0, total = 0;
+        var sumR = 0, sumG = 0, sumB = 0, sumSqR = 0, sumSqG = 0, sumSqB = 0;
         for (var i = 0; i < data.length; i += 4) {
+          total++;
           var a = data[i + 3];
           if (a < 80) continue;
           var r = data[i], g = data[i + 1], b = data[i + 2];
@@ -1144,9 +1706,15 @@ body::before {
           sumR += r;
           sumG += g;
           sumB += b;
+          sumSqR += r * r;
+          sumSqG += g * g;
+          sumSqB += b * b;
           if (countBeige(r, g, b)) beige++;
+          if (r >= 220 && g >= 220 && b >= 220) light++;
+          if (r <= 35 && g <= 35 && b <= 35) dark++;
         }
-        result = isBeigeStats(seen, beige, sumR, sumG, sumB) || (seen > 320 && size.width >= 512 && size.height >= 512);
+        result = isBeigeStats(seen, beige, sumR, sumG, sumB) ||
+          isPlainBackgroundStats(seen, total, light, dark, sumR, sumG, sumB, sumSqR, sumSqG, sumSqB);
       }
     } catch(e) { result = false; }
     if (decisionCache) decisionCache.set(source, result);
@@ -1193,10 +1761,12 @@ body::before {
       if (channels < 3) return false;
       if (pixels.length < width * height * channels) return false;
       var steps = 18;
-      var beige = 0, seen = 0, sumR = 0, sumG = 0, sumB = 0;
+      var beige = 0, light = 0, dark = 0, seen = 0, total = 0;
+      var sumR = 0, sumG = 0, sumB = 0, sumSqR = 0, sumSqG = 0, sumSqB = 0;
       for (var y = 0; y < steps; y++) {
         var py = Math.min(height - 1, Math.floor((y + 0.5) * height / steps));
         for (var x = 0; x < steps; x++) {
+          total++;
           var px = Math.min(width - 1, Math.floor((x + 0.5) * width / steps));
           var index = (py * width + px) * channels;
           var r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
@@ -1206,10 +1776,16 @@ body::before {
           sumR += r;
           sumG += g;
           sumB += b;
+          sumSqR += r * r;
+          sumSqG += g * g;
+          sumSqB += b * b;
           if (countBeige(r, g, b)) beige++;
+          if (r >= 220 && g >= 220 && b >= 220) light++;
+          if (r <= 35 && g <= 35 && b <= 35) dark++;
         }
       }
-      return isBeigeStats(seen, beige, sumR, sumG, sumB) || (seen > 300 && width >= 512 && height >= 512);
+      return isBeigeStats(seen, beige, sumR, sumG, sumB) ||
+        isPlainBackgroundStats(seen, total, light, dark, sumR, sumG, sumB, sumSqR, sumSqG, sumSqB);
     } catch(e) { return false; }
   }
   function makePixelReplacement(gl, width, height, format, type, pixels){
@@ -1286,27 +1862,112 @@ body::before {
 <\/script>`;
     }
 
-    function makeOverlayTextPatch(text, color, size) {
-      return `<div id="codex-overlay-text" style="
+    function makeTextMaskPatch(size, color, height) {
+      const fallbackHeight = Math.round((Number(size) || 36) * 1.35 + 20);
+      const maskHeight = Math.max(1, Math.min(180, Math.round(Number(height) || fallbackHeight)));
+      return `<div id="codex-text-mask" style="
+position:fixed!important;
+left:0!important;
+top:0!important;
+z-index:2147483647!important;
+width:100vw!important;
+height:${maskHeight}px!important;
+background:${color}!important;
+border-radius:0!important;
+box-shadow:0 10px 24px rgba(0,0,0,.16)!important;
+pointer-events:none!important;
+"><\/div><script id="codex-text-mask-raise">
+(function(){
+  var endAt = Date.now() + 12000;
+  var maskHeight = ${maskHeight};
+  function getGameRect(){
+    var selectors = "canvas,#unity-canvas,#gameContainer,#unity-container,.game-container,.gameContainer,[id*='game'],[class*='game']";
+    var nodes = [];
+    try { nodes = Array.prototype.slice.call(document.querySelectorAll(selectors)); } catch(e) {}
+    var best = null;
+    for (var i = 0; i < nodes.length; i++) {
+      var rect = nodes[i].getBoundingClientRect ? nodes[i].getBoundingClientRect() : null;
+      if (!rect || rect.width < 220 || rect.height < 160) continue;
+      if (rect.bottom <= 0 || rect.right <= 0 || rect.left >= window.innerWidth || rect.top >= window.innerHeight) continue;
+      if (!best || rect.width * rect.height > best.width * best.height) best = rect;
+    }
+    if (best) return best;
+    return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+  }
+  function syncTextLayers(){
+    var host = document.body || document.documentElement;
+    if (!host) return;
+    var mask = document.getElementById("codex-text-mask");
+    var overlay = document.getElementById("codex-overlay-text");
+    var rect = getGameRect();
+    if (mask) {
+      mask.style.left = Math.max(0, Math.round(rect.left)) + "px";
+      mask.style.top = Math.max(0, Math.round(rect.top)) + "px";
+      mask.style.width = Math.round(rect.width) + "px";
+      mask.style.height = maskHeight + "px";
+    }
+    if (overlay) {
+      overlay.style.left = Math.max(0, Math.round(rect.left)) + "px";
+      overlay.style.right = "auto";
+      overlay.style.width = Math.round(rect.width) + "px";
+      if (overlay.getAttribute("data-center-mask") === "true") {
+        overlay.style.top = Math.max(0, Math.round(rect.top + (maskHeight - overlay.offsetHeight) / 2)) + "px";
+      } else {
+        overlay.style.top = Math.max(0, Math.round(rect.top + Math.max(4, maskHeight * 0.18))) + "px";
+      }
+    }
+    if (mask) host.appendChild(mask);
+    if (overlay) host.appendChild(overlay);
+    if (Date.now() < endAt) setTimeout(syncTextLayers, 250);
+  }
+  syncTextLayers();
+  window.addEventListener("load", syncTextLayers);
+  window.addEventListener("resize", syncTextLayers);
+  window.__codexSyncTextLayers = syncTextLayers;
+  window.__codexRaiseTextLayers = syncTextLayers;
+})();
+<\/script>`;
+    }
+
+    function makeOverlayTextPatch(text, color, size, centerInMask) {
+      const maxSize = Number(size) || 36;
+      return `<div id="codex-overlay-text" data-max-size="${maxSize}" data-center-mask="${centerInMask ? "true" : "false"}" style="
 position:fixed;
-left:50%;
-top:28px;
-transform:translateX(-50%);
-z-index:2147483647;
-max-width:92vw;
-padding:0 10px;
+left:0!important;
+right:0!important;
+top:20px;
+z-index:2147483647!important;
+width:auto;
+max-width:none;
+padding:0;
+box-sizing:border-box;
 color:${color};
 font-family:Arial, 'Microsoft YaHei', sans-serif;
-font-size:${Number(size) || 36}px;
+font-size:${maxSize}px;
 font-weight:800;
 line-height:1.12;
 text-align:center;
 letter-spacing:0;
 text-shadow:0 2px 0 rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
 pointer-events:none;
-white-space:normal;
-overflow-wrap:anywhere;
-">${escapeHtml(text)}<\/div>`;
+white-space:nowrap;
+overflow-wrap:normal;
+word-break:normal;
+">${escapeHtml(text)}<\/div><script id="codex-overlay-text-fit">
+(function(){
+  function syncOverlayText(){
+    var el = document.getElementById("codex-overlay-text");
+    if (!el) return;
+    var maxSize = Number(el.getAttribute("data-max-size")) || 36;
+    el.style.fontSize = maxSize + "px";
+  }
+  syncOverlayText();
+  if (window.__codexSyncTextLayers) window.__codexSyncTextLayers();
+  window.addEventListener("resize", syncOverlayText);
+  setTimeout(syncOverlayText, 80);
+  setTimeout(syncOverlayText, 500);
+})();
+<\/script>`;
     }
 
     function patchTextColors(content) {
@@ -1340,16 +2001,28 @@ overflow-wrap:anywhere;
       return content + injection;
     }
 
-    function patchUnityBackgroundColor(content, color) {
+    function patchUnityBackgroundColor(content, color, transparent, keys) {
       const rgb = hexToRgb01(color);
-      const replacement = `"MainCameraBackgroundColor":["color",${rgb[0]},${rgb[1]},${rgb[2]},1]`;
-      const patterns = [
-        /"MainCameraBackgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g,
-        /"cameraBackgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g,
-        /"backgroundColor":\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\]/g
-      ];
-      for (const pattern of patterns) content = content.replace(pattern, replacement);
+      const alpha = transparent ? 0 : 1;
+      const targetKeys = keys || ["MainCameraBackgroundColor", "cameraBackgroundColor", "backgroundColor"];
+      for (const key of targetKeys) {
+        const pattern = new RegExp('"' + key + '":\\["color",[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+,[0-9.eE+-]+\\]', "g");
+        const replacement = `"${key}":["color",${rgb[0]},${rgb[1]},${rgb[2]},${alpha}]`;
+        content = content.replace(pattern, replacement);
+      }
       return content;
+    }
+
+    function patchUnityCameraBackgroundTransparent(content) {
+      return patchUnityBackgroundColor(content, "#000000", true, ["MainCameraBackgroundColor", "cameraBackgroundColor"]);
+    }
+    function patchCssFallbackBackgrounds(content, color, transparent) {
+      const fallback = transparent ? "transparent" : color;
+      return content
+        .replace(/background\s*:\s*#000(?:000)?(?:ff)?/gi, "background:" + fallback)
+        .replace(/background-color\s*:\s*#000(?:000)?(?:ff)?/gi, "background-color:" + fallback)
+        .replace(/background\s*:\s*rgb\(\s*0\s*,\s*0\s*,\s*0\s*\)/gi, "background:" + fallback)
+        .replace(/background-color\s*:\s*rgb\(\s*0\s*,\s*0\s*,\s*0\s*\)/gi, "background-color:" + fallback);
     }
 
     function transform(content) {
@@ -1374,19 +2047,24 @@ overflow-wrap:anywhere;
       if (optBackground.checked) {
         const mode = getBgMode();
         const color = bgColor.value;
+        const useTexture = mode === "texture" && !!textureDataUrl;
         content = removePatchById(content, "codex-playable-background");
+        content = removePatchById(content, "codex-background-layer");
+        content = removePatchById(content, "codex-background-layer-script");
         content = removePatchById(content, "codex-force-webgl-background");
         content = removePatchById(content, "codex-replace-bg-texture");
-        let injection = makeBackgroundPatch(mode, color, textureDataUrl) + makeWebGLBackgroundPatch(mode, color);
+        content = content.replace(/<script\s+data-background-safe-webgl-patch[\s\S]*?<\/script>/g, "");
+        let injection = makeBackgroundPatch(mode, color, textureDataUrl) + makeWebGLBackgroundPatch(mode, color, textureDataUrl);
         if (optTextureReplace.checked) injection += makeTextureReplacementPatch(mode, color, textureDataUrl);
         content = injectIntoHead(content, injection);
-        content = patchUnityBackgroundColor(content, color);
-        content = content
-          .replace(/background:#000/g, "background:" + color)
-          .replace(/background: #000/g, "background: " + color)
-          .replace(/background-color:#000/g, "background-color:" + color)
-          .replace(/background-color: #000/g, "background-color: " + color);
-        stats.push(optTextureReplace.checked ? "背景/贴图替换已启用" : "背景已修改");
+        if (mode === "texture" && textureDataUrl) {
+          // 图片背景使用“页面背景 + 透明 WebGL 相机”的兼容模式，只改相机背景，不再泛改 backgroundColor，避免误伤瓶子/液体材质。
+          content = patchUnityCameraBackgroundTransparent(content);
+        } else {
+          content = patchUnityBackgroundColor(content, color, false);
+          content = patchCssFallbackBackgrounds(content, color, false);
+        }
+        stats.push(optTextureReplace.checked ? "背景/贴图替换已启用" : (useTexture ? "背景图片已修改（兼容模式）" : "背景颜色已修改"));
       }
 
       if (optForceLanguage.checked) {
@@ -1395,15 +2073,23 @@ overflow-wrap:anywhere;
         stats.push("语言已强制为 " + languageSelect.value);
       }
 
+      content = removePatchById(content, "codex-text-mask");
+      content = removePatchById(content, "codex-text-mask-raise");
+      content = removePatchById(content, "codex-overlay-text");
+      content = removePatchById(content, "codex-overlay-text-fit");
       if (optHideTextColor.checked) {
         const before = content;
         content = patchTextColors(content);
-        stats.push(before === content ? "未找到可隐藏文案字段" : "常见文案颜色已透明化");
+        stats.push(before === content ? "未找到可透明化文案字段" : "文案字段已透明化");
+      }
+
+      if (optTextMask.checked) {
+        content = injectBeforeBody(content, makeTextMaskPatch(overlaySize.value, textMaskColor.value, textMaskHeight.value));
+        stats.push("顶部旧文案遮罩已添加");
       }
 
       if (optOverlayText.checked && overlayText.value.trim()) {
-        content = removePatchById(content, "codex-overlay-text");
-        content = injectBeforeBody(content, makeOverlayTextPatch(overlayText.value.trim(), overlayColor.value, overlaySize.value));
+        content = injectBeforeBody(content, makeOverlayTextPatch(overlayText.value.trim(), overlayColor.value, overlaySize.value, optCenterTextInMask.checked));
         stats.push("覆盖文案已添加");
       }
 
@@ -1437,11 +2123,82 @@ overflow-wrap:anywhere;
       renderDetection();
     }
 
+    function clearPreview() {
+      previewTitle.textContent = "预览窗口";
+      previewFrame.removeAttribute("src");
+      previewFrame.hidden = true;
+      previewEmpty.hidden = false;
+      openPreviewBtn.disabled = true;
+      openPreviewBtn.removeAttribute("data-url");
+      largePreviewBtn.disabled = true;
+      largePreviewBtn.removeAttribute("data-url");
+      largePreviewBtn.removeAttribute("data-name");
+      modalPreviewFrame.removeAttribute("src");
+      previewModal.hidden = true;
+    }
+
+    function showPreview(index) {
+      const item = outputs[index];
+      if (!item) {
+        clearPreview();
+        return;
+      }
+      previewTitle.textContent = "预览: " + item.name;
+      previewFrame.src = item.url;
+      previewFrame.hidden = false;
+      previewEmpty.hidden = true;
+      openPreviewBtn.disabled = false;
+      openPreviewBtn.dataset.url = item.url;
+      largePreviewBtn.disabled = false;
+      largePreviewBtn.dataset.url = item.url;
+      largePreviewBtn.dataset.name = item.name;
+      addLog("正在预览: " + item.name);
+    }
+
+    function setPreviewMode(mode) {
+      previewPanel.classList.remove("landscape", "fit");
+      if (mode === "landscape") previewPanel.classList.add("landscape");
+      if (mode === "fit") previewPanel.classList.add("fit");
+      document.querySelectorAll(".viewport-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.mode === mode);
+      });
+    }
+
+    function updateModalPreviewSize() {
+      const width = modalPreviewWidth.value;
+      const height = modalPreviewHeight.value;
+      modalPreviewWidthValue.textContent = width;
+      modalPreviewHeightValue.textContent = height;
+      previewModal.style.setProperty("--modal-preview-w", width + "px");
+      previewModal.style.setProperty("--modal-preview-h", height + "px");
+    }
+
+    function setModalPreset(width, height) {
+      modalPreviewWidth.value = width;
+      modalPreviewHeight.value = height;
+      updateModalPreviewSize();
+    }
+
+    function openLargePreview() {
+      const url = largePreviewBtn.dataset.url;
+      if (!url) return;
+      modalPreviewTitle.textContent = "放大预览: " + (largePreviewBtn.dataset.name || "");
+      modalPreviewFrame.src = url;
+      updateModalPreviewSize();
+      previewModal.hidden = false;
+    }
+
+    function closeLargePreview() {
+      previewModal.hidden = true;
+      modalPreviewFrame.removeAttribute("src");
+    }
+
     function clearOutputs() {
       for (const item of outputs) URL.revokeObjectURL(item.url);
       outputs.length = 0;
       resultList.innerHTML = '<div class="result-card"><div class="meta">生成后的下载链接会显示在这里。</div></div>';
       downloadAllBtn.disabled = true;
+      clearPreview();
     }
 
     function renderOutputs() {
@@ -1450,12 +2207,15 @@ overflow-wrap:anywhere;
         return;
       }
 
-      resultList.innerHTML = outputs.map(item => `
+      resultList.innerHTML = outputs.map((item, index) => `
         <div class="result-card">
           <div class="file-name">${escapeHtml(item.sourceName)}</div>
           <div class="meta">输出: ${escapeHtml(item.name)} · ${(item.size / 1024).toFixed(1)} KB</div>
           <div style="margin:8px 0">${item.stats.map(x => `<span class="badge">${escapeHtml(x)}</span>`).join(" ")}</div>
-          <a class="download" href="${item.url}" download="${escapeHtml(item.name)}">下载</a>
+          <div class="result-actions">
+            <button class="secondary preview-btn" type="button" data-index="${index}">预览</button>
+            <a class="download" href="${item.url}" download="${escapeHtml(item.name)}">下载</a>
+          </div>
         </div>
       `).join("");
     }
@@ -1484,6 +2244,7 @@ overflow-wrap:anywhere;
 
       renderOutputs();
       downloadAllBtn.disabled = outputs.length === 0;
+      if (outputs.length) showPreview(0);
     }
 
     function readFileAsDataUrl(file) {
@@ -1523,6 +2284,7 @@ overflow-wrap:anywhere;
         textureName.textContent = file.name;
         bgPreview.style.backgroundImage = `url("${textureDataUrl}")`;
         optBackground.checked = true;
+        optTextureReplace.checked = false;
         document.querySelector('input[name="bgMode"][value="texture"]').checked = true;
         updateBackgroundModeUI();
         addLog("已载入背景图片: " + file.name);
@@ -1547,7 +2309,50 @@ overflow-wrap:anywhere;
       if (optTextureReplace.checked) optBackground.checked = true;
     });
 
+    function switchSettingsTab(tabName) {
+      document.querySelectorAll(".settings-tab").forEach(button => {
+        const active = button.dataset.settingsTab === tabName;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      document.querySelectorAll(".settings-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.settingsPanel === tabName);
+      });
+    }
+
+    document.querySelectorAll(".settings-tab").forEach(button => {
+      button.addEventListener("click", () => switchSettingsTab(button.dataset.settingsTab));
+    });
+
     generateBtn.addEventListener("click", generate);
+
+    document.querySelectorAll(".viewport-btn").forEach(button => {
+      button.addEventListener("click", () => setPreviewMode(button.dataset.mode));
+    });
+
+    resultList.addEventListener("click", event => {
+      const button = event.target.closest(".preview-btn");
+      if (!button) return;
+      showPreview(Number(button.dataset.index));
+    });
+
+    openPreviewBtn.addEventListener("click", () => {
+      const url = openPreviewBtn.dataset.url;
+      if (url) window.open(url, "_blank", "noopener");
+    });
+
+    largePreviewBtn.addEventListener("click", openLargePreview);
+    closePreviewModalBtn.addEventListener("click", closeLargePreview);
+    modalPreviewWidth.addEventListener("input", updateModalPreviewSize);
+    modalPreviewHeight.addEventListener("input", updateModalPreviewSize);
+    modalPortraitBtn.addEventListener("click", () => setModalPreset(405, 720));
+    modalLandscapeBtn.addEventListener("click", () => setModalPreset(960, 540));
+    previewModal.addEventListener("click", event => {
+      if (event.target === previewModal) closeLargePreview();
+    });
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !previewModal.hidden) closeLargePreview();
+    });
 
     downloadAllBtn.addEventListener("click", () => {
       for (const item of outputs) {
