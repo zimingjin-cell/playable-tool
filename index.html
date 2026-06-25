@@ -107,7 +107,13 @@
 
     .layout > .panel:nth-child(1),
     .layout > .panel:nth-child(2) {
-      min-height: 560px;
+      height: 600px;
+    }
+
+    .layout > .panel:nth-child(1) .panel-body,
+    .layout > .panel:nth-child(2) .panel-body {
+      flex: 1 1 auto;
+      overflow: auto;
     }
 
     .panel-head {
@@ -681,6 +687,7 @@
 
     .segmented {
       display: inline-flex;
+      flex-wrap: wrap;
       border: 1px solid var(--line);
       border-radius: 8px;
       overflow: hidden;
@@ -699,6 +706,14 @@
 
     .segmented label:first-child {
       border-left: 0;
+    }
+
+    .segmented.wrap label {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .segmented.wrap label:last-child {
+      border-bottom: 0;
     }
 
     .segmented input {
@@ -782,6 +797,11 @@
         grid-template-columns: 1fr;
       }
 
+      .layout > .panel:nth-child(1),
+      .layout > .panel:nth-child(2) {
+        height: auto;
+      }
+
       .topbar {
         align-items: flex-start;
         flex-direction: column;
@@ -808,7 +828,7 @@
       <h1>试玩 HTML 检测修改工具</h1>
       <a class="guide-link" href="https://docs.google.com/document/d/1k_H63zH0p-ZkBSVhY3bbEETz-o_73RUMMH0M6V21fGA/edit?tab=t.0" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.1.0 · 先检测，再修改 · 本地处理</div>
+      <div class="version">Ray · v1.2.0 · 先检测，再修改 · 本地处理</div>
     </div>
 
     <div class="layout">
@@ -866,9 +886,10 @@
         <div class="panel-body">
           <div class="settings-shell">
             <div class="settings-tabs" role="tablist" aria-label="修改分类">
-              <button class="settings-tab active" type="button" data-settings-tab="basic">基础设置</button>
+              <button class="settings-tab active" type="button" data-settings-tab="basic">跳转/次数</button>
               <button class="settings-tab" type="button" data-settings-tab="background">背景</button>
               <button class="settings-tab" type="button" data-settings-tab="text">文案/语言</button>
+              <button class="settings-tab" type="button" data-settings-tab="audio">音频</button>
             </div>
             <div class="settings">
               <div class="settings-panel active" data-settings-panel="basic">
@@ -884,6 +905,19 @@
               <label class="option">
                 <input id="optStoreLinks" type="checkbox">
                 <span><strong>清空商店链接</strong>把 `iosLink` / `androidLink` 改成 `about:blank`，遇到顽固跳转再勾。</span>
+              </label>
+                </div>
+              </div>
+
+              <div class="settings-panel" data-settings-panel="audio">
+                <div class="option-card">
+              <label class="option">
+                <input id="optRemoveBgm" type="checkbox">
+                <span><strong>去掉背景音乐</strong>保守移除疑似 BGM，尽量保留点击、碰撞、胜利等玩法音效。</span>
+              </label>
+              <label class="option">
+                <input id="optMuteAllAudio" type="checkbox">
+                <span><strong>强制静音全部音频</strong>高风险，会去掉所有声音，可能误伤玩法反馈音效。</span>
               </label>
                 </div>
               </div>
@@ -924,6 +958,31 @@
                 <input id="optTextureReplace" type="checkbox">
                 <span><strong>强制替换疑似背景贴图</strong>用于背景是场景材质/资源包贴图的试玩。高风险，可能误伤图集或玩法元素，建议先预览再下载。</span>
               </label>
+              <label class="option">
+                <input id="optVideoBackground" type="checkbox">
+                <span><strong>视频背景：请选择视频背景处理方式</strong>用于背景是一段内嵌 MP4 视频的试玩。可替换为图片、纯色、替换为视频或移除视频背景。</span>
+              </label>
+              <div class="operation-panel">
+                <div class="control-row">
+                  <label>处理类型</label>
+                  <div>
+                    <div class="segmented wrap video-action-group">
+                      <label><input type="radio" name="videoBgMode" value="remove" checked>移除视频背景</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceColor">替换纯色</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceImage">替换图片</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceVideo">替换视频</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-row mode-panel" id="videoUploadRow">
+                  <label>新视频</label>
+                  <div class="texture-line">
+                    <label class="file-button" for="videoInput">选择视频</label>
+                    <input id="videoInput" type="file" accept="video/mp4,video/webm,video/*">
+                    <span class="texture-name" id="videoName">未选择</span>
+                  </div>
+                </div>
+              </div>
                 </div>
               </div>
 
@@ -1007,12 +1066,12 @@
             </div>
           </div>
 
-          <div class="preview-panel landscape" id="previewPanel">
+          <div class="preview-panel" id="previewPanel">
             <div class="preview-head">
               <div class="preview-title" id="previewTitle">预览窗口</div>
               <div class="preview-tools">
-                <button class="secondary viewport-btn" type="button" data-mode="portrait">竖屏 9:16</button>
-                <button class="secondary viewport-btn active" type="button" data-mode="landscape">横屏 16:9</button>
+                <button class="secondary viewport-btn active" type="button" data-mode="portrait">竖屏 9:16</button>
+                <button class="secondary viewport-btn" type="button" data-mode="landscape">横屏 16:9</button>
                 <button class="secondary viewport-btn" type="button" data-mode="fit">适应宽度</button>
                 <button class="secondary" id="largePreviewBtn" type="button" disabled>放大预览</button>
                 <button class="secondary" id="openPreviewBtn" type="button" disabled>新窗口打开</button>
@@ -1059,7 +1118,9 @@
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("fileInput");
     const textureInput = document.getElementById("textureInput");
+    const videoInput = document.getElementById("videoInput");
     const textureName = document.getElementById("textureName");
+    const videoName = document.getElementById("videoName");
     const bgPreview = document.getElementById("bgPreview");
     const bgColor = document.getElementById("bgColor");
     const bgColorPanel = document.getElementById("bgColorPanel");
@@ -1091,8 +1152,12 @@
     const optRedirect = document.getElementById("optRedirect");
     const optCounters = document.getElementById("optCounters");
     const optStoreLinks = document.getElementById("optStoreLinks");
+    const optRemoveBgm = document.getElementById("optRemoveBgm");
+    const optMuteAllAudio = document.getElementById("optMuteAllAudio");
     const optBackground = document.getElementById("optBackground");
     const optTextureReplace = document.getElementById("optTextureReplace");
+    const optVideoBackground = document.getElementById("optVideoBackground");
+    const videoUploadRow = document.getElementById("videoUploadRow");
     const optForceLanguage = document.getElementById("optForceLanguage");
     const languageSelect = document.getElementById("languageSelect");
     const optOverlayText = document.getElementById("optOverlayText");
@@ -1106,6 +1171,7 @@
     const optTextMask = document.getElementById("optTextMask");
 
     let textureDataUrl = "";
+    let videoDataUrl = "";
     const inputs = [];
     const outputs = [];
 
@@ -1164,6 +1230,12 @@
         { label: "iosLink", count: countMatches(content, /iosLink:"[^"]*"/g) },
         { label: "androidLink", count: countMatches(content, /androidLink:"[^"]*"/g) }
       ].filter(item => item.count > 0);
+      const audioSignals = [
+        { label: "内嵌音频资源", count: countMatches(content, /data:audio\/(?:mpeg|mp3|ogg|wav|webm|aac)/gi) },
+        { label: "音频文件", count: countMatches(content, /\.(?:mp3|ogg|wav|m4a|aac|webm)["']/gi) },
+        { label: "音乐播放 API", count: countMatches(content, /playMusic|playBGM|playBackgroundMusic|audioEngine\.playMusic/gi) },
+        { label: "音频解锁/上下文", count: countMatches(content, /AudioContext|webkitAudioContext|__PLAYABLE_AUDIO_GUARD__|unlockAudio/gi) }
+      ].filter(item => item.count > 0);
 
       const directBackground = [
         "MainCameraBackgroundColor",
@@ -1172,6 +1244,8 @@
       ].map(key => ({ key, values: findValues(content, key) })).filter(item => item.values.length > 0);
 
       const cssBlackCount = countMatches(content, /background(?:-color)?:\s*#000/g);
+      const backVideoCount = countMatches(content, /["']?backVideo["']?\s*:\s*["']data:video\//g);
+      const dataVideoCount = countMatches(content, /data:video\/(?:mp4|webm|ogg)/g);
       const hasCanvas = content.includes("#application-canvas") || content.includes("<canvas");
       const hasDataBlob = content.includes("assets/bundles/-1/data.blob") || content.includes("window.blobs");
       const likelyTextureBackground = hasDataBlob && directBackground.length === 0;
@@ -1180,8 +1254,14 @@
         { label: "标题颜色字段", count: countMatches(content, /TextTitleImageColor|titleColor/g) },
         { label: "文本/图片资源包", count: countMatches(content, /TextMeshPro|font|sprite|atlas/gi) }
       ].filter(item => item.count > 0);
+      const adaptiveLanguageSignals = [
+        { label: "多语言切换组件", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
+        { label: "包配置 languages", count: countMatches(content, /\blanguages\s*:\s*\[[^\]]+\]/g) },
+        { label: "系统语言 locale", count: countMatches(content, /navigator\.language|locale\s*:\s*\(?\s*navigator\.language/gi) },
+        { label: "常见语言键表", count: countMatches(content, /["'](?:en|zh|ja|ko|de|fr|es|pt|it|ru|tr|ar|id|th|vi)["']\s*:/g) }
+      ].filter(item => item.count > 0);
 
-      return { counters, redirects, storeLinks, directBackground, cssBlackCount, hasCanvas, hasDataBlob, likelyTextureBackground, textSignals };
+      return { counters, redirects, storeLinks, audioSignals, directBackground, cssBlackCount, backVideoCount, dataVideoCount, hasCanvas, hasDataBlob, likelyTextureBackground, textSignals, adaptiveLanguageSignals };
     }
 
     function renderFiles() {
@@ -1214,6 +1294,7 @@
       const cards = [];
       let found = 0;
       let anyTextureBg = false;
+      let anyVideoBg = false;
       let anyRedirect = false;
       let anyCounters = false;
 
@@ -1238,6 +1319,16 @@
           cards.push(makeDetectCard("商店链接", "可清空", filePrefix + a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
         }
 
+        if (a.audioSignals && a.audioSignals.length) {
+          found++;
+          cards.push(makeDetectCard(
+            "背景音乐/音频",
+            "可处理",
+            filePrefix + a.audioSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>可尝试“去掉背景音乐”保留玩法音效；如果必须完全无声，再使用“强制静音全部音频”。",
+            "warn"
+          ));
+        }
+
         if (a.directBackground.length || a.cssBlackCount || a.hasCanvas) {
           found++;
           const parts = [];
@@ -1253,6 +1344,32 @@
           cards.push(makeDetectCard("场景背景贴图/材质", "谨慎尝试", filePrefix + "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。贴图替换可能误伤玩法元素，请手动勾选并先看预览。", "warn"));
         }
 
+        if (a.backVideoCount || a.dataVideoCount) {
+          anyVideoBg = true;
+          found++;
+          const detail = a.backVideoCount
+            ? `检测到 backVideo 内嵌视频 × ${a.backVideoCount}，这类背景需要用“视频背景”功能处理。`
+            : `检测到内嵌视频资源 × ${a.dataVideoCount}，可能是视频背景或开场视频。`;
+          cards.push(makeDetectCard("视频背景", a.backVideoCount ? "可处理" : "需确认", filePrefix + detail, a.backVideoCount ? "" : "warn"));
+        }
+
+        found++;
+        if (a.adaptiveLanguageSignals && a.adaptiveLanguageSignals.length) {
+          cards.push(makeDetectCard(
+            "自适应多语言",
+            "疑似包含",
+            filePrefix + a.adaptiveLanguageSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>检测到语言切换或语言键，请结合预览确认是否会按系统语言自适应。",
+            "neutral"
+          ));
+        } else {
+          cards.push(makeDetectCard(
+            "自适应多语言",
+            "未包含",
+            filePrefix + "未检测到 MLT_TextSwitch / MLT_ImageSwitch、语言/地区参数或常见多语言键。这个试玩大概率没有内置自适应多语言。",
+            "neutral"
+          ));
+        }
+
         if (a.textSignals.length) {
           found++;
           cards.push(makeDetectCard("文案/语言", "需要拆资源", filePrefix + a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这类通常不是 DOM 文本，常见情况是多语言图集或 Unity 文本组件。", "neutral"));
@@ -1262,7 +1379,6 @@
       optRedirect.checked = anyRedirect || inputs.length > 0;
       optCounters.checked = anyCounters || inputs.length > 0;
       optTextureReplace.checked = false;
-      if (anyTextureBg) optBackground.checked = true;
 
       detectCount.textContent = found + " 项";
       detectList.innerHTML = cards.length ? cards.join("") : '<div class="detect-card"><div class="detail">没有检测到常见可修改项。可以把文件发给我继续深挖。</div></div>';
@@ -1282,6 +1398,11 @@
     function getBgMode() {
       const checked = document.querySelector('input[name="bgMode"]:checked');
       return checked ? checked.value : "color";
+    }
+
+    function getVideoBgMode() {
+      const checked = document.querySelector('input[name="videoBgMode"]:checked');
+      return checked ? checked.value : "keep";
     }
 
     function updateBackgroundModeUI() {
@@ -1332,10 +1453,10 @@
 <\/script>`;
     }
 
-    function makeBackgroundPatch(mode, color, texture) {
+    function makeBackgroundPatch(mode, color, texture, transparentCanvas) {
       const useTexture = mode === "texture" && !!texture;
       const pageBaseColor = useTexture ? "#020614" : color;
-      const canvasBackground = useTexture ? "transparent" : color;
+      const canvasBackground = (useTexture || transparentCanvas) ? "transparent" : color;
       const textureGroupRule = useTexture ? `
 html,
 body,
@@ -1383,7 +1504,7 @@ body {
   bottom: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 0 !important;
+  z-index: -1 !important;
   pointer-events: none !important;
   background-color: ${pageBaseColor} !important;
 }
@@ -1455,11 +1576,12 @@ canvas:not(#codex-background-helper-canvas) {
 })();
 <\/script>`;
     }
-    function makeWebGLBackgroundPatch(mode, color, texture) {
+    function makeWebGLBackgroundPatch(mode, color, texture, transparentCanvas) {
       const useTexture = mode === "texture" && !!texture;
+      const useTransparentClear = useTexture || transparentCanvas;
       const baseColor = useTexture ? "#000000" : color;
       const rgb = hexToRgb01(baseColor);
-      if (useTexture) {
+      if (useTransparentClear) {
         return `<script id="codex-force-webgl-background">
 (function(){
   if (window.__codexTransparentBackgroundPatchV110) return;
@@ -2059,6 +2181,348 @@ word-break:normal;
         .replace(/background-color\s*:\s*rgb\(\s*0\s*,\s*0\s*,\s*0\s*\)/gi, "background-color:" + fallback);
     }
 
+    function patchBackVideo(content, replacement) {
+      const value = replacement === null ? "null" : JSON.stringify(replacement);
+      const before = content;
+      const patterns = [
+        /(["']backVideo["']\s*:\s*)(?:"data:video\/[^"]*"|'data:video\/[^']*'|null|"")/g,
+        /(\bbackVideo\s*:\s*)(?:"data:video\/[^"]*"|'data:video\/[^']*'|null|"")/g
+      ];
+      for (const pattern of patterns) {
+        content = content.replace(pattern, "$1" + value);
+      }
+      return { content, changed: content !== before };
+    }
+
+    function makeRemoveBgmPatch(forceAll, blockSingleAudioBgm) {
+      return `<script id="${forceAll ? "codex-mute-all-audio" : "codex-remove-bgm-audio"}">
+(function(){
+  if (window.${forceAll ? "__codexMuteAllAudioV120" : "__codexRemoveBgmAudioV120"}) return;
+  window.${forceAll ? "__codexMuteAllAudioV120" : "__codexRemoveBgmAudioV120"} = true;
+  var forceAll = ${forceAll ? "true" : "false"};
+  var blockSingleAudioBgm = false;
+  function safe(fn){ try { return fn(); } catch(e) {} }
+  function looksLikeMusic(value){
+    value = String(value || "").toLowerCase();
+    return /bgm|music|theme|loop|background/.test(value);
+  }
+  function looksLoopArg(args){
+    for (var i = 0; i < args.length; i++) {
+      if (args[i] === true) return true;
+      if (args[i] && typeof args[i] === "object" && args[i].loop === true) return true;
+    }
+    return false;
+  }
+  var lastUserAudioGesture = 0;
+  var blockedBgmBufferSourceCount = 0;
+  ["pointerdown","mousedown","touchstart","keydown"].forEach(function(eventName){
+    safe(function(){
+      window.addEventListener(eventName, function(event){
+        if (event && event.isTrusted === false) return;
+        lastUserAudioGesture = Date.now();
+      }, true);
+    });
+  });
+  function isNearUserAudioGesture(){
+    return Date.now() - lastUserAudioGesture < 1200;
+  }
+  function looksLikeBgmBufferSource(source){
+    if (!source) return false;
+    var duration = source.buffer && Number(source.buffer.duration);
+    if (source.loop === true) {
+      if (isFinite(duration) && duration >= 3 && blockedBgmBufferSourceCount === 0) return true;
+      return !isNearUserAudioGesture();
+    }
+    if (!isFinite(duration)) return false;
+    if (duration >= 6) return true;
+    return duration >= 3 && !isNearUserAudioGesture();
+  }
+  function patchCocosAdapterSource(source){
+    if (typeof source !== "string" || source.indexOf("playBgMusic") === -1) return source;
+    var before = source;
+    var exact = "u.playBgMusic=function(){var t=this;this.playBG||(this.playBG=!0,setTimeout((function(){t.playSound(g.BGM,!1,(function(){t.playSound(g.BGM,!0)}))}),100))}";
+    source = source.split(exact).join("u.playBgMusic=function(){this.playBG=!0}");
+    source = source.replace(/([A-Za-z_$][\\w$]*\\.playBgMusic=function\\(\\)\\{)var ([A-Za-z_$][\\w$]*)=this;this\\.playBG\\|\\|\\(this\\.playBG=!0,setTimeout\\(\\(function\\(\\)\\{\\2\\.playSound\\(([A-Za-z_$][\\w$]*\\.)?BGM,!1,\\(function\\(\\)\\{\\2\\.playSound\\(([A-Za-z_$][\\w$]*\\.)?BGM,!0\\)\\}\\)\\)\\}\\),100\\)\\)\\}/g, "$1this.playBG=!0}");
+    if (source !== before) {
+      window.__codexCocosAdapterBgmPatchCountV120 = (window.__codexCocosAdapterBgmPatchCountV120 || 0) + 1;
+    }
+    return source;
+  }
+  function patchCocosAdapterMap(map){
+    if (!map || typeof map !== "object") return map;
+    safe(function(){
+      Object.keys(map).forEach(function(key){
+        map[key] = patchCocosAdapterSource(map[key]);
+      });
+    });
+    return map;
+  }
+  function installCocosAdapterMapProxy(key){
+    safe(function(){
+      if (!("Proxy" in window) || window["__codex" + key + "ProxyInstalledV120"]) {
+        patchCocosAdapterMap(window[key]);
+        return;
+      }
+      var target = patchCocosAdapterMap(window[key] || {});
+      var proxy = new Proxy(target, {
+        set: function(obj, prop, value){
+          obj[prop] = patchCocosAdapterSource(value);
+          return true;
+        },
+        get: function(obj, prop){
+          return obj[prop];
+        },
+        ownKeys: function(obj){
+          return Reflect.ownKeys(obj);
+        },
+        getOwnPropertyDescriptor: function(obj, prop){
+          var desc = Object.getOwnPropertyDescriptor(obj, prop);
+          return desc || { configurable: true, enumerable: true, writable: true, value: obj[prop] };
+        }
+      });
+      Object.defineProperty(window, key, {
+        configurable: true,
+        get: function(){ return proxy; },
+        set: function(value){
+          target = patchCocosAdapterMap(value || {});
+          proxy = new Proxy(target, {
+            set: function(obj, prop, val){
+              obj[prop] = patchCocosAdapterSource(val);
+              return true;
+            },
+            get: function(obj, prop){ return obj[prop]; },
+            ownKeys: function(obj){ return Reflect.ownKeys(obj); },
+            getOwnPropertyDescriptor: function(obj, prop){
+              var desc = Object.getOwnPropertyDescriptor(obj, prop);
+              return desc || { configurable: true, enumerable: true, writable: true, value: obj[prop] };
+            }
+          });
+        }
+      });
+      window["__codex" + key + "ProxyInstalledV120"] = true;
+    });
+  }
+  function patchCocosAdapterResources(){
+    if (forceAll) return;
+    installCocosAdapterMapProxy("__adapter_resource__");
+    installCocosAdapterMapProxy("__adapter_js__");
+    patchCocosAdapterMap(window.__adapter_resource__);
+    patchCocosAdapterMap(window.__adapter_js__);
+  }
+  patchCocosAdapterResources();
+  function muteMedia(el){
+    safe(function(){
+      if (!el) return;
+      el.muted = true;
+      el.volume = 0;
+      if (forceAll || looksLikeMusic(el.src || el.currentSrc || el.id || el.className)) {
+        if (typeof el.pause === "function") el.pause();
+      }
+    });
+  }
+  safe(function(){
+    var play = window.HTMLMediaElement && HTMLMediaElement.prototype && HTMLMediaElement.prototype.play;
+    if (play && !HTMLMediaElement.prototype.__codexAudioPlayPatchV120) {
+      HTMLMediaElement.prototype.play = function(){
+        if (forceAll || this.loop === true || looksLikeMusic(this.src || this.currentSrc || this.id || this.className)) {
+          muteMedia(this);
+          return Promise.resolve();
+        }
+        return play.apply(this, arguments);
+      };
+      HTMLMediaElement.prototype.__codexAudioPlayPatchV120 = true;
+    }
+  });
+  var blockedBufferSources = typeof WeakSet === "function" ? new WeakSet() : null;
+  function markBlockedBufferSource(source){
+    safe(function(){ if (blockedBufferSources) blockedBufferSources.add(source); });
+    safe(function(){ source.__codexBlockedStartV120 = true; });
+  }
+  function isBlockedBufferSource(source){
+    if (!source) return false;
+    if (source.__codexBlockedStartV120) return true;
+    var blocked = false;
+    safe(function(){ blocked = !!(blockedBufferSources && blockedBufferSources.has(source)); });
+    return blocked;
+  }
+  function patchAudioContext(name){
+    safe(function(){
+      var Ctor = window[name];
+      if (!Ctor || Ctor.__codexAudioContextPatchV120) return;
+      var original = Ctor.prototype.createBufferSource;
+      if (original) {
+        Ctor.prototype.createBufferSource = function(){
+          var source = original.apply(this, arguments);
+          if (source && source.start && !source.__codexStartPatchV120) {
+            var start = source.start;
+            source.start = function(){
+              if (forceAll || looksLikeBgmBufferSource(source)) {
+                window.__codexBlockedAudioBufferSourceV120 = (window.__codexBlockedAudioBufferSourceV120 || 0) + 1;
+                blockedBgmBufferSourceCount++;
+                markBlockedBufferSource(source);
+                return;
+              }
+              return start.apply(source, arguments);
+            };
+            source.__codexStartPatchV120 = true;
+          }
+          if (source && source.stop && !source.__codexStopPatchV120) {
+            var stop = source.stop;
+            source.stop = function(){
+              if (isBlockedBufferSource(source)) return;
+              return stop.apply(source, arguments);
+            };
+            source.__codexStopPatchV120 = true;
+          }
+          return source;
+        };
+      }
+      Ctor.__codexAudioContextPatchV120 = true;
+    });
+  }
+  patchAudioContext("AudioContext");
+  patchAudioContext("webkitAudioContext");
+  function patchEngines(){
+    safe(function(){
+      var cc = window.cc;
+      var engine = cc && cc.audioEngine;
+      if (engine && !engine.__codexBgmPatchV120) {
+        ["playMusic","playBackgroundMusic","stopMusic"].forEach(function(key){
+          if (typeof engine[key] === "function") engine[key] = function(){ return null; };
+        });
+        if (forceAll) {
+          ["play","playEffect"].forEach(function(key){
+            if (typeof engine[key] === "function") engine[key] = function(){ return null; };
+          });
+          if (typeof engine.stopAll === "function") engine.stopAll();
+          if (typeof engine.setMusicVolume === "function") engine.setMusicVolume(0);
+          if (typeof engine.setEffectsVolume === "function") engine.setEffectsVolume(0);
+        } else if (typeof engine.setMusicVolume === "function") {
+          engine.setMusicVolume(0);
+        }
+        if (!forceAll && typeof engine.playEffect === "function") {
+          var playEffect = engine.playEffect;
+          engine.playEffect = function(){
+            if (looksLoopArg(arguments)) return null;
+            return playEffect.apply(this, arguments);
+          };
+        }
+        var AudioSourceComponent = cc.AudioSourceComponent;
+        if (!forceAll && AudioSourceComponent && AudioSourceComponent.prototype && !AudioSourceComponent.prototype.__codexBgmPatchV120) {
+          ["play","playOneShot"].forEach(function(key){
+            var fn = AudioSourceComponent.prototype[key];
+            if (typeof fn === "function") {
+              AudioSourceComponent.prototype[key] = function(){
+                if (this && this.loop === true && !isNearUserAudioGesture()) return;
+                return fn.apply(this, arguments);
+              };
+            }
+          });
+          AudioSourceComponent.prototype.__codexBgmPatchV120 = true;
+        }
+        engine.__codexBgmPatchV120 = true;
+      }
+    });
+    safe(function(){
+      var Laya = window.Laya;
+      var soundManager = Laya && Laya.SoundManager;
+      if (soundManager && !soundManager.__codexBgmPatchV120) {
+        ["playMusic","stopMusic"].forEach(function(key){
+          if (typeof soundManager[key] === "function") soundManager[key] = function(){ return null; };
+        });
+        if (!forceAll && typeof soundManager.playSound === "function") {
+          var playSound = soundManager.playSound;
+          soundManager.playSound = function(){
+            if (looksLoopArg(arguments)) return null;
+            return playSound.apply(this, arguments);
+          };
+        }
+        if (typeof soundManager.musicMuted !== "undefined") soundManager.musicMuted = true;
+        if (forceAll && typeof soundManager.muted !== "undefined") soundManager.muted = true;
+        soundManager.__codexBgmPatchV120 = true;
+      }
+    });
+    safe(function(){
+      var createjs = window.createjs;
+      var sound = createjs && createjs.Sound;
+      if (sound && !sound.__codexBgmPatchV120) {
+        var play = sound.play;
+        if (typeof play === "function") {
+          sound.play = function(id){
+            if (forceAll || looksLikeMusic(id)) return null;
+            return play.apply(this, arguments);
+          };
+        }
+        sound.__codexBgmPatchV120 = true;
+      }
+    });
+    safe(function(){
+      function patchPhaserSoundManager(manager){
+        if (!manager || manager.__codexBgmPatchV120) return;
+        var play = manager.play;
+        if (typeof play === "function") {
+          manager.play = function(key, config){
+            if (forceAll || looksLikeMusic(key) || (config && config.loop === true)) return null;
+            return play.apply(this, arguments);
+          };
+        }
+        var add = manager.add;
+        if (typeof add === "function") {
+          manager.add = function(key, config){
+            var sound = add.apply(this, arguments);
+            if (sound && !sound.__codexSoundPlayPatchV120) {
+              var soundPlay = sound.play;
+              if (typeof soundPlay === "function") {
+                sound.play = function(marker, playConfig){
+                  if (forceAll || looksLikeMusic(key) || looksLikeMusic(marker) || (playConfig && playConfig.loop === true) || this.loop === true) {
+                    if (typeof this.stop === "function") this.stop();
+                    return false;
+                  }
+                  return soundPlay.apply(this, arguments);
+                };
+              }
+              if (typeof sound.createAndStartLoopBufferSource === "function") {
+                sound.createAndStartLoopBufferSource = function(){ return null; };
+              }
+              sound.__codexSoundPlayPatchV120 = true;
+            }
+            return sound;
+          };
+        }
+        if (forceAll && typeof manager.stopAll === "function") manager.stopAll();
+        manager.__codexBgmPatchV120 = true;
+      }
+      ["game","app","phaserGame"].forEach(function(key){
+        var game = window[key];
+        if (game && game.sound) patchPhaserSoundManager(game.sound);
+      });
+      if (window.Phaser && window.Phaser.GAMES) {
+        for (var i = 0; i < window.Phaser.GAMES.length; i++) {
+          var game = window.Phaser.GAMES[i];
+          if (game && game.sound) patchPhaserSoundManager(game.sound);
+        }
+      }
+    });
+  }
+  function sweep(){
+    if (forceAll) safe(function(){ document.querySelectorAll("audio,video").forEach(muteMedia); });
+    patchCocosAdapterResources();
+    patchEngines();
+  }
+  sweep();
+  window.addEventListener("DOMContentLoaded", sweep);
+  window.addEventListener("load", sweep);
+  window.addEventListener("luna:start", sweep);
+  window.addEventListener("luna:started", sweep);
+  var tries = 0;
+  var timer = setInterval(function(){
+    sweep();
+    if (++tries > 300) clearInterval(timer);
+  }, 80);
+})();
+<\/script>`;
+    }
+
     function transform(content) {
       const stats = [];
 
@@ -2078,8 +2542,29 @@ word-break:normal;
         if (content !== before) stats.push("商店链接已清空");
       }
 
-      if (optBackground.checked) {
-        const mode = getBgMode();
+      content = removePatchById(content, "codex-remove-bgm-audio");
+      content = removePatchById(content, "codex-mute-all-audio");
+      if (optRemoveBgm.checked || optMuteAllAudio.checked) {
+        const forceAllAudio = optMuteAllAudio.checked;
+        const audioAssetCount = countMatches(content, /data:audio\/(?:mpeg|mp3|ogg|wav|webm|aac)/gi);
+        const blockSingleAudioBgm = false;
+        content = injectIntoHead(content, makeRemoveBgmPatch(forceAllAudio, blockSingleAudioBgm));
+        if (forceAllAudio) {
+          stats.push("全部音频已强制静音");
+        } else if (blockSingleAudioBgm) {
+          stats.push("已按单音频 BGM 模式拦截背景音乐，未改动音频资源");
+        } else {
+          stats.push("已注入背景音乐拦截，未改动音频资源，玩法音效尽量保留");
+        }
+      }
+
+      const videoAction = optVideoBackground.checked ? getVideoBgMode() : "keep";
+      const videoNeedsImageBackground = videoAction === "replaceImage" && !!textureDataUrl;
+      const videoNeedsColorBackground = videoAction === "replaceColor";
+      const videoImageMissing = videoAction === "replaceImage" && !textureDataUrl;
+
+      if ((optBackground.checked && !videoImageMissing) || videoNeedsImageBackground || videoNeedsColorBackground) {
+        const mode = videoNeedsImageBackground ? "texture" : (videoNeedsColorBackground ? "color" : getBgMode());
         const color = bgColor.value;
         const useTexture = mode === "texture" && !!textureDataUrl;
         content = removePatchById(content, "codex-playable-background");
@@ -2088,17 +2573,52 @@ word-break:normal;
         content = removePatchById(content, "codex-force-webgl-background");
         content = removePatchById(content, "codex-replace-bg-texture");
         content = content.replace(/<script\s+data-background-safe-webgl-patch[\s\S]*?<\/script>/g, "");
-        let injection = makeBackgroundPatch(mode, color, textureDataUrl) + makeWebGLBackgroundPatch(mode, color, textureDataUrl);
+        const useTransparentCanvas = videoNeedsColorBackground;
+        let injection = makeBackgroundPatch(mode, color, textureDataUrl, useTransparentCanvas) + makeWebGLBackgroundPatch(mode, color, textureDataUrl, useTransparentCanvas);
         if (optTextureReplace.checked) injection += makeTextureReplacementPatch(mode, color, textureDataUrl);
         content = injectIntoHead(content, injection);
         if (mode === "texture" && textureDataUrl) {
           // 图片背景使用“页面背景 + 透明 WebGL 相机”的兼容模式，只改相机背景，不再泛改 backgroundColor，避免误伤瓶子/液体材质。
           content = patchUnityCameraBackgroundTransparent(content);
+        } else if (useTransparentCanvas) {
+          // 视频改纯色时，视频常常承载整段场景画面；只让相机透明露出页面底色，避免用纯色强行清掉 WebGL 画面。
+          content = patchUnityCameraBackgroundTransparent(content);
+          content = patchCssFallbackBackgrounds(content, color, false);
         } else {
           content = patchUnityBackgroundColor(content, color, false);
           content = patchCssFallbackBackgrounds(content, color, false);
         }
         stats.push(optTextureReplace.checked ? "背景/贴图替换已启用" : (useTexture ? "背景图片已修改（兼容模式）" : "背景颜色已修改"));
+      }
+
+      if (optVideoBackground.checked) {
+        if (videoAction === "remove") {
+          const patched = patchBackVideo(content, null);
+          content = patched.content;
+          stats.push(patched.changed ? "背景已移除" : "未找到 backVideo 背景");
+        } else if (videoAction === "replaceVideo") {
+          if (videoDataUrl) {
+            const patched = patchBackVideo(content, videoDataUrl);
+            content = patched.content;
+            stats.push(patched.changed ? "视频背景已替换为新视频" : "未找到 backVideo 视频背景");
+          } else {
+            stats.push("未选择新视频，视频背景未替换");
+          }
+        } else if (videoAction === "replaceImage") {
+          if (textureDataUrl) {
+            const patched = patchBackVideo(content, null);
+            content = patched.content;
+            stats.push(patched.changed ? "视频背景已改用图片背景" : "未找到 backVideo 视频背景");
+          } else {
+            stats.push("未选择背景图片，视频背景未替换");
+          }
+        } else if (videoAction === "replaceColor") {
+          const patched = patchBackVideo(content, null);
+          content = patched.content;
+          stats.push(patched.changed ? "视频背景已改用纯色背景" : "未找到 backVideo 视频背景");
+        } else {
+          stats.push("视频背景已保留");
+        }
       }
 
       if (optForceLanguage.checked) {
@@ -2329,18 +2849,97 @@ word-break:normal;
       }
     });
 
+    videoInput.addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        videoDataUrl = await readFileAsDataUrl(file);
+        videoName.textContent = file.name;
+        optVideoBackground.checked = true;
+        setVideoBgMode("replaceVideo");
+        addLog("已载入视频背景: " + file.name);
+      } catch (error) {
+        videoDataUrl = "";
+        videoName.textContent = "读取失败";
+        addLog("视频背景读取失败: " + error.message);
+      }
+    });
+
     bgColor.addEventListener("input", () => {
       bgPreview.style.backgroundColor = bgColor.value;
     });
 
+    function setBgMode(mode) {
+      const input = document.querySelector('input[name="bgMode"][value="' + mode + '"]');
+      if (input) input.checked = true;
+      updateBackgroundModeUI();
+    }
+
+    function setVideoBgMode(mode) {
+      const input = document.querySelector('input[name="videoBgMode"][value="' + mode + '"]');
+      if (input) input.checked = true;
+      syncVideoBackgroundModeUI();
+    }
+
+    function clearVideoBgMode() {
+      document.querySelectorAll('input[name="videoBgMode"]').forEach(input => {
+        input.checked = false;
+      });
+      syncVideoBackgroundModeUI();
+    }
+
+    function syncVideoBackgroundModeUI() {
+      const selected = document.querySelector('input[name="videoBgMode"]:checked');
+      const action = selected ? selected.value : "none";
+      if (videoUploadRow) videoUploadRow.classList.toggle("active", action === "replaceVideo");
+      if (!selected) {
+        optVideoBackground.checked = false;
+        updateBackgroundModeUI();
+        return;
+      }
+      if (action !== "keep") optVideoBackground.checked = true;
+      if (action === "replaceColor") {
+        optBackground.checked = true;
+        setBgMode("color");
+      } else if (action === "replaceImage") {
+        optBackground.checked = true;
+        setBgMode("texture");
+      } else if (action === "replaceVideo" || action === "remove") {
+        optBackground.checked = false;
+        optTextureReplace.checked = false;
+      }
+      updateBackgroundModeUI();
+    }
+
     document.querySelectorAll('input[name="bgMode"]').forEach(input => {
-      input.addEventListener("change", updateBackgroundModeUI);
+      input.addEventListener("change", () => {
+        optBackground.checked = true;
+        updateBackgroundModeUI();
+      });
     });
 
     updateBackgroundModeUI();
 
     optTextureReplace.addEventListener("change", () => {
       if (optTextureReplace.checked) optBackground.checked = true;
+    });
+
+    optMuteAllAudio.addEventListener("change", () => {
+      if (optMuteAllAudio.checked) optRemoveBgm.checked = true;
+    });
+
+    optVideoBackground.addEventListener("change", () => {
+      if (!optVideoBackground.checked) clearVideoBgMode();
+      else {
+        if (!document.querySelector('input[name="videoBgMode"]:checked')) setVideoBgMode("remove");
+        else syncVideoBackgroundModeUI();
+      }
+    });
+
+    document.querySelectorAll('input[name="videoBgMode"]').forEach(input => {
+      input.addEventListener("change", () => {
+        syncVideoBackgroundModeUI();
+      });
     });
 
     function switchSettingsTab(tabName) {
