@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>试玩 HTML 检测修改工具</title>
+  <title>试玩 HTML 参数修改工具</title>
   <style>
     :root {
       --bg: #f4f7fb;
@@ -21,6 +21,10 @@
     }
 
     * { box-sizing: border-box; }
+
+    [hidden] {
+      display: none !important;
+    }
 
     body {
       margin: 0;
@@ -156,6 +160,159 @@
     .dropzone.dragover {
       border-color: var(--accent);
       background: #eef6ff;
+    }
+
+    .import-compact-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7faff;
+    }
+
+    .import-compact-main {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .import-compact-title {
+      font-weight: 800;
+    }
+
+    .import-compact-bar.is-empty .import-compact-title {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .import-compact-bar.is-empty #importCompactMeta,
+    .import-compact-bar.is-empty .import-compact-actions {
+      display: none;
+    }
+
+    .import-compact-actions,
+    .panel-head-actions,
+    .file-list-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .import-compact-actions {
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+
+    .import-compact-actions .file-button,
+    .import-compact-actions button,
+    .file-list-tools button {
+      min-height: 32px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .file-list-wrap {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .file-list-wrap.is-empty .file-list-tools {
+      display: none;
+    }
+
+    .file-list-empty {
+      min-height: 132px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .file-list-tools {
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .compact-file-row {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 7px 9px;
+      border-bottom: 1px solid #e8eef6;
+      cursor: pointer;
+      transition: background .15s ease, box-shadow .15s ease;
+    }
+
+    .compact-file-row:last-child {
+      border-bottom: 0;
+    }
+
+    .compact-file-row:hover,
+    .compact-file-row:focus-visible,
+    .compact-file-row.active {
+      background: #eef6ff;
+      outline: 0;
+    }
+
+    .compact-file-row.active {
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .file-status-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e6f5ed;
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .compact-file-main {
+      min-width: 0;
+    }
+
+    .compact-file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .compact-file-meta {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .remove-file-btn {
+      min-width: 30px;
+      min-height: 30px;
+      padding: 0;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .remove-file-btn:hover {
+      border-color: #efcaca;
+      background: #fff1f1;
+      color: var(--bad);
     }
 
     .drop-icon {
@@ -344,72 +501,125 @@
       padding: 20px;
     }
 
-    .preview-modal[hidden] {
+    body.recording-mode {
+      overflow: hidden;
+    }
+
+    .recording-preview[hidden] {
       display: none !important;
     }
 
-    .preview-modal {
+    .recording-preview {
       position: fixed;
       inset: 0;
-      z-index: 9999;
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
-      background: rgba(15, 23, 42, .72);
-      backdrop-filter: blur(3px);
+      z-index: 10050;
+      overflow: hidden;
+      background: #000;
+      cursor: default;
+      isolation: isolate;
     }
 
-    .modal-bar {
+    .recording-stage {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .recording-viewport {
+      position: relative;
+      flex: 0 0 auto;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .recording-frame {
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 1080px;
+      height: 1920px;
+      border: 0;
+      background: #000;
+      transform-origin: 0 0;
+    }
+
+    .recording-top-trigger {
+      position: absolute;
+      inset: 0 0 auto;
+      z-index: 1;
+      height: 18px;
+      cursor: default;
+      background: transparent;
+    }
+
+    .recording-toolbar {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      z-index: 2;
+      width: min(760px, calc(100vw - 28px));
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      padding: 12px 16px;
-      background: #fff;
-      border-bottom: 1px solid var(--line);
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, .88);
+      color: #fff;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, .34);
+      transform: translateX(-50%);
+      transition: opacity .22s ease, transform .22s ease;
+      backdrop-filter: blur(8px);
     }
 
-    .modal-title {
-      min-width: 180px;
-      font-weight: 700;
+    .recording-preview.controls-hidden .recording-toolbar {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -12px);
+    }
+
+    .recording-toolbar-main {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .recording-toolbar-title {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-weight: 800;
     }
 
-    .modal-controls {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
-      color: var(--muted);
-    }
-
-    .modal-controls label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    .recording-toolbar-meta {
+      color: #cbd5e1;
+      font-size: 12px;
       white-space: nowrap;
     }
 
-    .modal-controls input[type="range"] {
-      width: 150px;
+    .recording-toolbar-actions {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 8px;
     }
 
-    .modal-stage {
-      display: grid;
-      place-items: center;
-      overflow: auto;
-      padding: 18px;
+    .recording-toolbar button {
+      min-height: 34px;
+      padding: 8px 10px;
     }
 
-    .modal-frame {
-      width: min(var(--modal-preview-w, 430px), calc(100vw - 56px));
-      height: min(var(--modal-preview-h, 760px), calc(100vh - 112px));
-      border: 0;
-      border-radius: 0;
-      background: #fff;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .34);
+    @media (max-width: 680px) {
+      .recording-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .recording-toolbar-actions button {
+        flex: 1 1 0;
+      }
     }
 
     .file-card, .result-card, .detect-card {
@@ -433,8 +643,41 @@
 
     .detect-card {
       background: #fff;
-      height: 104px;
-      overflow: auto;
+    }
+
+    .detect-file-group {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f7f9fd;
+      overflow: hidden;
+    }
+
+    .detect-file-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      background: #eef3fb;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .detect-file-head::-webkit-details-marker {
+      display: none;
+    }
+
+    .detect-file-name {
+      min-width: 0;
+      font-weight: 800;
+      color: var(--ink);
+      word-break: break-all;
+    }
+
+    .detect-file-cards {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
     }
 
     .detect-top {
@@ -734,6 +977,19 @@
       gap: 10px;
     }
 
+    .resource-input-stack {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .resource-error {
+      color: var(--bad);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
     .mode-panel {
       display: none;
     }
@@ -766,6 +1022,56 @@
       justify-content: flex-end;
     }
 
+    .operation-status {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border: 1px solid #cbd7e8;
+      border-radius: 8px;
+      background: #f7faff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .operation-status[hidden] { display: none; }
+
+    .operation-status-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .operation-status-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .operation-status-percent {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .operation-progress {
+      width: 100%;
+      height: 8px;
+      accent-color: var(--accent);
+    }
+
+    body.is-busy .file-button,
+    body.is-busy .dropzone {
+      pointer-events: none;
+      opacity: .62;
+    }
+
+    body.is-busy .settings-shell {
+      opacity: .72;
+    }
+
     .result-actions {
       display: flex;
       gap: 8px;
@@ -773,24 +1079,41 @@
       margin-top: 8px;
     }
 
-    .log {
-      margin-top: 12px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfdff;
-      color: var(--muted);
-      line-height: 1.55;
-      height: 150px;
-      overflow: auto;
-      white-space: pre-wrap;
+    .file-list {
+      display: block;
     }
 
-    .file-list {
-      max-height: 86px;
-      overflow: auto;
-      padding-right: 4px;
+    .detect-file-group.is-linked {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29, 111, 212, .12);
     }
+
+    .toast-container {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 10020;
+      width: min(380px, calc(100vw - 36px));
+      display: grid;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      line-height: 1.5;
+      box-shadow: 0 12px 30px rgba(24, 39, 75, .18);
+      overflow-wrap: anywhere;
+    }
+
+    .toast.success { border-left-color: var(--ok); }
+    .toast.warn { border-left-color: var(--warn); }
+    .toast.error { border-left-color: var(--bad); }
 
     @media (max-width: 980px) {
       .layout {
@@ -825,17 +1148,27 @@
   <main class="app">
     <div class="topbar">
       <div class="topbar-left">
-      <h1>试玩 HTML 检测修改工具</h1>
-      <a class="guide-link" href="https://docs.google.com/document/d/1k_H63zH0p-ZkBSVhY3bbEETz-o_73RUMMH0M6V21fGA/edit?tab=t.0" target="_blank" rel="noopener noreferrer">使用说明</a>
+      <h1>试玩 HTML 参数修改工具</h1>
+      <a class="guide-link" href="https://docs.google.com/document/d/1gvVdHRKiXOo4Rrt-X1UTd2oCTMoRY0yn_5Vh7nRjaWc/edit?tab=t.0" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.2.0 · 先检测，再修改 · 本地处理</div>
+      <div class="version">Ray · v1.3.4 · 先导入检测，再修改，本地处理</div>
+    </div>
+
+    <div class="operation-status" id="operationStatus" role="status" aria-live="polite" hidden>
+      <div class="operation-status-head">
+        <span class="operation-status-text" id="operationStatusText">准备处理…</span>
+        <span class="operation-status-percent" id="operationStatusPercent">0%</span>
+      </div>
+      <progress class="operation-progress" id="operationProgress" max="100" value="0"></progress>
     </div>
 
     <div class="layout">
       <section class="panel">
         <div class="panel-head">
           <h2>1. 导入文件</h2>
-          <button class="secondary" id="clearBtn" type="button">清空</button>
+          <div class="panel-head-actions">
+            <span class="meta" id="importSummary">0 个文件</span>
+          </div>
         </div>
         <div class="panel-body">
           <div class="dropzone" id="dropzone">
@@ -850,17 +1183,27 @@
               <div class="drop-title">拖入 playable HTML</div>
               <div class="drop-text">工具会先扫描能改的地方，再让你选择具体修改项。</div>
               <label class="file-button" for="fileInput">选择 HTML</label>
-              <input id="fileInput" type="file" accept=".html,.htm,text/html" multiple>
             </div>
           </div>
 
-          <div id="fileList" class="file-list" style="margin-top:12px">
-            <div class="file-card">
-              <div class="meta">还没有导入文件。</div>
+          <div class="import-compact-bar is-empty" id="importCompactBar">
+            <div class="import-compact-main">
+              <div class="import-compact-title" id="importCompactTitle">还没有导入文件。</div>
+              <div class="meta" id="importCompactMeta"></div>
+            </div>
+            <div class="import-compact-actions">
+              <label class="file-button" for="fileInput">继续添加</label>
+              <button class="secondary" id="clearBtn" type="button" disabled>清空</button>
             </div>
           </div>
+          <input id="fileInput" type="file" accept=".html,.htm,text/html" multiple>
 
-          <div id="log" class="log">等待文件。</div>
+          <div class="file-list-wrap is-empty" id="fileListWrap">
+            <div class="file-list-tools">
+              <span class="meta" id="fileListSummary">共 0 个文件</span>
+            </div>
+            <div id="fileList" class="file-list"><div class="file-list-empty">等待文件。</div></div>
+          </div>
         </div>
       </section>
 
@@ -872,7 +1215,7 @@
         <div class="panel-body">
           <div id="detectList" class="detect-list">
             <div class="detect-card">
-              <div class="detail">导入 HTML 后，这里会显示跳转、次数、背景、文案/语言等可修改点。</div>
+              <div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div>
             </div>
           </div>
         </div>
@@ -890,6 +1233,7 @@
               <button class="settings-tab" type="button" data-settings-tab="background">背景</button>
               <button class="settings-tab" type="button" data-settings-tab="text">文案/语言</button>
               <button class="settings-tab" type="button" data-settings-tab="audio">音频</button>
+              <button class="settings-tab" type="button" data-settings-tab="uiCleanup">CTA/引导</button>
             </div>
             <div class="settings">
               <div class="settings-panel active" data-settings-panel="basic">
@@ -909,16 +1253,25 @@
                 </div>
               </div>
 
-              <div class="settings-panel" data-settings-panel="audio">
+              <div class="settings-panel" data-settings-panel="uiCleanup">
                 <div class="option-card">
               <label class="option">
-                <input id="optRemoveBgm" type="checkbox">
-                <span><strong>去掉背景音乐</strong>保守移除疑似 BGM，尽量保留点击、碰撞、胜利等玩法音效。</span>
+                <input id="optRemoveIcon" type="checkbox">
+                <span><strong>去掉 icon 图标</strong>隐藏常见 logo、商店图标和试玩浮层 icon。</span>
               </label>
               <label class="option">
-                <input id="optMuteAllAudio" type="checkbox">
-                <span><strong>强制静音全部音频</strong>高风险，会去掉所有声音，可能误伤玩法反馈音效。</span>
+                <input id="optRemoveCta" type="checkbox">
+                <span><strong>去掉 CTA 按钮</strong>隐藏 Play Now、Install、Download 等常见 CTA，并关闭相关点击入口。</span>
               </label>
+              <label class="option">
+                <input id="optRemoveHandGuide" type="checkbox">
+                <span><strong>去掉引导手指（推荐、低风险）</strong></span>
+              </label>
+              <label class="option">
+                <input id="optRemoveBroadGuide" type="checkbox">
+                <span><strong>关闭通用引导逻辑（扩展、高风险）</strong></span>
+              </label>
+              <div class="meta" style="margin-top:10px;line-height:1.6"><strong>区别与建议：</strong>第一项只处理已识别的手指引导；第二项尝试关闭更宽泛的通用引导逻辑，兼容性和误伤风险更高。通常先使用第一项，若仍有其他引导元素，再尝试第二项并预览玩法是否正常。</div>
                 </div>
               </div>
 
@@ -945,11 +1298,14 @@
                 <div class="mode-panel" id="bgTexturePanel">
                   <div class="control-row">
                     <label>背景图片</label>
-                    <div class="texture-line">
-                      <label class="file-button" for="textureInput">选择图片</label>
-                      <input id="textureInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-                      <span class="texture-name" id="textureName">未选择</span>
-                      <div class="preview" id="bgPreview"></div>
+                    <div class="resource-input-stack">
+                      <div class="texture-line">
+                        <label class="file-button" for="textureInput">选择图片</label>
+                        <input id="textureInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+                        <span class="texture-name" id="textureName">未选择</span>
+                        <div class="preview" id="bgPreview"></div>
+                      </div>
+                      <div class="resource-error" id="textureRequiredError" hidden>请先选择一张背景图片。</div>
                     </div>
                   </div>
                 </div>
@@ -976,10 +1332,13 @@
                 </div>
                 <div class="control-row mode-panel" id="videoUploadRow">
                   <label>新视频</label>
-                  <div class="texture-line">
-                    <label class="file-button" for="videoInput">选择视频</label>
-                    <input id="videoInput" type="file" accept="video/mp4,video/webm,video/*">
-                    <span class="texture-name" id="videoName">未选择</span>
+                  <div class="resource-input-stack">
+                    <div class="texture-line">
+                      <label class="file-button" for="videoInput">选择视频</label>
+                      <input id="videoInput" type="file" accept="video/mp4,video/webm,video/*">
+                      <span class="texture-name" id="videoName">未选择</span>
+                    </div>
+                    <div class="resource-error" id="videoRequiredError" hidden>请先选择用于替换的新视频。</div>
                   </div>
                 </div>
               </div>
@@ -1052,6 +1411,19 @@
               </div>
                 </div>
               </div>
+
+              <div class="settings-panel" data-settings-panel="audio">
+                <div class="option-card">
+              <label class="option">
+                <input id="optRemoveBgm" type="checkbox">
+                <span><strong>去掉背景音乐</strong>保守移除疑似 BGM，尽量保留点击、碰撞、胜利等玩法音效。</span>
+              </label>
+              <label class="option">
+                <input id="optMuteAllAudio" type="checkbox">
+                <span><strong>强制静音全部音频</strong>高风险，会去掉所有声音，可能误伤玩法反馈音效。</span>
+              </label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1073,8 +1445,8 @@
                 <button class="secondary viewport-btn active" type="button" data-mode="portrait">竖屏 9:16</button>
                 <button class="secondary viewport-btn" type="button" data-mode="landscape">横屏 16:9</button>
                 <button class="secondary viewport-btn" type="button" data-mode="fit">适应宽度</button>
-                <button class="secondary" id="largePreviewBtn" type="button" disabled>放大预览</button>
-                <button class="secondary" id="openPreviewBtn" type="button" disabled>新窗口打开</button>
+                <button class="secondary" id="recordPreviewBtn" type="button" disabled>9:16 全屏录屏模式</button>
+                <button class="secondary" id="recordLandscapePreviewBtn" type="button" disabled>16:9 全屏录屏模式</button>
               </div>
             </div>
             <div class="preview-stage">
@@ -1093,30 +1465,37 @@
     </div>
   </main>
 
-  <div class="preview-modal" id="previewModal" hidden>
-    <div class="modal-bar">
-      <div class="modal-title" id="modalPreviewTitle">放大预览</div>
-      <div class="modal-controls">
-        <label>宽 <input id="modalPreviewWidth" type="range" min="320" max="1400" value="405" step="1"> <span id="modalPreviewWidthValue">405</span></label>
-        <label>高 <input id="modalPreviewHeight" type="range" min="360" max="1200" value="720" step="1"> <span id="modalPreviewHeightValue">720</span></label>
-        <button class="secondary" id="modalPortraitBtn" type="button">竖屏 9:16</button>
-        <button class="secondary" id="modalLandscapeBtn" type="button">横屏 16:9</button>
-        <button id="closePreviewModalBtn" type="button">关闭</button>
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="false"></div>
+
+  <div class="recording-preview" id="recordingPreview" role="dialog" aria-modal="true" aria-label="全屏录屏模式" hidden>
+    <div class="recording-stage" id="recordingStage">
+      <div class="recording-viewport" id="recordingViewport">
+        <div class="recording-top-trigger" id="recordingTopTrigger" aria-hidden="true"></div>
+        <iframe
+          id="recordingPreviewFrame"
+          class="recording-frame"
+          title="全屏录屏模式预览"
+          sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups allow-downloads"
+        ></iframe>
       </div>
     </div>
-    <div class="modal-stage">
-      <iframe
-        id="modalPreviewFrame"
-        class="modal-frame"
-        title="放大预览"
-        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups allow-downloads"
-      ></iframe>
+    <div class="recording-toolbar" id="recordingToolbar">
+      <div class="recording-toolbar-main">
+        <div class="recording-toolbar-title" id="recordingPreviewTitle">全屏录屏模式</div>
+        <div class="recording-toolbar-meta" id="recordingSizeText">等比例适应显示器</div>
+      </div>
+      <div class="recording-toolbar-actions">
+        <button class="secondary" id="restartRecordingBtn" type="button">重新开始</button>
+        <button class="secondary" id="enterRecordingFullscreenBtn" type="button">进入全屏</button>
+        <button id="closeRecordingBtn" type="button">退出</button>
+      </div>
     </div>
   </div>
 
   <script>
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("fileInput");
+    const toastContainer = document.getElementById("toastContainer");
     const textureInput = document.getElementById("textureInput");
     const videoInput = document.getElementById("videoInput");
     const textureName = document.getElementById("textureName");
@@ -1125,39 +1504,56 @@
     const bgColor = document.getElementById("bgColor");
     const bgColorPanel = document.getElementById("bgColorPanel");
     const bgTexturePanel = document.getElementById("bgTexturePanel");
+    const textureRequiredError = document.getElementById("textureRequiredError");
     const fileList = document.getElementById("fileList");
+    const fileListWrap = document.getElementById("fileListWrap");
+    const fileListSummary = document.getElementById("fileListSummary");
+    const importSummary = document.getElementById("importSummary");
+    const importCompactBar = document.getElementById("importCompactBar");
+    const importCompactTitle = document.getElementById("importCompactTitle");
+    const importCompactMeta = document.getElementById("importCompactMeta");
     const detectList = document.getElementById("detectList");
     const detectCount = document.getElementById("detectCount");
     const resultList = document.getElementById("resultList");
+    const settingsShell = document.querySelector(".settings-shell");
+    const operationStatus = document.getElementById("operationStatus");
+    const operationStatusText = document.getElementById("operationStatusText");
+    const operationStatusPercent = document.getElementById("operationStatusPercent");
+    const operationProgress = document.getElementById("operationProgress");
     const previewPanel = document.getElementById("previewPanel");
     const previewTitle = document.getElementById("previewTitle");
     const previewEmpty = document.getElementById("previewEmpty");
     const previewFrame = document.getElementById("previewFrame");
-    const openPreviewBtn = document.getElementById("openPreviewBtn");
-    const largePreviewBtn = document.getElementById("largePreviewBtn");
-    const previewModal = document.getElementById("previewModal");
-    const modalPreviewTitle = document.getElementById("modalPreviewTitle");
-    const modalPreviewFrame = document.getElementById("modalPreviewFrame");
-    const modalPreviewWidth = document.getElementById("modalPreviewWidth");
-    const modalPreviewHeight = document.getElementById("modalPreviewHeight");
-    const modalPreviewWidthValue = document.getElementById("modalPreviewWidthValue");
-    const modalPreviewHeightValue = document.getElementById("modalPreviewHeightValue");
-    const modalPortraitBtn = document.getElementById("modalPortraitBtn");
-    const modalLandscapeBtn = document.getElementById("modalLandscapeBtn");
-    const closePreviewModalBtn = document.getElementById("closePreviewModalBtn");
-    const log = document.getElementById("log");
+    const recordPreviewBtn = document.getElementById("recordPreviewBtn");
+    const recordLandscapePreviewBtn = document.getElementById("recordLandscapePreviewBtn");
+    const recordingPreview = document.getElementById("recordingPreview");
+    const recordingStage = document.getElementById("recordingStage");
+    const recordingViewport = document.getElementById("recordingViewport");
+    const recordingTopTrigger = document.getElementById("recordingTopTrigger");
+    const recordingPreviewFrame = document.getElementById("recordingPreviewFrame");
+    const recordingToolbar = document.getElementById("recordingToolbar");
+    const recordingPreviewTitle = document.getElementById("recordingPreviewTitle");
+    const recordingSizeText = document.getElementById("recordingSizeText");
+    const restartRecordingBtn = document.getElementById("restartRecordingBtn");
+    const enterRecordingFullscreenBtn = document.getElementById("enterRecordingFullscreenBtn");
+    const closeRecordingBtn = document.getElementById("closeRecordingBtn");
     const clearBtn = document.getElementById("clearBtn");
     const generateBtn = document.getElementById("generateBtn");
     const downloadAllBtn = document.getElementById("downloadAllBtn");
     const optRedirect = document.getElementById("optRedirect");
     const optCounters = document.getElementById("optCounters");
     const optStoreLinks = document.getElementById("optStoreLinks");
+    const optRemoveIcon = document.getElementById("optRemoveIcon");
+    const optRemoveCta = document.getElementById("optRemoveCta");
+    const optRemoveHandGuide = document.getElementById("optRemoveHandGuide");
+    const optRemoveBroadGuide = document.getElementById("optRemoveBroadGuide");
     const optRemoveBgm = document.getElementById("optRemoveBgm");
     const optMuteAllAudio = document.getElementById("optMuteAllAudio");
     const optBackground = document.getElementById("optBackground");
     const optTextureReplace = document.getElementById("optTextureReplace");
     const optVideoBackground = document.getElementById("optVideoBackground");
     const videoUploadRow = document.getElementById("videoUploadRow");
+    const videoRequiredError = document.getElementById("videoRequiredError");
     const optForceLanguage = document.getElementById("optForceLanguage");
     const languageSelect = document.getElementById("languageSelect");
     const optOverlayText = document.getElementById("optOverlayText");
@@ -1172,8 +1568,26 @@
 
     let textureDataUrl = "";
     let videoDataUrl = "";
+    let activeInputIndex = -1;
+    let settingsDefaultsInitialized = false;
+    let busyOperation = "";
+    let recordingControlsTimer = 0;
+    let recordingPreviewActive = false;
+    let recordingEnteredFullscreen = false;
+    let recordingPreviewClosing = false;
+    let activeRecordingAspect = "9:16";
+    let activeRecordingWidth = 1080;
+    let activeRecordingHeight = 1920;
     const inputs = [];
     const outputs = [];
+    const PORTRAIT_RECORDING_WIDTH = 1080;
+    const PORTRAIT_RECORDING_HEIGHT = 1920;
+    const LANDSCAPE_RECORDING_WIDTH = 1920;
+    const LANDSCAPE_RECORDING_HEIGHT = 1080;
+    const LARGE_HTML_WARNING_BYTES = 30 * 1024 * 1024;
+    const LARGE_IMAGE_WARNING_BYTES = 12 * 1024 * 1024;
+    const LARGE_VIDEO_WARNING_BYTES = 50 * 1024 * 1024;
+    const LARGE_HTML_TOTAL_WARNING_BYTES = 100 * 1024 * 1024;
 
     const counterPatterns = [
       { key: "targetStepCount", label: "目标步数", re: /"targetStepCount":\["int",\d+\]/g, replacement: '"targetStepCount":["int",999999]' },
@@ -1185,10 +1599,212 @@
       { key: "deathTime", label: "结束倒计时", re: /"deathTime":\["float",[0-9.]+\]/g, replacement: '"deathTime":["float",999999]' }
     ];
 
+    // 严格素材指纹：来自已确认的 Luna 白色手套、点击手势及其动画帧。
+    // 使用“字节长度 + FNV-1a”而不是资源 ID，兼容同一素材在不同构建中的编号变化。
+    const knownEmbeddedHandFingerprints = new Set([
+      "1035:e9dd9756", "1056:bfdd0f0c", "1062:3d574859", "1094:ff345e94",
+      "1100:d009dd6d", "1115:b39b66f4", "1117:e08695c4", "1146:1e2bd39d",
+      "1213:f7c2d31f", "1224:380d9284", "1235:4e3ec93c", "1249:c82ea335",
+      "1272:96e59974", "1324:7bc6a781", "1389:321c4a00", "851:4d9bd8ff",
+      "860:d6c24706", "867:b78f55cb", "867:caedbbe9", "867:d9afe71f",
+      "868:4838c4ae", "868:dc6ed6d9", "869:c3e605ed", "869:d6c6f2d2",
+      "873:3d164f1b", "875:a9727699", "876:dc31b0d1", "880:18a48c77",
+      "880:fa0f1b9e", "881:502cb4bc", "889:30fddecd", "889:852f0df4",
+      "891:8b1bb935", "896:a331facc", "896:d9516cc5", "897:3c42f88d",
+      "897:6e8e76ce", "898:0f550e1c", "898:95f06532", "900:e2f04172",
+      "902:f952ccc9", "918:fc59e5bb", "922:cec712fb", "936:d4d89f6c",
+      "948:d9a7d580"
+    ]);
+    const knownEmbeddedHandByteLengths = new Set(
+      [...knownEmbeddedHandFingerprints].map(value => Number(value.split(":")[0]))
+    );
+
+    const transparentHandPngBySize = new Map([
+      ["94x102", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF4AAABmCAYAAABC+yauAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA8SURBVHhe7cExAQAAAMKg9U/tZwogAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK4GljYAAaWIAvUAAAAASUVORK5CYII="],
+      ["256x256", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEVSURBVHhe7cExAQAAAMKg9U/tawggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABODQE8AAH/Cno5AAAAAElFTkSuQmCC"]
+    ]);
+
+    const transparentPixelPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+X1RZ1wAAAABJRU5ErkJggg==";
+
+    function decodeBase64Bytes(base64) {
+      try {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index++) bytes[index] = binary.charCodeAt(index);
+        return bytes;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function base64ByteLength(base64) {
+      const padding = base64.endsWith("==") ? 2 : (base64.endsWith("=") ? 1 : 0);
+      return Math.floor(base64.length * 3 / 4) - padding;
+    }
+
+    function fingerprintBytes(bytes) {
+      if (!bytes) return "";
+      let hash = 0x811c9dc5;
+      for (let index = 0; index < bytes.length; index++) {
+        hash ^= bytes[index];
+        hash = Math.imul(hash, 0x01000193);
+      }
+      return bytes.length + ":" + (hash >>> 0).toString(16).padStart(8, "0");
+    }
+
+    function pngSizeKey(bytes) {
+      if (!bytes || bytes.length < 24) return "";
+      const isPng = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71;
+      if (!isPng) return "";
+      const width = ((bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19]) >>> 0;
+      const height = ((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23]) >>> 0;
+      return width && height ? width + "x" + height : "";
+    }
+
+    function inspectKnownEmbeddedHandAssets(content) {
+      const found = [];
+      const imageTagPattern = /<img\b[^>]*>/gi;
+      let tagMatch;
+      while ((tagMatch = imageTagPattern.exec(content))) {
+        const tag = tagMatch[0];
+        const sourceMatch = tag.match(/\bsrc=(["'])(data:image\/png;base64,)([^"']+)\1/i);
+        if (!sourceMatch) continue;
+        if (!knownEmbeddedHandByteLengths.has(base64ByteLength(sourceMatch[3]))) continue;
+        const bytes = decodeBase64Bytes(sourceMatch[3]);
+        if (!knownEmbeddedHandFingerprints.has(fingerprintBytes(bytes))) continue;
+        const idMatch = tag.match(/\bid=(["'])([^"']+)\1/i);
+        found.push({ id: idMatch ? idMatch[2] : "未命名图片", sizeKey: pngSizeKey(bytes) });
+      }
+      return found;
+    }
+
+    function replaceKnownEmbeddedHandAssets(content) {
+      const ids = [];
+      const imageTagPattern = /<img\b[^>]*>/gi;
+      const patched = content.replace(imageTagPattern, tag => {
+        const sourceMatch = tag.match(/\bsrc=(["'])(data:image\/png;base64,)([^"']+)\1/i);
+        if (!sourceMatch) return tag;
+        if (!knownEmbeddedHandByteLengths.has(base64ByteLength(sourceMatch[3]))) return tag;
+        const bytes = decodeBase64Bytes(sourceMatch[3]);
+        if (!knownEmbeddedHandFingerprints.has(fingerprintBytes(bytes))) return tag;
+        const idMatch = tag.match(/\bid=(["'])([^"']+)\1/i);
+        ids.push(idMatch ? idMatch[2] : "未命名图片");
+        const transparent = transparentHandPngBySize.get(pngSizeKey(bytes)) || transparentPixelPng;
+        return tag.replace(sourceMatch[0], "src=" + sourceMatch[1] + transparent + sourceMatch[1]);
+      });
+      return { content: patched, count: ids.length, ids };
+    }
+
     function addLog(message) {
-      const time = new Date().toLocaleTimeString();
-      log.textContent += "\n[" + time + "] " + message;
-      log.scrollTop = log.scrollHeight;
+      try { console.log("[试玩参数修改工具] " + message); } catch (error) {}
+    }
+
+    function showToast(message, tone, duration) {
+      if (!toastContainer || !message) return;
+      const toast = document.createElement("div");
+      const toastTone = tone || "info";
+      toast.className = "toast " + toastTone;
+      toast.textContent = message;
+      toast.setAttribute("role", toastTone === "error" ? "alert" : "status");
+      while (toastContainer.children.length >= 3) toastContainer.firstElementChild.remove();
+      toastContainer.appendChild(toast);
+      const visibleDuration = Number(duration) || (toastTone === "error" ? 6000 : 4200);
+      window.setTimeout(() => toast.remove(), visibleDuration);
+    }
+
+    function formatFileSize(bytes) {
+      const value = Number(bytes) || 0;
+      if (value >= 1024 * 1024) return (value / 1024 / 1024).toFixed(1) + " MB";
+      return (value / 1024).toFixed(1) + " KB";
+    }
+
+    function warnLargeHtmlSelection(files) {
+      const list = Array.from(files || []);
+      const totalBytes = list.reduce((sum, file) => sum + (Number(file.size) || 0), 0);
+      const largeFiles = list.filter(file => Number(file.size) >= LARGE_HTML_WARNING_BYTES);
+      if (!largeFiles.length && totalBytes < LARGE_HTML_TOTAL_WARNING_BYTES) return;
+      const largestBytes = list.reduce((largest, file) => Math.max(largest, Number(file.size) || 0), 0);
+      const detail = largeFiles.length
+        ? largeFiles.length + " 个较大的 HTML，最大 " + formatFileSize(largestBytes)
+        : "HTML 总大小 " + formatFileSize(totalBytes);
+      showToast("检测到" + detail + "，读取和生成可能需要更久。", "warn", 7000);
+    }
+
+    function warnLargeResource(file, label, threshold) {
+      if (!file || Number(file.size) < threshold) return;
+      showToast(label + "较大（" + formatFileSize(file.size) + "），读取后会占用更多内存。", "warn", 7000);
+    }
+
+    function setOperationStatus(message, percent) {
+      const value = Math.max(0, Math.min(100, Number(percent) || 0));
+      operationStatus.hidden = false;
+      operationStatusText.textContent = message || "正在处理…";
+      operationStatusPercent.textContent = Math.round(value) + "%";
+      operationProgress.value = value;
+    }
+
+    function clearOperationStatus() {
+      operationStatus.hidden = true;
+      operationStatusText.textContent = "准备处理…";
+      operationStatusPercent.textContent = "0%";
+      operationProgress.value = 0;
+    }
+
+    function beginOperation(kind, message) {
+      if (busyOperation) {
+        showToast("当前文件仍在处理，请稍候。", "warn");
+        return false;
+      }
+      busyOperation = kind;
+      document.body.classList.add("is-busy");
+      fileInput.disabled = true;
+      textureInput.disabled = true;
+      videoInput.disabled = true;
+      clearBtn.disabled = true;
+      generateBtn.disabled = true;
+      downloadAllBtn.disabled = true;
+      if (settingsShell) settingsShell.inert = true;
+      dropzone.setAttribute("aria-busy", "true");
+      if (kind === "generate") {
+        generateBtn.textContent = "生成中…";
+        generateBtn.setAttribute("aria-busy", "true");
+      }
+      setOperationStatus(message, 0);
+      return true;
+    }
+
+    function endOperation() {
+      busyOperation = "";
+      document.body.classList.remove("is-busy");
+      fileInput.disabled = false;
+      textureInput.disabled = false;
+      videoInput.disabled = false;
+      clearBtn.disabled = inputs.length === 0;
+      if (settingsShell) settingsShell.inert = false;
+      dropzone.removeAttribute("aria-busy");
+      generateBtn.textContent = "生成修改版";
+      generateBtn.removeAttribute("aria-busy");
+      clearOperationStatus();
+      updateGenerateAvailability();
+      downloadAllBtn.disabled = outputs.length === 0;
+    }
+
+    function waitForPaint() {
+      return new Promise(resolve => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        const fallbackTimer = setTimeout(finish, 80);
+        if (typeof requestAnimationFrame === "function") {
+          requestAnimationFrame(() => {
+            clearTimeout(fallbackTimer);
+            finish();
+          });
+        }
+      });
     }
 
     function escapeHtml(text) {
@@ -1249,6 +1865,9 @@
       const hasCanvas = content.includes("#application-canvas") || content.includes("<canvas");
       const hasDataBlob = content.includes("assets/bundles/-1/data.blob") || content.includes("window.blobs");
       const likelyTextureBackground = hasDataBlob && directBackground.length === 0;
+      const canvas2DGameConfig = isCanvas2DGameConfig(content);
+      const canvas2DBackgroundConfig = canvas2DGameConfig && /\bbackground(?:Image|ImageLandscape|Color|Gradient)\s*:/.test(content);
+      const canvas2DTextConfig = canvas2DGameConfig && /\b(?:titleText|subtitleText)\s*:/.test(content) && /\.fillText\s*\(/.test(content);
       const textSignals = [
         { label: "多语言文本切换", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
         { label: "标题颜色字段", count: countMatches(content, /TextTitleImageColor|titleColor/g) },
@@ -1260,22 +1879,89 @@
         { label: "系统语言 locale", count: countMatches(content, /navigator\.language|locale\s*:\s*\(?\s*navigator\.language/gi) },
         { label: "常见语言键表", count: countMatches(content, /["'](?:en|zh|ja|ko|de|fr|es|pt|it|ru|tr|ar|id|th|vi)["']\s*:/g) }
       ].filter(item => item.count > 0);
+      const knownEmbeddedHands = inspectKnownEmbeddedHandAssets(content);
+      const ctaIconSignals = [
+        { label: "icon/logo 图标", count: countMatches(content, /\b(?:gameLogo|appLogo|appIcon|storeIcon|showLogo|logoImageUrl)\b/gi) },
+        { label: "CTA 按钮", count: countMatches(content, /\b(?:persistentCta|persistentCTA|ctaBtn|ctaButton|showPersistentCTA|Play Now|Install|Download)\b/gi) }
+      ].filter(item => item.count > 0);
+      const guideSignals = [
+        { label: "hand/finger 手指相关", count: countMatches(content, /\b(?:handTip|handHint|finger|guideHand|tutorialHand|tapPulseHand|TutorialHandController|handScale|showHandHint|showHand|handEnabled|fingerHintEnabled|tutorialHandEnabled|guideHandEnabled|tapHandEnabled|pointerHandEnabled)\b/gi) },
+        { label: "通用引导相关逻辑", count: countMatches(content, /\b(?:guideEnabled|showGuide|showHint|hintEnabled|tutorialEnabled|showTutorial|pointerGuideEnabled|enableRoundArrowHead|enableArrowSameWidthAsLine|enableArcPolyline|enableTailSwing|enableEntryAnimation|enableEntryVideo)\b/gi) },
+        { label: "已识别的 Luna 内嵌手势贴图", count: knownEmbeddedHands.length }
+      ].filter(item => item.count > 0);
 
-      return { counters, redirects, storeLinks, audioSignals, directBackground, cssBlackCount, backVideoCount, dataVideoCount, hasCanvas, hasDataBlob, likelyTextureBackground, textSignals, adaptiveLanguageSignals };
+      return { counters, redirects, storeLinks, audioSignals, directBackground, cssBlackCount, backVideoCount, dataVideoCount, hasCanvas, hasDataBlob, likelyTextureBackground, canvas2DBackgroundConfig, canvas2DTextConfig, textSignals, adaptiveLanguageSignals, ctaIconSignals, guideSignals, knownEmbeddedHands };
+    }
+
+    function makeFallbackAnalysis(content, error) {
+      const hasCanvas = content.includes("#application-canvas") || content.includes("<canvas");
+      const hasDataBlob = content.includes("assets/bundles/-1/data.blob") || content.includes("window.blobs");
+      return {
+        counters: [],
+        redirects: [],
+        storeLinks: [],
+        audioSignals: [],
+        directBackground: [],
+        cssBlackCount: countMatches(content, /background(?:-color)?:\s*#000/g),
+        backVideoCount: countMatches(content, /["']?backVideo["']?\s*:\s*["']data:video\//g),
+        dataVideoCount: countMatches(content, /data:video\/(?:mp4|webm|ogg)/g),
+        hasCanvas,
+        hasDataBlob,
+        likelyTextureBackground: hasDataBlob,
+        canvas2DBackgroundConfig: false,
+        canvas2DTextConfig: false,
+        textSignals: [],
+        adaptiveLanguageSignals: [],
+        ctaIconSignals: [],
+        guideSignals: [],
+        knownEmbeddedHands: [],
+        analysisError: error && error.message ? error.message : String(error || "未知错误")
+      };
     }
 
     function renderFiles() {
       if (!inputs.length) {
-        fileList.innerHTML = '<div class="file-card"><div class="meta">还没有导入文件。</div></div>';
+        fileList.innerHTML = '<div class="file-list-empty">等待文件。</div>';
+        fileListWrap.hidden = false;
+        fileListWrap.classList.add("is-empty");
+        importCompactBar.hidden = false;
+        importCompactBar.classList.add("is-empty");
+        dropzone.hidden = false;
+        importSummary.textContent = "0 个文件";
+        importCompactTitle.textContent = "还没有导入文件。";
+        importCompactMeta.textContent = "";
+        fileListSummary.textContent = "共 0 个文件";
+        clearBtn.disabled = true;
         return;
       }
 
-      fileList.innerHTML = inputs.map(item => `
-        <div class="file-card">
-          <div class="file-name">${escapeHtml(item.file.name)}</div>
-          <div class="meta">${(item.file.size / 1024).toFixed(1)} KB · 已完成检测</div>
+      clearBtn.disabled = false;
+      dropzone.hidden = false;
+      importCompactBar.hidden = false;
+      importCompactBar.classList.remove("is-empty");
+      fileListWrap.hidden = false;
+      fileListWrap.classList.remove("is-empty");
+      const totalBytes = inputs.reduce((sum, item) => sum + (Number(item.file.size) || 0), 0);
+      importSummary.textContent = inputs.length + " 个文件 · " + formatFileSize(totalBytes);
+      importCompactTitle.textContent = "已导入 " + inputs.length + " 个文件";
+      importCompactMeta.textContent = formatFileSize(totalBytes) + " · " + inputs.length + " 个已完成检测";
+
+      fileListSummary.textContent = "共 " + inputs.length + " 个文件";
+
+      fileList.innerHTML = inputs.map(item => {
+        const index = inputs.indexOf(item);
+        const largeFileHint = Number(item.file.size) >= LARGE_HTML_WARNING_BYTES ? " · 大文件，处理较慢" : "";
+        return `
+        <div class="compact-file-row${index === activeInputIndex ? " active" : ""}" data-file-index="${index}" role="button" tabindex="0" title="定位到 ${escapeHtml(item.file.name)} 的检测结果">
+          <span class="file-status-icon" aria-hidden="true">✓</span>
+          <div class="compact-file-main">
+            <div class="compact-file-name" title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}</div>
+            <div class="compact-file-meta">${formatFileSize(item.file.size)} · 已完成检测${largeFileHint}</div>
+          </div>
+          <button class="remove-file-btn" type="button" data-remove-file-index="${index}" title="移除 ${escapeHtml(item.file.name)}" aria-label="移除 ${escapeHtml(item.file.name)}">×</button>
         </div>
-      `).join("");
+      `;
+      }).join("");
     }
 
     function makeDetectCard(title, status, detail, tone) {
@@ -1290,7 +1976,7 @@
       `;
     }
 
-    function renderDetection() {
+    function renderDetection(initializeDefaults) {
       const cards = [];
       let found = 0;
       let anyTextureBg = false;
@@ -1298,91 +1984,156 @@
       let anyRedirect = false;
       let anyCounters = false;
 
-      for (const item of inputs) {
+      for (let inputIndex = 0; inputIndex < inputs.length; inputIndex++) {
+        const item = inputs[inputIndex];
         const a = item.analysis;
-        const filePrefix = inputs.length > 1 ? `<strong>${escapeHtml(item.file.name)}</strong><br>` : "";
+        const fileCards = [];
+        let fileFound = 0;
+
+        if (a.analysisError) {
+          found++;
+          fileFound++;
+          fileCards.push(makeDetectCard(
+            "检测兼容提示",
+            "部分检测失败",
+            "完整检测发生异常，但基础检测结果仍会继续显示。错误：" + escapeHtml(a.analysisError),
+            "warn"
+          ));
+        }
 
         if (a.redirects.length) {
           anyRedirect = true;
           found++;
-          cards.push(makeDetectCard("跳转平台", "可关闭", filePrefix + a.redirects.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), ""));
+          fileFound++;
+          fileCards.push(makeDetectCard("跳转平台", "可关闭", a.redirects.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), ""));
         }
 
         if (a.counters.length) {
           anyCounters = true;
           found++;
-          cards.push(makeDetectCard("试玩次数/结束条件", "可延长", filePrefix + a.counters.map(x => `${escapeHtml(x.label)} ${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("<br>"), ""));
+          fileFound++;
+          fileCards.push(makeDetectCard("试玩次数/结束条件", "可延长", a.counters.map(x => `${escapeHtml(x.label)} ${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("<br>"), ""));
         }
 
         if (a.storeLinks.length) {
           found++;
-          cards.push(makeDetectCard("商店链接", "可清空", filePrefix + a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
+          fileFound++;
+          fileCards.push(makeDetectCard("商店链接", "可清空", a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
+        }
+
+        if (a.ctaIconSignals && a.ctaIconSignals.length) {
+          found++;
+          fileFound++;
+          const ctaIconLabels = a.ctaIconSignals.map(x => escapeHtml(x.label) + " × " + x.count).join("、");
+          fileCards.push(makeDetectCard(
+            "CTA / icon",
+            "可清理",
+            "检测到相关信号：" + ctaIconLabels + "<br>可分别使用“去掉 icon 图标”和“去掉 CTA 按钮”。",
+            ""
+          ));
+        }
+
+        if (a.guideSignals && a.guideSignals.length) {
+          found++;
+          fileFound++;
+          const guideLabels = a.guideSignals.map(x => escapeHtml(x.label) + " × " + x.count).join("、");
+          fileCards.push(makeDetectCard(
+            "引导手指 / 引导逻辑",
+            "可处理",
+            "检测到相关信号：" + guideLabels + "<br>先使用低风险的“去掉引导手指”；若仍有其他引导元素，再尝试“关闭通用引导逻辑”并预览玩法是否正常。",
+            ""
+          ));
         }
 
         if (a.audioSignals && a.audioSignals.length) {
           found++;
-          cards.push(makeDetectCard(
+          fileFound++;
+          fileCards.push(makeDetectCard(
             "背景音乐/音频",
             "可处理",
-            filePrefix + a.audioSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>可尝试“去掉背景音乐”保留玩法音效；如果必须完全无声，再使用“强制静音全部音频”。",
+            a.audioSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>可尝试“去掉背景音乐”保留玩法音效；如果必须完全无声，再使用“强制静音全部音频”。",
             "warn"
           ));
         }
 
-        if (a.directBackground.length || a.cssBlackCount || a.hasCanvas) {
+        if (a.directBackground.length || a.cssBlackCount || a.hasCanvas || a.canvas2DBackgroundConfig) {
           found++;
+          fileFound++;
           const parts = [];
           if (a.directBackground.length) parts.push("检测到 Unity/相机背景字段：" + a.directBackground.map(x => `${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("，"));
+          if (a.canvas2DBackgroundConfig) parts.push("检测到 Canvas 2D GameConfig 背景，现有背景功能可直接修改。");
           if (a.cssBlackCount) parts.push("检测到 HTML/CSS 黑色背景 × " + a.cssBlackCount);
-          if (a.hasCanvas) parts.push("检测到游戏画布，可尝试注入页面背景和 WebGL 清屏色。");
-          cards.push(makeDetectCard("背景颜色", a.directBackground.length ? "可直接改" : "可尝试", filePrefix + parts.join("<br>"), a.directBackground.length ? "" : "warn"));
+          if (a.hasCanvas && !a.canvas2DBackgroundConfig) parts.push("检测到游戏画布，可尝试注入页面背景和 WebGL 清屏色。");
+          const directBackgroundSupported = a.directBackground.length || a.canvas2DBackgroundConfig;
+          fileCards.push(makeDetectCard("背景颜色", directBackgroundSupported ? "可直接改" : "可尝试", parts.join("<br>"), directBackgroundSupported ? "" : "warn"));
         }
 
         if (a.likelyTextureBackground) {
           anyTextureBg = true;
           found++;
-          cards.push(makeDetectCard("场景背景贴图/材质", "谨慎尝试", filePrefix + "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。贴图替换可能误伤玩法元素，请手动勾选并先看预览。", "warn"));
+          fileFound++;
+          fileCards.push(makeDetectCard("场景背景贴图/材质", "谨慎尝试", "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。贴图替换可能误伤玩法元素，请手动勾选并先看预览。", "warn"));
         }
 
         if (a.backVideoCount || a.dataVideoCount) {
           anyVideoBg = true;
           found++;
+          fileFound++;
           const detail = a.backVideoCount
             ? `检测到 backVideo 内嵌视频 × ${a.backVideoCount}，这类背景需要用“视频背景”功能处理。`
             : `检测到内嵌视频资源 × ${a.dataVideoCount}，可能是视频背景或开场视频。`;
-          cards.push(makeDetectCard("视频背景", a.backVideoCount ? "可处理" : "需确认", filePrefix + detail, a.backVideoCount ? "" : "warn"));
+          fileCards.push(makeDetectCard("视频背景", a.backVideoCount ? "可处理" : "需确认", detail, a.backVideoCount ? "" : "warn"));
         }
 
         found++;
+        fileFound++;
         if (a.adaptiveLanguageSignals && a.adaptiveLanguageSignals.length) {
-          cards.push(makeDetectCard(
+          fileCards.push(makeDetectCard(
             "自适应多语言",
             "疑似包含",
-            filePrefix + a.adaptiveLanguageSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>检测到语言切换或语言键，请结合预览确认是否会按系统语言自适应。",
+            a.adaptiveLanguageSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>检测到语言切换或语言键，请结合预览确认是否会按系统语言自适应。",
             "neutral"
           ));
         } else {
-          cards.push(makeDetectCard(
+          fileCards.push(makeDetectCard(
             "自适应多语言",
             "未包含",
-            filePrefix + "未检测到 MLT_TextSwitch / MLT_ImageSwitch、语言/地区参数或常见多语言键。这个试玩大概率没有内置自适应多语言。",
+            "未检测到 MLT_TextSwitch / MLT_ImageSwitch、语言/地区参数或常见多语言键。这个试玩大概率没有内置自适应多语言。",
             "neutral"
           ));
         }
 
-        if (a.textSignals.length) {
+        if (a.canvas2DTextConfig) {
           found++;
-          cards.push(makeDetectCard("文案/语言", "需要拆资源", filePrefix + a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这类通常不是 DOM 文本，常见情况是多语言图集或 Unity 文本组件。", "neutral"));
+          fileFound++;
+          fileCards.push(makeDetectCard("文案/语言", "可处理", "检测到 Canvas 2D GameConfig 标题/副标题。可使用现有的“隐藏常见标题/文案字段”和“添加覆盖文案”。", ""));
+        } else if (a.textSignals.length) {
+          found++;
+          fileFound++;
+          fileCards.push(makeDetectCard("文案/语言", "需要拆资源", a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这类通常不是 DOM 文本，常见情况是多语言图集或 Unity 文本组件。", "neutral"));
         }
+
+        cards.push(`
+          <details class="detect-file-group" id="detect-file-group-${inputIndex}" data-file-index="${inputIndex}" open>
+            <summary class="detect-file-head">
+              <span class="detect-file-name">${escapeHtml(item.file.name)}</span>
+              <span class="badge neutral">${fileFound} 项</span>
+            </summary>
+            <div class="detect-file-cards">${fileCards.join("")}</div>
+          </details>
+        `);
       }
 
-      optRedirect.checked = anyRedirect || inputs.length > 0;
-      optCounters.checked = anyCounters || inputs.length > 0;
-      optTextureReplace.checked = false;
+      if (initializeDefaults) {
+        optRedirect.checked = anyRedirect || inputs.length > 0;
+        optCounters.checked = anyCounters || inputs.length > 0;
+        optTextureReplace.checked = false;
+      }
 
       detectCount.textContent = found + " 项";
       detectList.innerHTML = cards.length ? cards.join("") : '<div class="detect-card"><div class="detail">没有检测到常见可修改项。可以把文件发给我继续深挖。</div></div>';
-      generateBtn.disabled = inputs.length === 0;
+      updateGenerateAvailability();
+      highlightLinkedSelection(false, false);
     }
 
     function hexToRgb01(hex) {
@@ -1405,10 +2156,48 @@
       return checked ? checked.value : "keep";
     }
 
+    function getResourceValidation() {
+      const videoAction = optVideoBackground.checked ? getVideoBgMode() : "keep";
+      const textureRequired = (optBackground.checked && getBgMode() === "texture") || videoAction === "replaceImage";
+      const videoRequired = videoAction === "replaceVideo";
+      return {
+        textureMissing: textureRequired && !textureDataUrl,
+        videoMissing: videoRequired && !videoDataUrl,
+        videoAction
+      };
+    }
+
+    function updateGenerateAvailability() {
+      const validation = getResourceValidation();
+      if (textureRequiredError) {
+        textureRequiredError.textContent = validation.videoAction === "replaceImage"
+          ? "请先选择一张用于替换视频背景的图片。"
+          : "请先选择一张背景图片。";
+        textureRequiredError.hidden = !validation.textureMissing;
+      }
+      if (videoRequiredError) videoRequiredError.hidden = !validation.videoMissing;
+
+      const hasInputs = inputs.length > 0;
+      generateBtn.disabled = !!busyOperation || !hasInputs || validation.textureMissing || validation.videoMissing;
+      if (busyOperation) {
+        generateBtn.title = busyOperation === "generate" ? "正在生成修改版" : "请等待当前文件处理完成";
+      } else if (!hasInputs) {
+        generateBtn.title = "请先导入 HTML 文件";
+      } else if (validation.textureMissing) {
+        generateBtn.title = "请先选择一张背景图片";
+      } else if (validation.videoMissing) {
+        generateBtn.title = "请先选择用于替换的新视频";
+      } else {
+        generateBtn.removeAttribute("title");
+      }
+      return hasInputs && !validation.textureMissing && !validation.videoMissing;
+    }
+
     function updateBackgroundModeUI() {
       const mode = getBgMode();
       if (bgColorPanel) bgColorPanel.classList.toggle("active", mode === "color");
       if (bgTexturePanel) bgTexturePanel.classList.toggle("active", mode === "texture");
+      updateGenerateAvailability();
     }
 
     function makeRuntimePatch() {
@@ -1449,6 +2238,510 @@
     attempts++;
     if (attempts > 300) clearInterval(timer);
   }, 50);
+})();
+<\/script>`;
+    }
+
+    function escapeForRegExp(value) {
+      return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function patchBooleanConfig(content, keys, enabled) {
+      const replacement = enabled ? "true" : "false";
+      for (const key of keys) {
+        const escaped = escapeForRegExp(key);
+        content = content.replace(new RegExp('((?:["\\\']?' + escaped + '["\\\']?)\\s*:\\s*)true', "g"), "$1" + replacement);
+        content = content.replace(new RegExp('((?:["\\\']?' + escaped + '["\\\']?)\\s*:\\s*)false', "g"), "$1" + replacement);
+        content = content.replace(new RegExp('("' + escaped + '"\\s*:\\["boolean",)(?:true|false)(\\])', "g"), "$1" + replacement + "$2");
+      }
+      return content;
+    }
+
+    function patchBooleanAssignments(content, keys, enabled) {
+      const replacement = enabled ? "true" : "false";
+      const roots = "(?:window\\.)?(?:CustomGameData|GameConfig|gameConfig|config|LunaConfig|playableConfig)";
+      for (const key of keys) {
+        const escaped = escapeForRegExp(key);
+        content = content.replace(
+          new RegExp('(\\b' + roots + '(?:\\.[A-Za-z_$][\\w$]*)*\\.' + escaped + '\\s*=\\s*)(?:true|false)', "g"),
+          "$1" + replacement
+        );
+      }
+      return content;
+    }
+
+    function patchLunaTutorialHandOverrides(content) {
+      const original = content;
+      const scaleValue = '"handScale":["vector3",0,0,0]';
+      const scalePattern = /"handScale"\s*:\s*\["vector3",\s*[0-9.eE+-]+\s*,\s*[0-9.eE+-]+\s*,\s*[0-9.eE+-]+\s*\]/g;
+      const hasOverrides = /window\.playgroundOverrides\s*=\s*\{/.test(content);
+      if (!hasOverrides) return { content, changed: false, mode: "none" };
+
+      const hasController = /"TutorialHandController"\s*:/.test(content);
+      if (hasController) {
+        if (scalePattern.test(content)) {
+          scalePattern.lastIndex = 0;
+          content = content.replace(scalePattern, scaleValue);
+          return { content, changed: content !== original, mode: "patched" };
+        }
+        const emptyController = /("TutorialHandController"\s*:\s*\{)\s*\}/;
+        if (emptyController.test(content)) {
+          content = content.replace(emptyController, "$1" + scaleValue + "}");
+        } else {
+          content = content.replace(/("TutorialHandController"\s*:\s*\{)/, "$1" + scaleValue + ",");
+        }
+        return { content, changed: content !== original, mode: "patched" };
+      }
+
+      const emptyOverrides = /window\.playgroundOverrides\s*=\s*\{\s*\}/;
+      if (emptyOverrides.test(content)) {
+        content = content.replace(emptyOverrides, 'window.playgroundOverrides = {"TutorialHandController":{' + scaleValue + '}}');
+      } else {
+        content = content.replace(/(window\.playgroundOverrides\s*=\s*\{)/, '$1"TutorialHandController":{' + scaleValue + '},');
+      }
+      return { content, changed: content !== original, mode: "injected" };
+    }
+
+    function patchUiCleanupSource(content, options) {
+      if (options.hideIcon) {
+        const iconKeys = [
+          "showLogo",
+          "showGameLogo",
+          "logoEnabled",
+          "showIcon",
+          "iconEnabled",
+          "showAppIcon"
+        ];
+        content = patchBooleanConfig(content, iconKeys, false);
+        content = patchBooleanAssignments(content, iconKeys, false);
+      }
+      if (options.hideCta) {
+        const ctaKeys = [
+          "showPersistentCTA",
+          "showPersistentCta",
+          "persistentCTAEnabled",
+          "persistentCtaEnabled",
+          "showCTA",
+          "showCta",
+          "ctaEnabled",
+          "tapRedirectEnabled"
+        ];
+        content = patchBooleanConfig(content, ctaKeys, false);
+        content = patchBooleanAssignments(content, ctaKeys, false);
+      }
+      if (options.removeHand) {
+        const handKeys = [
+          "handHintEnabled",
+          "showHandHint",
+          "showHand",
+          "handEnabled",
+          "enableHand",
+          "showFinger",
+          "fingerHintEnabled",
+          "tutorialHandEnabled",
+          "guideHandEnabled",
+          "tapHandEnabled",
+          "pointerHandEnabled"
+        ];
+        content = patchBooleanConfig(content, handKeys, false);
+        content = patchBooleanAssignments(content, handKeys, false);
+        content = content.replace(/\{\s*fn:\s*\(\)\s*=>\s*loadImg\(dom\.handTip,\s*GameConfig\.handImageUrl\)\s*\}/g, "{ fn: () => Promise.resolve() }");
+      }
+      if (options.removeBroadGuide) {
+        const broadGuideKeys = [
+          "guideEnabled",
+          "showGuide",
+          "showHint",
+          "hintEnabled",
+          "tutorialEnabled",
+          "showTutorial",
+          "pointerGuideEnabled",
+          "enableRoundArrowHead",
+          "enableArrowSameWidthAsLine",
+          "enableArcPolyline",
+          "enableTailSwing",
+          "enableEntryAnimation",
+          "enableEntryVideo"
+        ];
+        content = patchBooleanConfig(content, broadGuideKeys, false);
+        content = patchBooleanAssignments(content, broadGuideKeys, false);
+      }
+      return content;
+    }
+
+    function makeUiCleanupPatch(options) {
+      const iconSelectors = options.hideIcon ? [
+        "#gameLogo",
+        "#appLogo",
+        "#appIcon",
+        "#storeIcon",
+        "#cornerIcon",
+        ".game-logo",
+        ".app-logo",
+        ".store-icon",
+        "img[alt='logo']",
+        "img[alt='icon']"
+      ] : [];
+      const ctaSelectors = options.hideCta ? [
+        "#persistentCta",
+        "#persistentCTA",
+        "#ctaBtn",
+        "#ctaButton",
+        "#cta",
+        "#playNow",
+        "#playNowBtn",
+        "#installBtn",
+        "#downloadBtn",
+        ".persistent-cta",
+        ".cta",
+        ".cta-btn",
+        ".play-now",
+        ".install-btn",
+        ".download-btn",
+        "button[id*='cta' i]",
+        "button[class*='cta' i]",
+        "a[id*='cta' i]",
+        "a[class*='cta' i]"
+      ] : [];
+      const handSelectors = options.removeHand ? [
+        "#handTip",
+        "#handHint",
+        "#hand",
+        "#finger",
+        "#guideHand",
+        "#tutorialHand",
+        ".hand-tip",
+        ".hand-hint",
+        ".guide-hand",
+        ".tutorial-hand",
+        ".finger",
+        "img[id*='hand' i]",
+        "img[class*='hand' i]",
+        "img[id*='finger' i]",
+        "img[class*='finger' i]",
+        "[id*='tutorialHand' i]",
+        "[class*='tutorial-hand' i]",
+        "[id*='guideHand' i]",
+        "[class*='guide-hand' i]"
+      ] : [];
+      const selectors = [...iconSelectors, ...ctaSelectors, ...handSelectors];
+      const textMatchers = options.hideCta ? [
+        "play now",
+        "install",
+        "install now",
+        "download",
+        "download now",
+        "get it now",
+        "get the app",
+        "play free",
+        "try now",
+        "下载",
+        "安装",
+        "立即下载",
+        "立即安装",
+        "马上下载",
+        "马上安装",
+        "现在就玩",
+        "立即试玩",
+        "开始试玩",
+        "下载游戏",
+        "安装游戏",
+        "今すぐプレイ",
+        "インストール",
+        "ダウンロード",
+        "지금 플레이",
+        "설치",
+        "다운로드"
+      ] : [];
+      const hideSelectors = selectors.length ? [...selectors, '[data-codex-ui-hidden="true"]'] : selectors;
+      const cssBlock = hideSelectors.length ? `<style id="codex-hide-playable-ui">
+${hideSelectors.join(",\n")} {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+</style>` : "";
+
+      return cssBlock + `<script id="codex-disable-cta-hand-ui">
+(function(){
+  var selectors = ${JSON.stringify(selectors)};
+  var textMatchers = ${JSON.stringify(textMatchers)};
+  var hideIcon = ${options.hideIcon ? "true" : "false"};
+  var hideCta = ${options.hideCta ? "true" : "false"};
+  var removeHand = ${options.removeHand ? "true" : "false"};
+  var removeBroadGuide = ${options.removeBroadGuide ? "true" : "false"};
+  var selectorQuery = selectors.join(",");
+  function hideElement(el){
+    if (!el || !el.setAttribute || el.getAttribute("data-codex-ui-hidden") === "true") return;
+    try {
+      el.setAttribute("data-codex-ui-hidden", "true");
+      el.setAttribute("aria-hidden", "true");
+      if ("onclick" in el) el.onclick = null;
+    } catch(e) {}
+  }
+  function normalizeCtaText(value){
+    return String(value || "")
+      .toLowerCase()
+      .replace(/\\s+/g, " ")
+      .trim()
+      .replace(/^[!！?？.,，。:：;；\\-—_\\s]+|[!！?？.,，。:：;；\\-—_\\s]+$/g, "");
+  }
+  function looksLikeCta(el){
+    if (!hideCta || !el) return false;
+    var values = [el.textContent || "", el.getAttribute && el.getAttribute("aria-label") || ""];
+    for (var i = 0; i < values.length; i++) {
+      var text = normalizeCtaText(values[i]);
+      if (text && text.length <= 40 && textMatchers.indexOf(text) >= 0) return true;
+    }
+    return false;
+  }
+  function forEachMatch(root, query, callback){
+    if (!root || !query) return;
+    try {
+      if (root.nodeType === 1 && root.matches && root.matches(query)) callback(root);
+      if (root.querySelectorAll) {
+        Array.prototype.forEach.call(root.querySelectorAll(query), callback);
+      }
+    } catch(e) {}
+  }
+  function scanRoot(root){
+    forEachMatch(root, selectorQuery, hideElement);
+    if (textMatchers.length) {
+      forEachMatch(root, "button,a,[role='button']", function(el){
+        if (looksLikeCta(el)) hideElement(el);
+      });
+    }
+  }
+  function setBool(obj, key, value){
+    try { if (obj && key in obj) obj[key] = value; } catch(e) {}
+  }
+  function patchHandFlags(obj){
+    if (!obj) return;
+    [
+      "handHintEnabled","showHandHint","showHand","handEnabled","enableHand","showFinger",
+      "fingerHintEnabled","tutorialHandEnabled","guideHandEnabled","tapHandEnabled","pointerHandEnabled"
+    ].forEach(function(key){ setBool(obj, key, false); });
+  }
+  function patchBroadGuideFlags(obj){
+    if (!obj) return;
+    [
+      "guideEnabled","showGuide","showHint","hintEnabled",
+      "tutorialEnabled","showTutorial","pointerGuideEnabled",
+      "enableRoundArrowHead","enableArrowSameWidthAsLine",
+      "enableArcPolyline","enableTailSwing","enableEntryAnimation","enableEntryVideo"
+    ].forEach(function(key){ setBool(obj, key, false); });
+  }
+  function patchConfig(){
+    var cfg = window.GameConfig || window.gameConfig || window.config || null;
+    var custom = window.CustomGameData || null;
+    if (cfg) {
+      if (hideIcon && cfg.ui) {
+        ["showLogo","showGameLogo","logoEnabled","showIcon","iconEnabled","showAppIcon"].forEach(function(key){ setBool(cfg.ui, key, false); });
+      }
+      if (hideCta) {
+        if (cfg.ui) ["showPersistentCTA","showPersistentCta","persistentCTAEnabled","persistentCtaEnabled","showCTA","showCta","ctaEnabled"].forEach(function(key){ setBool(cfg.ui, key, false); });
+        if (cfg.redirect) setBool(cfg.redirect, "tapRedirectEnabled", false);
+      }
+      if (removeHand) {
+        patchHandFlags(cfg.ui);
+        patchHandFlags(cfg.guide);
+        patchHandFlags(cfg.tutorial);
+        patchHandFlags(cfg.hint);
+      }
+      if (removeBroadGuide) {
+        patchBroadGuideFlags(cfg.ui);
+        patchBroadGuideFlags(cfg.guide);
+        patchBroadGuideFlags(cfg.tutorial);
+        patchBroadGuideFlags(cfg.hint);
+      }
+    }
+    if (custom) {
+      if (removeHand) {
+        patchHandFlags(custom);
+        patchHandFlags(custom.guide);
+        patchHandFlags(custom.tutorial);
+        patchHandFlags(custom.hint);
+        patchHandFlags(custom.lvCfgRobot);
+      }
+      if (removeBroadGuide) {
+        patchBroadGuideFlags(custom);
+        patchBroadGuideFlags(custom.guide);
+        patchBroadGuideFlags(custom.tutorial);
+        patchBroadGuideFlags(custom.hint);
+        patchBroadGuideFlags(custom.lvCfgRobot);
+      }
+    }
+  }
+  function patchLunaOverrides(){
+    if (!removeHand) return;
+    try {
+      var overrides = window.playgroundOverrides || (window.playgroundOverrides = {});
+      var controller = overrides.TutorialHandController || (overrides.TutorialHandController = {});
+      controller.handScale = ["vector3",0,0,0];
+    } catch(e) {}
+  }
+  function patchHandFunctions(){
+    if (!removeHand) return;
+    [
+      "showHandHint","scheduleHandHint","scheduleHandHintAfterInactivity","positionHandHint",
+      "showFinger","showGuideHand","scheduleGuideHand","showTutorialHand","showTapHand",
+      "scheduleTapHand","startHandTutorial","playHandAnimation"
+    ].forEach(function(name){
+      try { window[name] = function(){ return null; }; } catch(e) {}
+    });
+  }
+  function isGuideNode(node){
+    var name = String((node && node.name) || "");
+    return /hand|finger|tutorialhand|guidehand|taphand|handguide|fingerhint/i.test(name);
+  }
+  function hideGuideNode(node){
+    if (!isGuideNode(node)) return;
+    try { node.active = false; } catch(e) {}
+    try { node.opacity = 0; } catch(e) {}
+  }
+  function patchCocosNodeApi(){
+    if (!removeHand) return;
+    try {
+      if (!window.cc || !cc.Node || !cc.Node.prototype || cc.Node.prototype.__codexGuidePatchV134) return;
+      var proto = cc.Node.prototype;
+      var addChild = proto.addChild;
+      if (typeof addChild === "function") {
+        proto.addChild = function(child){
+          var result = addChild.apply(this, arguments);
+          hideGuideNode(child);
+          return result;
+        };
+      }
+      var setParent = proto.setParent;
+      if (typeof setParent === "function") {
+        proto.setParent = function(parent){
+          var result = setParent.apply(this, arguments);
+          hideGuideNode(this);
+          return result;
+        };
+      }
+      proto.__codexGuidePatchV134 = true;
+    } catch(e) {}
+    try {
+      if (window.cc && typeof cc.instantiate === "function" && !cc.__codexInstantiateGuidePatchV134) {
+        var instantiate = cc.instantiate;
+        cc.instantiate = function(){
+          var node = instantiate.apply(this, arguments);
+          hideGuideNode(node);
+          return node;
+        };
+        cc.__codexInstantiateGuidePatchV134 = true;
+      }
+    } catch(e) {}
+  }
+  function patchCocosGuideNodes(){
+    if (!removeHand) return;
+    try {
+      if (!window.cc || !cc.director || !cc.director.getScene) return;
+      var scene = cc.director.getScene();
+      function walk(node){
+        if (!node) return;
+        hideGuideNode(node);
+        var children = node.children || [];
+        for (var i = 0; i < children.length; i++) walk(children[i]);
+      }
+      walk(scene);
+    } catch(e) {}
+  }
+  function hidePlayCanvasGuideEntity(entity){
+    if (!isGuideNode(entity)) return;
+    try { entity.enabled = false; } catch(e) {}
+    try { if (entity.element) entity.element.opacity = 0; } catch(e) {}
+    try { if (entity.render) entity.render.enabled = false; } catch(e) {}
+    try { if (entity.model) entity.model.enabled = false; } catch(e) {}
+  }
+  function patchPlayCanvasGuideNodes(){
+    if (!removeHand) return;
+    try {
+      var pcApp = window.app && (window.app.app || window.app);
+      var root = pcApp && (pcApp.root || (pcApp.app && pcApp.app.root));
+      if (!root) return;
+      function walk(entity){
+        if (!entity) return;
+        hidePlayCanvasGuideEntity(entity);
+        var children = entity.children || [];
+        for (var i = 0; i < children.length; i++) walk(children[i]);
+      }
+      walk(root);
+    } catch(e) {}
+    try {
+      if (!window.pc || !pc.Entity || !pc.Entity.prototype || pc.Entity.prototype.__codexGuidePatchV134) return;
+      var proto = pc.Entity.prototype;
+      var addChild = proto.addChild;
+      if (typeof addChild === "function") {
+        proto.addChild = function(child){
+          var result = addChild.apply(this, arguments);
+          hidePlayCanvasGuideEntity(child);
+          return result;
+        };
+      }
+      proto.__codexGuidePatchV134 = true;
+    } catch(e) {}
+  }
+  function sweepRuntime(){
+    patchConfig();
+    patchLunaOverrides();
+    patchHandFunctions();
+    patchCocosNodeApi();
+    patchCocosGuideNodes();
+    patchPlayCanvasGuideNodes();
+  }
+  var pendingRoots = [];
+  var flushScheduled = false;
+  function queueRoot(root){
+    if (!root) return;
+    if (root.nodeType !== 1 && root.nodeType !== 9) root = root.parentElement;
+    if (!root || pendingRoots.indexOf(root) >= 0) return;
+    pendingRoots.push(root);
+    if (flushScheduled) return;
+    flushScheduled = true;
+    var schedule = window.requestAnimationFrame || function(callback){ return setTimeout(callback, 16); };
+    schedule(function(){
+      flushScheduled = false;
+      var roots = pendingRoots.slice();
+      pendingRoots.length = 0;
+      roots.forEach(scanRoot);
+    });
+  }
+  function refresh(){
+    sweepRuntime();
+    queueRoot(document.documentElement || document);
+  }
+  sweepRuntime();
+  scanRoot(document);
+  window.addEventListener("DOMContentLoaded", refresh);
+  window.addEventListener("load", refresh);
+  window.addEventListener("luna:build", refresh);
+  window.addEventListener("luna:start", refresh);
+  window.addEventListener("luna:started", refresh);
+  try {
+    new MutationObserver(function(records){
+      records.forEach(function(record){
+        if (record.type === "childList") {
+          Array.prototype.forEach.call(record.addedNodes || [], queueRoot);
+        } else if (record.type === "attributes") {
+          queueRoot(record.target);
+        } else if (record.type === "characterData") {
+          queueRoot(record.target && record.target.parentElement);
+        }
+      });
+    }).observe(document.documentElement || document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class","id","aria-label"],
+      characterData: true
+    });
+  } catch(e) {}
+  [100, 300, 800, 1600, 3200, 6400].forEach(function(delay){
+    setTimeout(sweepRuntime, delay);
+  });
 })();
 <\/script>`;
     }
@@ -2135,6 +3428,58 @@ word-break:normal;
       return content;
     }
 
+    function isCanvas2DGameConfig(content) {
+      return /\b(?:const|let|var)\s+GameConfig\s*=\s*\{/.test(content) &&
+        /\.getContext\s*\(\s*["']2d["']\s*\)/.test(content);
+    }
+
+    function replaceCanvas2DConfigValue(content, key, serializedValue, valuePattern) {
+      const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const keyPattern = "((?:^|[,{])\\s*(?:[\"']?" + escapedKey + "[\"']?)\\s*:\\s*)";
+      const pattern = new RegExp(keyPattern + "(" + valuePattern + ")", "m");
+      let changed = false;
+      const next = content.replace(pattern, function(match, prefix) {
+        const replacement = prefix + serializedValue;
+        if (replacement !== match) changed = true;
+        return replacement;
+      });
+      return { content: next, changed };
+    }
+
+    function patchCanvas2DGameConfigBackground(content, mode, color, texture) {
+      if (!isCanvas2DGameConfig(content)) return { content, changed: false };
+      const stringOrNull = '(?:"[^"\\r\\n]*"|\'[^\'\\r\\n]*\'|null)';
+      const arrayOrNull = "(?:\\[[^\\]]*\\]|null)";
+      let changed = false;
+      function replace(key, serializedValue, valuePattern) {
+        const result = replaceCanvas2DConfigValue(content, key, serializedValue, valuePattern);
+        content = result.content;
+        changed = result.changed || changed;
+      }
+      if (mode === "texture" && texture) {
+        const textureValue = JSON.stringify(texture);
+        replace("backgroundImage", textureValue, stringOrNull);
+        replace("backgroundImageLandscape", textureValue, stringOrNull);
+      } else {
+        replace("backgroundImage", "null", stringOrNull);
+        replace("backgroundImageLandscape", "null", stringOrNull);
+        replace("backgroundGradient", "null", arrayOrNull);
+        replace("backgroundColor", JSON.stringify(color), stringOrNull);
+      }
+      return { content, changed };
+    }
+
+    function patchCanvas2DGameConfigTextVisibility(content) {
+      if (!isCanvas2DGameConfig(content)) return { content, changed: false };
+      let changed = false;
+      for (const key of ["titleEnabled", "subtitleEnabled", "showTitle", "showSubtitle"]) {
+        const result = replaceCanvas2DConfigValue(content, key, "false", "(?:true|false)");
+        content = result.content;
+        changed = result.changed || changed;
+      }
+      return { content, changed };
+    }
+
     function removePatchById(content, id) {
       const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       content = content.replace(new RegExp("<div\\s+id=[\"']" + escaped + "[\"'][\\s\\S]*?<\\/div>", "g"), "");
@@ -2144,6 +3489,11 @@ word-break:normal;
     }
 
     function injectIntoHead(content, injection) {
+      const openHead = content.match(/<head\b[^>]*>/i);
+      if (openHead && typeof openHead.index === "number") {
+        const index = openHead.index + openHead[0].length;
+        return content.slice(0, index) + injection + content.slice(index);
+      }
       const index = content.indexOf("</head>");
       if (index >= 0) return content.slice(0, index) + injection + content.slice(index);
       const bodyIndex = content.indexOf("<body");
@@ -2542,6 +3892,31 @@ word-break:normal;
         if (content !== before) stats.push("商店链接已清空");
       }
 
+      content = removePatchById(content, "codex-hide-playable-ui");
+      content = removePatchById(content, "codex-disable-cta-hand-ui");
+      const uiCleanupOptions = {
+        hideIcon: optRemoveIcon.checked,
+        hideCta: optRemoveCta.checked,
+        removeHand: optRemoveHandGuide.checked,
+        removeBroadGuide: optRemoveBroadGuide.checked
+      };
+      if (uiCleanupOptions.hideIcon || uiCleanupOptions.hideCta || uiCleanupOptions.removeHand || uiCleanupOptions.removeBroadGuide) {
+        let lunaHandResult = { content, changed: false, mode: "none" };
+        let embeddedHandResult = { content, count: 0, ids: [] };
+        if (uiCleanupOptions.removeHand) {
+          lunaHandResult = patchLunaTutorialHandOverrides(content);
+          content = lunaHandResult.content;
+          embeddedHandResult = replaceKnownEmbeddedHandAssets(content);
+          content = embeddedHandResult.content;
+        }
+        content = patchUiCleanupSource(content, uiCleanupOptions);
+        content = injectIntoHead(content, makeUiCleanupPatch(uiCleanupOptions));
+        if (uiCleanupOptions.hideIcon) stats.push("icon 图标已隐藏");
+        if (uiCleanupOptions.hideCta) stats.push("CTA 按钮已隐藏");
+        if (uiCleanupOptions.removeHand) stats.push("引导手指已处理");
+        if (uiCleanupOptions.removeBroadGuide) stats.push("通用引导逻辑已关闭");
+      }
+
       content = removePatchById(content, "codex-remove-bgm-audio");
       content = removePatchById(content, "codex-mute-all-audio");
       if (optRemoveBgm.checked || optMuteAllAudio.checked) {
@@ -2567,6 +3942,8 @@ word-break:normal;
         const mode = videoNeedsImageBackground ? "texture" : (videoNeedsColorBackground ? "color" : getBgMode());
         const color = bgColor.value;
         const useTexture = mode === "texture" && !!textureDataUrl;
+        const canvas2DBackgroundPatch = patchCanvas2DGameConfigBackground(content, mode, color, textureDataUrl);
+        content = canvas2DBackgroundPatch.content;
         content = removePatchById(content, "codex-playable-background");
         content = removePatchById(content, "codex-background-layer");
         content = removePatchById(content, "codex-background-layer-script");
@@ -2588,7 +3965,9 @@ word-break:normal;
           content = patchUnityBackgroundColor(content, color, false);
           content = patchCssFallbackBackgrounds(content, color, false);
         }
-        stats.push(optTextureReplace.checked ? "背景/贴图替换已启用" : (useTexture ? "背景图片已修改（兼容模式）" : "背景颜色已修改"));
+        stats.push(canvas2DBackgroundPatch.changed
+          ? (useTexture ? "Canvas 2D 背景图片已修改" : "Canvas 2D 背景颜色已修改")
+          : (optTextureReplace.checked ? "背景/贴图替换已启用" : (useTexture ? "背景图片已修改（兼容模式）" : "背景颜色已修改")));
       }
 
       if (optVideoBackground.checked) {
@@ -2634,7 +4013,12 @@ word-break:normal;
       if (optHideTextColor.checked) {
         const before = content;
         content = patchTextColors(content);
-        stats.push(before === content ? "未找到可透明化文案字段" : "文案字段已透明化");
+        const unityTextChanged = before !== content;
+        const canvas2DTextPatch = patchCanvas2DGameConfigTextVisibility(content);
+        content = canvas2DTextPatch.content;
+        if (unityTextChanged && canvas2DTextPatch.changed) stats.push("文案字段已透明化，Canvas 标题/副标题已隐藏");
+        else if (canvas2DTextPatch.changed) stats.push("Canvas 标题/副标题已隐藏");
+        else stats.push(unityTextChanged ? "文案字段已透明化" : "未找到可隐藏的文案字段");
       }
 
       if (optTextMask.checked) {
@@ -2661,34 +4045,120 @@ word-break:normal;
     }
 
     async function processFiles(files) {
-      const htmlFiles = [...files].filter(file => /\.html?$/i.test(file.name));
+      const selectedFiles = Array.from(files || []);
+      const htmlFiles = selectedFiles.filter(file => /\.html?$/i.test(file.name));
+      const ignoredCount = selectedFiles.length - htmlFiles.length;
       if (!htmlFiles.length) {
         addLog("没有找到 HTML 文件。");
+        showToast(selectedFiles.length ? "未导入：所选文件中没有 HTML 文件。" : "未选择文件。", "warn");
         return;
       }
 
-      for (const file of htmlFiles) {
-        const text = await file.text();
-        inputs.push({ file, text, analysis: analyze(text, file.name) });
-        addLog("已检测: " + file.name);
+      if (!beginOperation("import", "准备读取 HTML 文件…")) return;
+      warnLargeHtmlSelection(htmlFiles);
+
+      try {
+
+      let addedCount = 0;
+      let duplicateCount = 0;
+      let readFailureCount = 0;
+      let fallbackCount = 0;
+      const totalBytes = htmlFiles.reduce((sum, file) => sum + Math.max(Number(file.size) || 0, 1), 0);
+      let completedBytes = 0;
+      for (let fileIndex = 0; fileIndex < htmlFiles.length; fileIndex++) {
+        const file = htmlFiles[fileIndex];
+        const fileBytes = Math.max(Number(file.size) || 0, 1);
+        const duplicate = inputs.some(item =>
+          item.file.name === file.name &&
+          item.file.size === file.size &&
+          Number(item.file.lastModified || 0) === Number(file.lastModified || 0)
+        );
+        if (duplicate) {
+          duplicateCount++;
+          completedBytes += fileBytes;
+          setOperationStatus("已跳过重复文件 " + (fileIndex + 1) + "/" + htmlFiles.length + "：" + file.name, completedBytes / totalBytes * 100);
+          addLog("已跳过重复文件: " + file.name);
+          continue;
+        }
+        try {
+          const readLabel = "正在读取 HTML " + (fileIndex + 1) + "/" + htmlFiles.length + "：" + file.name;
+          setOperationStatus(readLabel, completedBytes / totalBytes * 100);
+          const text = await readFileAsText(file, (loaded, total) => {
+            const sourceTotal = Math.max(Number(total) || fileBytes, 1);
+            const loadedRatio = Math.min(1, (Number(loaded) || 0) / sourceTotal);
+            setOperationStatus(readLabel, (completedBytes + fileBytes * loadedRatio) / totalBytes * 100);
+          });
+          setOperationStatus("正在检测 " + (fileIndex + 1) + "/" + htmlFiles.length + "：" + file.name, (completedBytes + fileBytes) / totalBytes * 100);
+          await waitForPaint();
+          let analysis;
+          try {
+            analysis = analyze(text, file.name);
+          } catch (error) {
+            analysis = makeFallbackAnalysis(text, error);
+            fallbackCount++;
+            addLog("完整检测失败，已显示基础检测结果: " + file.name + " · " + analysis.analysisError);
+          }
+          inputs.push({ file, text, analysis });
+          addedCount++;
+          addLog("已检测: " + file.name);
+        } catch (error) {
+          readFailureCount++;
+          addLog("文件读取失败: " + file.name + " · " + (error && error.message ? error.message : error));
+        } finally {
+          completedBytes += fileBytes;
+          setOperationStatus("已处理 " + (fileIndex + 1) + "/" + htmlFiles.length + " 个 HTML 文件", completedBytes / totalBytes * 100);
+        }
       }
 
+      if (addedCount > 0) {
+        invalidateOutputs("文件列表已变更，请重新生成修改版。");
+        if (activeInputIndex < 0) activeInputIndex = 0;
+      }
+      setOperationStatus("正在整理检测结果…", 100);
+      await waitForPaint();
       renderFiles();
-      renderDetection();
+      try {
+        const initializeDefaults = addedCount > 0 && !settingsDefaultsInitialized;
+        renderDetection(initializeDefaults);
+        if (initializeDefaults) settingsDefaultsInitialized = true;
+      } catch (error) {
+        detectCount.textContent = "检测异常";
+        detectList.innerHTML = '<div class="detect-card"><div class="detail">检测结果渲染失败：' + escapeHtml(error && error.message ? error.message : error) + '</div></div>';
+        updateGenerateAvailability();
+        addLog("检测结果渲染失败: " + (error && error.message ? error.message : error));
+        showToast("检测结果渲染失败，请检查文件后重试。", "error");
+      }
+
+      const summary = [];
+      if (addedCount) summary.push("已导入 " + addedCount + " 个 HTML 文件");
+      if (duplicateCount) summary.push("跳过 " + duplicateCount + " 个重复文件");
+      if (ignoredCount) summary.push("忽略 " + ignoredCount + " 个非 HTML 文件");
+      if (readFailureCount) summary.push("读取失败 " + readFailureCount + " 个文件");
+      if (fallbackCount) summary.push(fallbackCount + " 个文件仅完成基础检测");
+      if (summary.length) {
+        const tone = readFailureCount ? "error" : ((duplicateCount || ignoredCount || fallbackCount) ? "warn" : "success");
+        showToast(summary.join("；") + "。", tone);
+      }
+      } catch (error) {
+        addLog("文件处理失败: " + (error && error.message ? error.message : error));
+        showToast("文件处理失败，请重新选择文件后重试。", "error");
+      } finally {
+        endOperation();
+      }
     }
 
     function clearPreview() {
+      if (recordingPreviewActive) closeRecordingPreview();
       previewTitle.textContent = "预览窗口";
       previewFrame.removeAttribute("src");
       previewFrame.hidden = true;
       previewEmpty.hidden = false;
-      openPreviewBtn.disabled = true;
-      openPreviewBtn.removeAttribute("data-url");
-      largePreviewBtn.disabled = true;
-      largePreviewBtn.removeAttribute("data-url");
-      largePreviewBtn.removeAttribute("data-name");
-      modalPreviewFrame.removeAttribute("src");
-      previewModal.hidden = true;
+      recordPreviewBtn.disabled = true;
+      recordPreviewBtn.removeAttribute("data-url");
+      recordPreviewBtn.removeAttribute("data-name");
+      recordLandscapePreviewBtn.disabled = true;
+      recordLandscapePreviewBtn.removeAttribute("data-url");
+      recordLandscapePreviewBtn.removeAttribute("data-name");
     }
 
     function showPreview(index) {
@@ -2701,11 +4171,12 @@ word-break:normal;
       previewFrame.src = item.url;
       previewFrame.hidden = false;
       previewEmpty.hidden = true;
-      openPreviewBtn.disabled = false;
-      openPreviewBtn.dataset.url = item.url;
-      largePreviewBtn.disabled = false;
-      largePreviewBtn.dataset.url = item.url;
-      largePreviewBtn.dataset.name = item.name;
+      recordPreviewBtn.disabled = false;
+      recordPreviewBtn.dataset.url = item.url;
+      recordPreviewBtn.dataset.name = item.name;
+      recordLandscapePreviewBtn.disabled = false;
+      recordLandscapePreviewBtn.dataset.url = item.url;
+      recordLandscapePreviewBtn.dataset.name = item.name;
       addLog("正在预览: " + item.name);
     }
 
@@ -2718,33 +4189,156 @@ word-break:normal;
       });
     }
 
-    function updateModalPreviewSize() {
-      const width = modalPreviewWidth.value;
-      const height = modalPreviewHeight.value;
-      modalPreviewWidthValue.textContent = width;
-      modalPreviewHeightValue.textContent = height;
-      previewModal.style.setProperty("--modal-preview-w", width + "px");
-      previewModal.style.setProperty("--modal-preview-h", height + "px");
+    function updateRecordingPreviewSize() {
+      if (!recordingPreviewActive || recordingPreview.hidden) return;
+      const availableWidth = Math.max(recordingStage.clientWidth || window.innerWidth || 1, 1);
+      const availableHeight = Math.max(recordingStage.clientHeight || window.innerHeight || 1, 1);
+      const scale = Math.min(availableWidth / activeRecordingWidth, availableHeight / activeRecordingHeight);
+      const displayWidth = activeRecordingWidth * scale;
+      const displayHeight = activeRecordingHeight * scale;
+      recordingViewport.style.width = displayWidth + "px";
+      recordingViewport.style.height = displayHeight + "px";
+      recordingPreviewFrame.style.width = activeRecordingWidth + "px";
+      recordingPreviewFrame.style.height = activeRecordingHeight + "px";
+      recordingPreviewFrame.style.transform = "scale(" + scale.toFixed(6) + ")";
+      recordingSizeText.textContent = "内部 " + activeRecordingWidth + "×" + activeRecordingHeight + " · 显示约 " + Math.round(displayWidth) + "×" + Math.round(displayHeight) + " · 顶部显示，向下收起";
     }
 
-    function setModalPreset(width, height) {
-      modalPreviewWidth.value = width;
-      modalPreviewHeight.value = height;
-      updateModalPreviewSize();
+    function setRecordingCursorHidden(hidden) {
+      try {
+        const frameDocument = recordingPreviewFrame.contentDocument;
+        if (!frameDocument) return;
+        let style = frameDocument.getElementById("codex-recording-hidden-cursor");
+        if (hidden && !style) {
+          style = frameDocument.createElement("style");
+          style.id = "codex-recording-hidden-cursor";
+          style.textContent = "html,body,body *{cursor:none!important}";
+          (frameDocument.head || frameDocument.documentElement).appendChild(style);
+        } else if (!hidden && style) {
+          style.remove();
+        }
+      } catch (error) {}
     }
 
-    function openLargePreview() {
-      const url = largePreviewBtn.dataset.url;
+    function syncRecordingFrameCursor() {
+      setRecordingCursorHidden(recordingPreview.classList.contains("controls-hidden"));
+    }
+
+    function hideRecordingControls() {
+      if (!recordingPreviewActive) return;
+      if (recordingControlsTimer) clearTimeout(recordingControlsTimer);
+      recordingControlsTimer = 0;
+      recordingPreview.classList.add("controls-hidden");
+      setRecordingCursorHidden(true);
+    }
+
+    function revealRecordingControls(autoHide) {
+      if (!recordingPreviewActive) return;
+      recordingPreview.classList.remove("controls-hidden");
+      setRecordingCursorHidden(false);
+      if (recordingControlsTimer) clearTimeout(recordingControlsTimer);
+      recordingControlsTimer = 0;
+      if (autoHide !== false) {
+        recordingControlsTimer = window.setTimeout(() => {
+          if (recordingPreviewActive) {
+            recordingPreview.classList.add("controls-hidden");
+            setRecordingCursorHidden(true);
+          }
+        }, 3200);
+      }
+    }
+
+    function finalizeRecordingPreviewClose() {
+      if (recordingControlsTimer) clearTimeout(recordingControlsTimer);
+      recordingControlsTimer = 0;
+      recordingPreviewActive = false;
+      recordingEnteredFullscreen = false;
+      recordingPreviewClosing = false;
+      recordingPreview.hidden = true;
+      recordingPreview.classList.remove("controls-hidden");
+      setRecordingCursorHidden(false);
+      recordingPreviewFrame.removeAttribute("src");
+      recordingPreviewFrame.removeAttribute("data-url");
+      recordingViewport.removeAttribute("style");
+      recordingPreviewFrame.removeAttribute("style");
+      document.body.classList.remove("recording-mode");
+      enterRecordingFullscreenBtn.disabled = false;
+      enterRecordingFullscreenBtn.textContent = "进入全屏";
+    }
+
+    function closeRecordingPreview() {
+      if (!recordingPreviewActive || recordingPreviewClosing) return;
+      recordingPreviewClosing = true;
+      const finish = () => finalizeRecordingPreviewClose();
+      if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+        try {
+          const exitResult = document.exitFullscreen();
+          if (exitResult && typeof exitResult.then === "function") exitResult.then(finish, finish);
+          else finish();
+        } catch (error) {
+          finish();
+        }
+      } else {
+        finish();
+      }
+    }
+
+    async function enterRecordingFullscreen() {
+      if (!recordingPreviewActive) return;
+      if (document.fullscreenElement === recordingPreview) return;
+      if (typeof recordingPreview.requestFullscreen !== "function") {
+        enterRecordingFullscreenBtn.disabled = true;
+        enterRecordingFullscreenBtn.textContent = "不支持全屏";
+        revealRecordingControls(false);
+        return;
+      }
+      try {
+        await recordingPreview.requestFullscreen();
+        recordingEnteredFullscreen = true;
+        enterRecordingFullscreenBtn.disabled = true;
+        enterRecordingFullscreenBtn.textContent = "已全屏";
+        revealRecordingControls();
+      } catch (error) {
+        enterRecordingFullscreenBtn.disabled = false;
+        enterRecordingFullscreenBtn.textContent = "再次进入全屏";
+        enterRecordingFullscreenBtn.title = "浏览器未允许自动全屏，可再次点击或按 F11";
+        revealRecordingControls(false);
+      }
+      updateRecordingPreviewSize();
+    }
+
+    function restartRecordingPreview() {
+      const url = recordingPreviewFrame.dataset.url;
       if (!url) return;
-      modalPreviewTitle.textContent = "放大预览: " + (largePreviewBtn.dataset.name || "");
-      modalPreviewFrame.src = url;
-      updateModalPreviewSize();
-      previewModal.hidden = false;
+      recordingPreviewFrame.removeAttribute("src");
+      window.setTimeout(() => {
+        if (recordingPreviewActive) recordingPreviewFrame.src = url;
+      }, 0);
+      revealRecordingControls();
     }
 
-    function closeLargePreview() {
-      previewModal.hidden = true;
-      modalPreviewFrame.removeAttribute("src");
+    function openRecordingPreview(mode) {
+      const landscape = mode === "landscape";
+      const sourceButton = landscape ? recordLandscapePreviewBtn : recordPreviewBtn;
+      const url = sourceButton.dataset.url;
+      if (!url) return;
+      activeRecordingAspect = landscape ? "16:9" : "9:16";
+      activeRecordingWidth = landscape ? LANDSCAPE_RECORDING_WIDTH : PORTRAIT_RECORDING_WIDTH;
+      activeRecordingHeight = landscape ? LANDSCAPE_RECORDING_HEIGHT : PORTRAIT_RECORDING_HEIGHT;
+      recordingPreviewActive = true;
+      recordingEnteredFullscreen = false;
+      recordingPreviewClosing = false;
+      recordingPreviewTitle.textContent = activeRecordingAspect + " 全屏录屏模式：" + (sourceButton.dataset.name || "修改版 HTML");
+      recordingPreviewFrame.dataset.url = url;
+      recordingPreviewFrame.src = url;
+      recordingPreview.hidden = false;
+      document.body.classList.add("recording-mode");
+      enterRecordingFullscreenBtn.disabled = false;
+      enterRecordingFullscreenBtn.textContent = "进入全屏";
+      enterRecordingFullscreenBtn.removeAttribute("title");
+      updateRecordingPreviewSize();
+      revealRecordingControls();
+      enterRecordingFullscreen();
     }
 
     function clearOutputs() {
@@ -2753,6 +4347,13 @@ word-break:normal;
       resultList.innerHTML = '<div class="result-card"><div class="meta">生成后的下载链接会显示在这里。</div></div>';
       downloadAllBtn.disabled = true;
       clearPreview();
+    }
+
+    function invalidateOutputs(message) {
+      if (!outputs.length) return false;
+      clearOutputs();
+      showToast(message || "设置已变更，请重新生成修改版。", "warn");
+      return true;
     }
 
     function renderOutputs() {
@@ -2774,41 +4375,148 @@ word-break:normal;
       `).join("");
     }
 
-    function generate() {
-      clearOutputs();
-
+    async function generate() {
       if (!inputs.length) {
         addLog("请先导入 HTML。");
+        showToast("请先导入 HTML 文件。", "warn");
+        updateGenerateAvailability();
+        return;
+      }
+      if (!updateGenerateAvailability()) {
+        switchSettingsTab("background");
+        showToast("请先补齐背景图片或替换视频，再生成修改版。", "error");
         return;
       }
 
-      for (const item of inputs) {
-        const result = transform(item.text);
-        const blob = new Blob([result.content], { type: "text/html;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        outputs.push({
-          sourceName: item.file.name,
-          name: outputName(item.file.name),
-          size: blob.size,
-          url,
-          stats: result.stats.length ? result.stats : ["未应用修改"]
-        });
-        addLog("已生成: " + outputName(item.file.name));
-      }
+      if (!beginOperation("generate", "准备生成修改版…")) return;
 
-      renderOutputs();
-      downloadAllBtn.disabled = outputs.length === 0;
-      if (outputs.length) showPreview(0);
+      clearOutputs();
+
+      try {
+        await waitForPaint();
+        for (let index = 0; index < inputs.length; index++) {
+          const item = inputs[index];
+          setOperationStatus("正在生成 " + (index + 1) + "/" + inputs.length + "：" + item.file.name, index / inputs.length * 100);
+          await waitForPaint();
+          const result = transform(item.text);
+          const blob = new Blob([result.content], { type: "text/html;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          outputs.push({
+            sourceName: item.file.name,
+            name: outputName(item.file.name),
+            size: blob.size,
+            url,
+            stats: result.stats.length ? result.stats : ["未应用修改"]
+          });
+          setOperationStatus("已生成 " + (index + 1) + "/" + inputs.length + " 个文件", (index + 1) / inputs.length * 100);
+          addLog("已生成: " + outputName(item.file.name));
+          await waitForPaint();
+        }
+
+        renderOutputs();
+        if (outputs.length) showPreview(0);
+        showToast("已生成 " + outputs.length + " 个修改版 HTML 文件。", "success");
+      } catch (error) {
+        clearOutputs();
+        addLog("生成失败: " + (error && error.message ? error.message : error));
+        showToast("生成失败，请减小文件或素材大小后重试。", "error");
+      } finally {
+        endOperation();
+      }
     }
 
-    function readFileAsDataUrl(file) {
+    function readFileWithProgress(file, method, onProgress) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
+        reader.onerror = () => reject(reader.error || new Error("文件读取失败"));
+        reader.onabort = () => reject(new Error("文件读取已取消"));
+        reader.onprogress = event => {
+          if (typeof onProgress === "function") onProgress(event.loaded, event.lengthComputable ? event.total : file.size);
+        };
+        reader[method](file);
       });
     }
+
+    function readFileAsText(file, onProgress) {
+      return readFileWithProgress(file, "readAsText", onProgress).then(result => String(result || ""));
+    }
+
+    function readFileAsDataUrl(file, onProgress) {
+      return readFileWithProgress(file, "readAsDataURL", onProgress);
+    }
+
+    function highlightLinkedSelection(scrollDetection, forceOpen) {
+      document.querySelectorAll(".compact-file-row.active").forEach(row => row.classList.remove("active"));
+      document.querySelectorAll(".detect-file-group.is-linked").forEach(group => group.classList.remove("is-linked"));
+      if (activeInputIndex < 0) return;
+
+      const row = fileList.querySelector('[data-file-index="' + activeInputIndex + '"]');
+      if (row) row.classList.add("active");
+      const group = document.getElementById("detect-file-group-" + activeInputIndex);
+      if (!group) return;
+      if (forceOpen !== false) group.open = true;
+      group.classList.add("is-linked");
+      if (scrollDetection) group.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function activateInput(index, scrollDetection, forceOpen) {
+      const nextIndex = Number(index);
+      if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= inputs.length) return;
+      activeInputIndex = nextIndex;
+      renderFiles();
+      highlightLinkedSelection(!!scrollDetection, forceOpen);
+    }
+
+    function removeInput(index) {
+      const removeIndex = Number(index);
+      if (!Number.isInteger(removeIndex) || removeIndex < 0 || removeIndex >= inputs.length) return;
+      const removed = inputs.splice(removeIndex, 1)[0];
+      invalidateOutputs("文件列表已变更，请重新生成修改版。");
+      if (!inputs.length) {
+        activeInputIndex = -1;
+      } else if (activeInputIndex === removeIndex) {
+        activeInputIndex = Math.min(removeIndex, inputs.length - 1);
+      } else if (activeInputIndex > removeIndex) {
+        activeInputIndex--;
+      }
+      renderFiles();
+      if (inputs.length) {
+        renderDetection();
+      } else {
+        detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div></div>';
+        detectCount.textContent = "0 项";
+        updateGenerateAvailability();
+      }
+      addLog("已移除: " + removed.file.name);
+    }
+
+    fileList.addEventListener("click", event => {
+      const removeButton = event.target.closest("[data-remove-file-index]");
+      if (removeButton) {
+        event.stopPropagation();
+        removeInput(removeButton.dataset.removeFileIndex);
+        return;
+      }
+      const row = event.target.closest("[data-file-index]");
+      if (row) activateInput(row.dataset.fileIndex, true);
+    });
+
+    fileList.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest("[data-remove-file-index]")) return;
+      const row = event.target.closest("[data-file-index]");
+      if (!row) return;
+      event.preventDefault();
+      activateInput(row.dataset.fileIndex, true);
+    });
+
+    detectList.addEventListener("click", event => {
+      const head = event.target.closest(".detect-file-head");
+      if (!head) return;
+      const group = head.closest("[data-file-index]");
+      if (group) activateInput(group.dataset.fileIndex, false, false);
+    });
 
     dropzone.addEventListener("dragover", event => {
       event.preventDefault();
@@ -2833,28 +4541,46 @@ word-break:normal;
     textureInput.addEventListener("change", async event => {
       const file = event.target.files[0];
       if (!file) return;
+      invalidateOutputs();
+      warnLargeResource(file, "背景图片", LARGE_IMAGE_WARNING_BYTES);
+      if (!beginOperation("resource", "准备读取背景图片…")) return;
       try {
-        textureDataUrl = await readFileAsDataUrl(file);
-        textureName.textContent = file.name;
+        textureDataUrl = await readFileAsDataUrl(file, (loaded, total) => {
+          const sourceTotal = Math.max(Number(total) || Number(file.size) || 0, 1);
+          setOperationStatus("正在读取背景图片：" + file.name, Math.min(100, (Number(loaded) || 0) / sourceTotal * 100));
+        });
+        setOperationStatus("背景图片读取完成：" + file.name, 100);
+        textureName.textContent = file.name + " · " + formatFileSize(file.size) + (Number(file.size) >= LARGE_IMAGE_WARNING_BYTES ? " · 大文件" : "");
         bgPreview.style.backgroundImage = `url("${textureDataUrl}")`;
         optBackground.checked = true;
         optTextureReplace.checked = false;
-        document.querySelector('input[name="bgMode"][value="texture"]').checked = true;
-        updateBackgroundModeUI();
+        setBgMode("texture");
+        syncActiveVideoModeFromBackground();
         addLog("已载入背景图片: " + file.name);
       } catch (error) {
         textureDataUrl = "";
         textureName.textContent = "读取失败";
         addLog("背景图片读取失败: " + error.message);
+        showToast("背景图片读取失败，请重新选择文件。", "error");
+      } finally {
+        textureInput.value = "";
+        endOperation();
       }
     });
 
     videoInput.addEventListener("change", async event => {
       const file = event.target.files[0];
       if (!file) return;
+      invalidateOutputs();
+      warnLargeResource(file, "替换视频", LARGE_VIDEO_WARNING_BYTES);
+      if (!beginOperation("resource", "准备读取替换视频…")) return;
       try {
-        videoDataUrl = await readFileAsDataUrl(file);
-        videoName.textContent = file.name;
+        videoDataUrl = await readFileAsDataUrl(file, (loaded, total) => {
+          const sourceTotal = Math.max(Number(total) || Number(file.size) || 0, 1);
+          setOperationStatus("正在读取替换视频：" + file.name, Math.min(100, (Number(loaded) || 0) / sourceTotal * 100));
+        });
+        setOperationStatus("替换视频读取完成：" + file.name, 100);
+        videoName.textContent = file.name + " · " + formatFileSize(file.size) + (Number(file.size) >= LARGE_VIDEO_WARNING_BYTES ? " · 大文件" : "");
         optVideoBackground.checked = true;
         setVideoBgMode("replaceVideo");
         addLog("已载入视频背景: " + file.name);
@@ -2862,6 +4588,10 @@ word-break:normal;
         videoDataUrl = "";
         videoName.textContent = "读取失败";
         addLog("视频背景读取失败: " + error.message);
+        showToast("视频背景读取失败，请重新选择文件。", "error");
+      } finally {
+        videoInput.value = "";
+        endOperation();
       }
     });
 
@@ -2879,6 +4609,12 @@ word-break:normal;
       const input = document.querySelector('input[name="videoBgMode"][value="' + mode + '"]');
       if (input) input.checked = true;
       syncVideoBackgroundModeUI();
+    }
+
+    function syncActiveVideoModeFromBackground() {
+      if (!optVideoBackground.checked) return;
+      const desiredAction = getBgMode() === "texture" ? "replaceImage" : "replaceColor";
+      if (getVideoBgMode() !== desiredAction) setVideoBgMode(desiredAction);
     }
 
     function clearVideoBgMode() {
@@ -2915,13 +4651,25 @@ word-break:normal;
       input.addEventListener("change", () => {
         optBackground.checked = true;
         updateBackgroundModeUI();
+        syncActiveVideoModeFromBackground();
       });
+    });
+
+    optBackground.addEventListener("change", () => {
+      if (optBackground.checked) {
+        syncActiveVideoModeFromBackground();
+      } else if (optVideoBackground.checked) {
+        const videoAction = getVideoBgMode();
+        if (videoAction === "replaceColor" || videoAction === "replaceImage") clearVideoBgMode();
+      }
+      updateGenerateAvailability();
     });
 
     updateBackgroundModeUI();
 
     optTextureReplace.addEventListener("change", () => {
       if (optTextureReplace.checked) optBackground.checked = true;
+      updateGenerateAvailability();
     });
 
     optMuteAllAudio.addEventListener("change", () => {
@@ -2957,6 +4705,15 @@ word-break:normal;
       button.addEventListener("click", () => switchSettingsTab(button.dataset.settingsTab));
     });
 
+    if (settingsShell) {
+      const invalidateFromSettings = event => {
+        const control = event.target.closest("input, select, textarea");
+        if (control && settingsShell.contains(control)) invalidateOutputs();
+      };
+      settingsShell.addEventListener("input", invalidateFromSettings);
+      settingsShell.addEventListener("change", invalidateFromSettings);
+    }
+
     generateBtn.addEventListener("click", generate);
 
     document.querySelectorAll(".viewport-btn").forEach(button => {
@@ -2969,22 +4726,42 @@ word-break:normal;
       showPreview(Number(button.dataset.index));
     });
 
-    openPreviewBtn.addEventListener("click", () => {
-      const url = openPreviewBtn.dataset.url;
-      if (url) window.open(url, "_blank", "noopener");
+    recordPreviewBtn.addEventListener("click", () => openRecordingPreview("portrait"));
+    recordLandscapePreviewBtn.addEventListener("click", () => openRecordingPreview("landscape"));
+    restartRecordingBtn.addEventListener("click", restartRecordingPreview);
+    enterRecordingFullscreenBtn.addEventListener("click", enterRecordingFullscreen);
+    closeRecordingBtn.addEventListener("click", closeRecordingPreview);
+    recordingPreviewFrame.addEventListener("load", syncRecordingFrameCursor);
+    recordingTopTrigger.addEventListener("pointerenter", () => revealRecordingControls());
+    recordingTopTrigger.addEventListener("pointermove", () => revealRecordingControls());
+    recordingTopTrigger.addEventListener("pointerleave", event => {
+      const triggerBounds = recordingTopTrigger.getBoundingClientRect();
+      if (event.clientY >= triggerBounds.bottom - 1) hideRecordingControls();
+      else revealRecordingControls();
     });
-
-    largePreviewBtn.addEventListener("click", openLargePreview);
-    closePreviewModalBtn.addEventListener("click", closeLargePreview);
-    modalPreviewWidth.addEventListener("input", updateModalPreviewSize);
-    modalPreviewHeight.addEventListener("input", updateModalPreviewSize);
-    modalPortraitBtn.addEventListener("click", () => setModalPreset(405, 720));
-    modalLandscapeBtn.addEventListener("click", () => setModalPreset(960, 540));
-    previewModal.addEventListener("click", event => {
-      if (event.target === previewModal) closeLargePreview();
+    recordingToolbar.addEventListener("pointerenter", () => revealRecordingControls(false));
+    recordingToolbar.addEventListener("pointerleave", event => {
+      const toolbarBounds = recordingToolbar.getBoundingClientRect();
+      if (event.clientY >= toolbarBounds.bottom - 1) hideRecordingControls();
+      else revealRecordingControls();
+    });
+    window.addEventListener("resize", updateRecordingPreviewSize);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", updateRecordingPreviewSize);
+    document.addEventListener("fullscreenchange", () => {
+      if (document.fullscreenElement === recordingPreview) {
+        recordingEnteredFullscreen = true;
+        enterRecordingFullscreenBtn.disabled = true;
+        enterRecordingFullscreenBtn.textContent = "已全屏";
+        updateRecordingPreviewSize();
+      } else if (recordingPreviewActive && recordingEnteredFullscreen && !recordingPreviewClosing && !document.fullscreenElement) {
+        closeRecordingPreview();
+      }
     });
     window.addEventListener("keydown", event => {
-      if (event.key === "Escape" && !previewModal.hidden) closeLargePreview();
+      if (event.key !== "Escape") return;
+      if (recordingPreviewActive) {
+        closeRecordingPreview();
+      }
     });
 
     downloadAllBtn.addEventListener("click", () => {
@@ -3000,12 +4777,12 @@ word-break:normal;
 
     clearBtn.addEventListener("click", () => {
       inputs.length = 0;
+      activeInputIndex = -1;
       clearOutputs();
       renderFiles();
-      detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、背景、文案/语言等可修改点。</div></div>';
+      detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div></div>';
       detectCount.textContent = "0 项";
-      generateBtn.disabled = true;
-      log.textContent = "等待文件。";
+      updateGenerateAvailability();
     });
   </script>
 </body>
