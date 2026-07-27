@@ -5197,24 +5197,17 @@ word-break:normal;
       recordingSizeText.textContent = "内部 " + activeRecordingWidth + "×" + activeRecordingHeight + " · 显示约 " + Math.round(displayWidth) + "×" + Math.round(displayHeight) + " · 顶部显示，向下收起";
     }
 
-    function setRecordingCursorHidden(hidden) {
+    function ensureRecordingCursorVisible() {
       try {
         const frameDocument = recordingPreviewFrame.contentDocument;
         if (!frameDocument) return;
-        let style = frameDocument.getElementById("codex-recording-hidden-cursor");
-        if (hidden && !style) {
-          style = frameDocument.createElement("style");
-          style.id = "codex-recording-hidden-cursor";
-          style.textContent = "html,body,body *{cursor:none!important}";
-          (frameDocument.head || frameDocument.documentElement).appendChild(style);
-        } else if (!hidden && style) {
-          style.remove();
-        }
+        const style = frameDocument.getElementById("codex-recording-hidden-cursor");
+        if (style) style.remove();
       } catch (error) {}
     }
 
     function syncRecordingFrameCursor() {
-      setRecordingCursorHidden(recordingPreview.classList.contains("controls-hidden"));
+      ensureRecordingCursorVisible();
     }
 
     function hideRecordingControls() {
@@ -5222,20 +5215,20 @@ word-break:normal;
       if (recordingControlsTimer) clearTimeout(recordingControlsTimer);
       recordingControlsTimer = 0;
       recordingPreview.classList.add("controls-hidden");
-      setRecordingCursorHidden(true);
+      ensureRecordingCursorVisible();
     }
 
     function revealRecordingControls(autoHide) {
       if (!recordingPreviewActive) return;
       recordingPreview.classList.remove("controls-hidden");
-      setRecordingCursorHidden(false);
+      ensureRecordingCursorVisible();
       if (recordingControlsTimer) clearTimeout(recordingControlsTimer);
       recordingControlsTimer = 0;
       if (autoHide !== false) {
         recordingControlsTimer = window.setTimeout(() => {
           if (recordingPreviewActive) {
             recordingPreview.classList.add("controls-hidden");
-            setRecordingCursorHidden(true);
+            ensureRecordingCursorVisible();
           }
         }, 3200);
       }
@@ -5249,7 +5242,7 @@ word-break:normal;
       recordingPreviewClosing = false;
       recordingPreview.hidden = true;
       recordingPreview.classList.remove("controls-hidden");
-      setRecordingCursorHidden(false);
+      ensureRecordingCursorVisible();
       stopPreviewInstance(recordingPreviewFrame);
       recordingPreviewFrame.removeAttribute("data-url");
       recordingViewport.removeAttribute("style");
