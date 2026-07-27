@@ -134,6 +134,13 @@
       font-size: 16px;
     }
 
+    .panel-head-note {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
     .panel-body {
       padding: 16px;
       min-height: 0;
@@ -802,6 +809,20 @@
       margin-bottom: 4px;
     }
 
+    .option .default-on-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #315f9f;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+      vertical-align: 1px;
+    }
+
     .option span {
       color: var(--muted);
       line-height: 1.45;
@@ -844,6 +865,32 @@
       border-top: 1px solid var(--line);
     }
 
+    .guide-group {
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .option-card .guide-group .option + .option {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .guide-advice {
+      padding: 10px 12px;
+      border: 1px solid #d9e6fb;
+      border-radius: 7px;
+      background: #f4f8ff;
+      color: #52657f;
+      line-height: 1.55;
+    }
+
+    .guide-advice strong {
+      color: #315f9f;
+    }
+
     .control-box {
       padding: 12px;
       border: 1px solid var(--line);
@@ -864,6 +911,28 @@
       flex: 0 0 auto;
       margin-top: 2px;
       min-width: 0;
+    }
+
+    .linked-settings {
+      transition: opacity .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .linked-settings.is-inactive {
+      opacity: .56;
+      border-color: #d9dee8;
+      background: #f7f8fa;
+    }
+
+    .linked-settings.is-inactive:hover,
+    .linked-settings.is-inactive:focus-within {
+      opacity: .82;
+      border-color: #b8c8e2;
+    }
+
+    .clear-settings-btn {
+      min-height: 32px;
+      padding: 7px 10px;
+      font-size: 12px;
     }
 
     .operation-panel .option {
@@ -1149,9 +1218,9 @@
     <div class="topbar">
       <div class="topbar-left">
       <h1>试玩 HTML 参数修改工具</h1>
-      <a class="guide-link" href="https://docs.google.com/document/d/1gvVdHRKiXOo4Rrt-X1UTd2oCTMoRY0yn_5Vh7nRjaWc/edit?tab=t.0" target="_blank" rel="noopener noreferrer">使用说明</a>
+      <a class="guide-link" href="https://docs.google.com/document/d/1xNLcIFyjhWeA7XH_vPIXB7QEdugwDgzqidzzwdqjemc/edit" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.3.4 · 先导入检测，再修改，本地处理</div>
+      <div class="version">Ray · v1.3.7 · 先检测，少量修改，生成后先预览</div>
     </div>
 
     <div class="operation-status" id="operationStatus" role="status" aria-live="polite" hidden>
@@ -1180,7 +1249,7 @@
                   <path d="M5 21h14"></path>
                 </svg>
               </div>
-              <div class="drop-title">拖入 playable HTML</div>
+              <div class="drop-title">拖入试玩 HTML</div>
               <div class="drop-text">工具会先扫描能改的地方，再让你选择具体修改项。</div>
               <label class="file-button" for="fileInput">选择 HTML</label>
             </div>
@@ -1215,7 +1284,7 @@
         <div class="panel-body">
           <div id="detectList" class="detect-list">
             <div class="detect-card">
-              <div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div>
+              <div class="detail">导入 HTML 后，这里会显示自动跳转、试玩次数、水印、按钮、引导、背景和文案等可修改内容。</div>
             </div>
           </div>
         </div>
@@ -1223,8 +1292,11 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>3. 选择修改</h2>
-          <span class="badge neutral">应用到全部文件</span>
+          <div class="panel-head-actions">
+            <h2>3. 参数修改</h2>
+            <span class="panel-head-note">以下设置将应用到全部文件</span>
+          </div>
+          <button class="secondary clear-settings-btn" id="clearSettingsBtn" type="button">全部取消</button>
         </div>
         <div class="panel-body">
           <div class="settings-shell">
@@ -1232,23 +1304,23 @@
               <button class="settings-tab active" type="button" data-settings-tab="basic">跳转/次数</button>
               <button class="settings-tab" type="button" data-settings-tab="background">背景</button>
               <button class="settings-tab" type="button" data-settings-tab="text">文案/语言</button>
-              <button class="settings-tab" type="button" data-settings-tab="audio">音频</button>
-              <button class="settings-tab" type="button" data-settings-tab="uiCleanup">CTA/引导</button>
+              <button class="settings-tab" type="button" data-settings-tab="audio">声音</button>
+              <button class="settings-tab" type="button" data-settings-tab="uiCleanup">画面清理</button>
             </div>
             <div class="settings">
               <div class="settings-panel active" data-settings-panel="basic">
                 <div class="option-card">
               <label class="option">
                 <input id="optRedirect" type="checkbox" checked>
-                <span><strong>关闭跳转平台</strong>拦截 `window.open`、`mraid.open`、`OpenStore`、`InstallFullGame`。</span>
+                <span><strong>阻止自动跳转<span class="default-on-badge">默认开启</span></strong>阻止试玩自动打开应用商店或其他页面。</span>
               </label>
               <label class="option">
                 <input id="optCounters" type="checkbox" checked>
-                <span><strong>延长试玩次数</strong>把常见步数、操作次数、完成次数、闲置时间调到很大。</span>
+                <span><strong>延长试玩次数<span class="default-on-badge">默认开启</span></strong>把常见步数、操作次数、完成次数、闲置时间调到很大。</span>
               </label>
               <label class="option">
                 <input id="optStoreLinks" type="checkbox">
-                <span><strong>清空商店链接</strong>把 `iosLink` / `androidLink` 改成 `about:blank`，遇到顽固跳转再勾。</span>
+                <span><strong>停用商店链接</strong>遇到仍会自动打开商店的试玩时再勾选。</span>
               </label>
                 </div>
               </div>
@@ -1257,21 +1329,27 @@
                 <div class="option-card">
               <label class="option">
                 <input id="optRemoveIcon" type="checkbox">
-                <span><strong>去掉 icon 图标</strong>隐藏常见 logo、商店图标和试玩浮层 icon。</span>
+                <span><strong>去掉应用图标或 Logo</strong>隐藏常见的应用图标、Logo 和商店图标。</span>
               </label>
               <label class="option">
                 <input id="optRemoveCta" type="checkbox">
-                <span><strong>去掉 CTA 按钮</strong>隐藏 Play Now、Install、Download 等常见 CTA，并关闭相关点击入口。</span>
+                <span><strong>去掉下载/安装按钮</strong>隐藏 Play Now、Install、Download 等下载或安装按钮，并关闭相关点击入口。</span>
               </label>
               <label class="option">
-                <input id="optRemoveHandGuide" type="checkbox">
-                <span><strong>去掉引导手指（推荐、低风险）</strong></span>
+                <input id="optRemoveDynamicWatermark" type="checkbox">
+                <span><strong>去除动态水印</strong>去掉画面中会移动或变换位置的文字水印。</span>
               </label>
-              <label class="option">
-                <input id="optRemoveBroadGuide" type="checkbox">
-                <span><strong>关闭通用引导逻辑（扩展、高风险）</strong></span>
-              </label>
-              <div class="meta" style="margin-top:10px;line-height:1.6"><strong>区别与建议：</strong>第一项只处理已识别的手指引导；第二项尝试关闭更宽泛的通用引导逻辑，兼容性和误伤风险更高。通常先使用第一项，若仍有其他引导元素，再尝试第二项并预览玩法是否正常。</div>
+              <div class="guide-group">
+                <label class="option">
+                  <input id="optRemoveHandGuide" type="checkbox">
+                  <span><strong>移除引导手指（推荐）</strong>隐藏画面中的手指提示；如果引导会卡住游戏，将自动结束。</span>
+                </label>
+                <label class="option">
+                  <input id="optRemoveBroadGuide" type="checkbox">
+                  <span><strong>跳过卡住操作的其他引导（谨慎）</strong>仅在勾选第一项后，游戏仍然无法操作时使用。</span>
+                </label>
+                <div class="meta guide-advice"><strong>建议：</strong>先只勾选第一项并预览；若仍无法操作，再勾选第二项。</div>
+              </div>
                 </div>
               </div>
 
@@ -1279,14 +1357,14 @@
                 <div class="option-card">
               <label class="option">
                 <input id="optBackground" type="checkbox">
-                <span><strong>背景：更换背景</strong>先改 HTML/相机背景；如果检测到可能是场景背景材质，也可以启用贴图替换尝试。</span>
+                <span><strong>更换普通背景</strong>把背景换成颜色或图片。如果画面没有变化，再尝试下方的备用功能。</span>
               </label>
               <div class="operation-panel">
                 <div class="control-row">
                   <label>背景类型</label>
                   <div class="segmented">
                     <label><input type="radio" name="bgMode" value="color" checked>纯色</label>
-                    <label><input type="radio" name="bgMode" value="texture">图片材质</label>
+                    <label><input type="radio" name="bgMode" value="texture">图片</label>
                   </div>
                 </div>
                 <div class="mode-panel active" id="bgColorPanel">
@@ -1312,11 +1390,11 @@
               </div>
               <label class="option">
                 <input id="optTextureReplace" type="checkbox">
-                <span><strong>强制替换疑似背景贴图</strong>用于背景是场景材质/资源包贴图的试玩。高风险，可能误伤图集或玩法元素，建议先预览再下载。</span>
+                <span><strong>尝试替换游戏内背景（谨慎）</strong>只有普通背景替换无效时才使用。可能会同时改到其他图片，生成后请先预览。</span>
               </label>
               <label class="option">
                 <input id="optVideoBackground" type="checkbox">
-                <span><strong>视频背景：请选择视频背景处理方式</strong>用于背景是一段内嵌 MP4 视频的试玩。可替换为图片、纯色、替换为视频或移除视频背景。</span>
+                <span><strong>处理视频背景</strong>如果试玩背景是一段视频，可以将它移除，或替换成颜色、图片或新视频。</span>
               </label>
               <div class="operation-panel">
                 <div class="control-row">
@@ -1349,9 +1427,9 @@
                 <div class="option-card text-card">
               <label class="option">
                 <input id="optForceLanguage" type="checkbox">
-                <span><strong>文案与语言：强制语言</strong>用于按浏览器语言自动切换文案的试玩。需要在游戏启动前生效。</span>
+                <span><strong>固定显示语言</strong>如果试玩会跟随设备语言自动换文案，可以把它固定为你选择的语言。</span>
               </label>
-              <div class="operation-panel language-panel">
+              <div class="operation-panel language-panel linked-settings" id="languageSettingsPanel">
                 <div class="control-row">
                   <label for="languageSelect">目标语言</label>
                   <select id="languageSelect">
@@ -1371,13 +1449,13 @@
               </div>
               <label class="option">
                 <input id="optHideTextColor" type="checkbox">
-                <span><strong>隐藏常见标题/文案字段</strong>把常见颜色字段透明化。只处理可识别字段，不会自动添加遮罩。</span>
+                <span><strong>隐藏常见标题/文案</strong>隐藏能够确认的标题或文案，不会自动添加遮挡层。</span>
               </label>
               <label class="option">
                 <input id="optOverlayText" type="checkbox">
                 <span><strong>添加覆盖文案</strong>在画面上方叠加自定义文案。是否遮住旧文案由“添加顶部遮罩”单独控制。</span>
               </label>
-              <div class="operation-panel">
+              <div class="operation-panel linked-settings" id="overlaySettingsPanel">
                 <div class="control-row">
                   <label for="overlayText">文案内容</label>
                   <input id="overlayText" type="text" value="99% of people can't solve this!">
@@ -1399,7 +1477,7 @@
                 <input id="optTextMask" type="checkbox">
                 <span><strong>添加顶部遮罩</strong>在画面顶部单独铺一条遮罩。可配合隐藏旧文案或覆盖文案使用，也可以单独使用。</span>
               </label>
-              <div class="operation-panel">
+              <div class="operation-panel linked-settings" id="textMaskSettingsPanel">
                 <div class="control-row">
                   <label for="textMaskColor">遮罩颜色</label>
                   <input id="textMaskColor" type="color" value="#527eaf">
@@ -1416,11 +1494,11 @@
                 <div class="option-card">
               <label class="option">
                 <input id="optRemoveBgm" type="checkbox">
-                <span><strong>去掉背景音乐</strong>保守移除疑似 BGM，尽量保留点击、碰撞、胜利等玩法音效。</span>
+                <span><strong>去掉背景音乐</strong>尽量只关闭持续播放的音乐，保留点击、碰撞、胜利等玩法声音。</span>
               </label>
               <label class="option">
                 <input id="optMuteAllAudio" type="checkbox">
-                <span><strong>强制静音全部音频</strong>高风险，会去掉所有声音，可能误伤玩法反馈音效。</span>
+                <span><strong>关闭全部声音（谨慎）</strong>会去掉所有声音，也可能一起去掉重要的操作反馈。</span>
               </label>
                 </div>
               </div>
@@ -1538,6 +1616,7 @@
     const enterRecordingFullscreenBtn = document.getElementById("enterRecordingFullscreenBtn");
     const closeRecordingBtn = document.getElementById("closeRecordingBtn");
     const clearBtn = document.getElementById("clearBtn");
+    const clearSettingsBtn = document.getElementById("clearSettingsBtn");
     const generateBtn = document.getElementById("generateBtn");
     const downloadAllBtn = document.getElementById("downloadAllBtn");
     const optRedirect = document.getElementById("optRedirect");
@@ -1546,6 +1625,7 @@
     const optRemoveIcon = document.getElementById("optRemoveIcon");
     const optRemoveCta = document.getElementById("optRemoveCta");
     const optRemoveHandGuide = document.getElementById("optRemoveHandGuide");
+    const optRemoveDynamicWatermark = document.getElementById("optRemoveDynamicWatermark");
     const optRemoveBroadGuide = document.getElementById("optRemoveBroadGuide");
     const optRemoveBgm = document.getElementById("optRemoveBgm");
     const optMuteAllAudio = document.getElementById("optMuteAllAudio");
@@ -1556,25 +1636,49 @@
     const videoRequiredError = document.getElementById("videoRequiredError");
     const optForceLanguage = document.getElementById("optForceLanguage");
     const languageSelect = document.getElementById("languageSelect");
+    const languageSettingsPanel = document.getElementById("languageSettingsPanel");
     const optOverlayText = document.getElementById("optOverlayText");
     const overlayText = document.getElementById("overlayText");
     const overlayColor = document.getElementById("overlayColor");
+    const overlaySettingsPanel = document.getElementById("overlaySettingsPanel");
     const textMaskColor = document.getElementById("textMaskColor");
     const textMaskHeight = document.getElementById("textMaskHeight");
+    const textMaskSettingsPanel = document.getElementById("textMaskSettingsPanel");
     const overlaySize = document.getElementById("overlaySize");
     const optCenterTextInMask = document.getElementById("optCenterTextInMask");
     const optHideTextColor = document.getElementById("optHideTextColor");
     const optTextMask = document.getElementById("optTextMask");
+    const modificationOptions = [
+      optRedirect,
+      optCounters,
+      optStoreLinks,
+      optRemoveIcon,
+      optRemoveCta,
+      optRemoveHandGuide,
+      optRemoveDynamicWatermark,
+      optRemoveBroadGuide,
+      optRemoveBgm,
+      optMuteAllAudio,
+      optBackground,
+      optTextureReplace,
+      optVideoBackground,
+      optForceLanguage,
+      optHideTextColor,
+      optOverlayText,
+      optTextMask
+    ];
 
     let textureDataUrl = "";
     let videoDataUrl = "";
     let activeInputIndex = -1;
+    let activePreviewIndex = -1;
     let settingsDefaultsInitialized = false;
     let busyOperation = "";
     let recordingControlsTimer = 0;
     let recordingPreviewActive = false;
     let recordingEnteredFullscreen = false;
     let recordingPreviewClosing = false;
+    let standardPreviewSuspendedForRecording = false;
     let activeRecordingAspect = "9:16";
     let activeRecordingWidth = 1080;
     let activeRecordingHeight = 1920;
@@ -1830,27 +1934,93 @@
       return [...new Set(values)].slice(0, 8);
     }
 
+    function analyzeGuideProfile(content, knownEmbeddedHands) {
+      const directKeywordCount = countMatches(
+        content,
+        /\b(?:handTip|handHint|fingerHint|guideHand|tutorialHand|tapPulseHand|tapHand|pointerHand|tutorialFinger|guideFinger|TutorialHandController|handScale|showHandHint|showHand|handEnabled|fingerHintEnabled|tutorialHandEnabled|guideHandEnabled|tapHandEnabled|pointerHandEnabled)\b/gi
+      );
+      const activeFlagCount = countMatches(
+        content,
+        /(?:handHintEnabled|showHandHint|showHand|handEnabled|enableHand|showFinger|fingerHintEnabled|tutorialHandEnabled|guideHandEnabled|tapHandEnabled|pointerHandEnabled)\s*[:=]\s*(?:true|!0)/gi
+      );
+      const directDomCount = countMatches(
+        content,
+        /\b(?:id|class)\s*=\s*(["'])[^"']*(?:handTip|handHint|fingerHint|guideHand|tutorialHand|tapHand|pointerHand|tutorialFinger|guideFinger)[^"']*\1/gi
+      );
+      const lunaControllerCount = countMatches(content, /\b(?:TutorialHandController|handScale)\b/g);
+      const cocosCompressedCount = countMatches(content, /\bplayableres_zip\b/g);
+      const lunaCompressedCount = Math.min(
+        countMatches(content, /window\._compressedAssets\.push\s*\(/g),
+        countMatches(content, /\b(?:decompressString|decompressArrayBuffer)\s*\(/g)
+      );
+      const evalRuntimeCount = countMatches(content, /(?:window\.)?eval\s*\(/g);
+      const explicitBlockingCount = countMatches(
+        content,
+        /\b(?:startGuide|guideEnd|resumeConveyor|pauseConveyor|tutorialComplete|completeTutorial|finishTutorial)\b/g
+      );
+      const knownAssetCount = Array.isArray(knownEmbeddedHands) ? knownEmbeddedHands.length : 0;
+      const hasDirectEvidence = directKeywordCount > 0 || directDomCount > 0 || lunaControllerCount > 0 || knownAssetCount > 0;
+      const hasCompressedContainer = cocosCompressedCount > 0 || lunaCompressedCount > 0;
+      const signals = [];
+
+      if (directKeywordCount > 0) {
+        signals.push({ label: "外层可读取的手指/引导", count: directKeywordCount, certainty: "direct" });
+      }
+      if (activeFlagCount > 0) {
+        signals.push({ label: "当前开启的引导开关", count: activeFlagCount, certainty: "direct" });
+      }
+      if (directDomCount > 0) {
+        signals.push({ label: "页面上的明确引导", count: directDomCount, certainty: "direct" });
+      }
+      if (knownAssetCount > 0) {
+        signals.push({ label: "已确认的手指图案", count: knownAssetCount, certainty: "direct" });
+      }
+      if (cocosCompressedCount > 0) {
+        signals.push({ label: "藏在游戏内部的引导内容", count: cocosCompressedCount, certainty: "runtime" });
+      }
+      if (lunaCompressedCount > 0) {
+        signals.push({ label: "另一处游戏内部引导内容", count: lunaCompressedCount, certainty: "runtime" });
+      }
+
+      return {
+        signals,
+        directKeywordCount,
+        activeFlagCount,
+        directDomCount,
+        lunaControllerCount,
+        knownAssetCount,
+        cocosCompressedCount,
+        lunaCompressedCount,
+        evalRuntimeCount,
+        explicitBlockingCount,
+        hasDirectEvidence,
+        hasCompressedContainer,
+        requiresPreview: hasCompressedContainer || (!hasDirectEvidence && evalRuntimeCount > 0),
+        blockingCandidate: explicitBlockingCount > 0 || hasCompressedContainer
+      };
+    }
+
     function analyze(content, name) {
       const counters = counterPatterns
         .map(item => ({ ...item, count: countMatches(content, item.re), values: findValues(content, item.key) }))
         .filter(item => item.count > 0);
 
       const redirects = [
-        { label: "window.open", count: countMatches(content, /window\.open/g) },
-        { label: "mraid.open", count: countMatches(content, /mraid\.open/g) },
-        { label: "InstallFullGame", count: countMatches(content, /InstallFullGame/g) },
-        { label: "OpenStore/OpenUrl", count: countMatches(content, /OpenStore|openStore|OpenUrl|openUrl/g) }
+        { label: "常见网页跳转", count: countMatches(content, /window\.open/g) },
+        { label: "常见广告跳转", count: countMatches(content, /mraid\.open/g) },
+        { label: "常见下载跳转", count: countMatches(content, /InstallFullGame/g) },
+        { label: "常见商店跳转", count: countMatches(content, /OpenStore|openStore|OpenUrl|openUrl/g) }
       ].filter(item => item.count > 0);
 
       const storeLinks = [
-        { label: "iosLink", count: countMatches(content, /iosLink:"[^"]*"/g) },
-        { label: "androidLink", count: countMatches(content, /androidLink:"[^"]*"/g) }
+        { label: "iPhone 商店链接", count: countMatches(content, /iosLink:"[^"]*"/g) },
+        { label: "Android 商店链接", count: countMatches(content, /androidLink:"[^"]*"/g) }
       ].filter(item => item.count > 0);
       const audioSignals = [
-        { label: "内嵌音频资源", count: countMatches(content, /data:audio\/(?:mpeg|mp3|ogg|wav|webm|aac)/gi) },
+        { label: "页面里带有声音", count: countMatches(content, /data:audio\/(?:mpeg|mp3|ogg|wav|webm|aac)/gi) },
         { label: "音频文件", count: countMatches(content, /\.(?:mp3|ogg|wav|m4a|aac|webm)["']/gi) },
-        { label: "音乐播放 API", count: countMatches(content, /playMusic|playBGM|playBackgroundMusic|audioEngine\.playMusic/gi) },
-        { label: "音频解锁/上下文", count: countMatches(content, /AudioContext|webkitAudioContext|__PLAYABLE_AUDIO_GUARD__|unlockAudio/gi) }
+        { label: "背景音乐播放功能", count: countMatches(content, /playMusic|playBGM|playBackgroundMusic|audioEngine\.playMusic/gi) },
+        { label: "声音启动控制", count: countMatches(content, /AudioContext|webkitAudioContext|__PLAYABLE_AUDIO_GUARD__|unlockAudio/gi) }
       ].filter(item => item.count > 0);
 
       const directBackground = [
@@ -1869,28 +2039,30 @@
       const canvas2DBackgroundConfig = canvas2DGameConfig && /\bbackground(?:Image|ImageLandscape|Color|Gradient)\s*:/.test(content);
       const canvas2DTextConfig = canvas2DGameConfig && /\b(?:titleText|subtitleText)\s*:/.test(content) && /\.fillText\s*\(/.test(content);
       const textSignals = [
-        { label: "多语言文本切换", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
-        { label: "标题颜色字段", count: countMatches(content, /TextTitleImageColor|titleColor/g) },
-        { label: "文本/图片资源包", count: countMatches(content, /TextMeshPro|font|sprite|atlas/gi) }
+        { label: "内置语言切换", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
+        { label: "标题颜色设置", count: countMatches(content, /TextTitleImageColor|titleColor/g) },
+        { label: "文字或图片素材", count: countMatches(content, /TextMeshPro|font|sprite|atlas/gi) }
       ].filter(item => item.count > 0);
       const adaptiveLanguageSignals = [
-        { label: "多语言切换组件", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g) },
-        { label: "包配置 languages", count: countMatches(content, /\blanguages\s*:\s*\[[^\]]+\]/g) },
-        { label: "系统语言 locale", count: countMatches(content, /navigator\.language|locale\s*:\s*\(?\s*navigator\.language/gi) },
-        { label: "常见语言键表", count: countMatches(content, /["'](?:en|zh|ja|ko|de|fr|es|pt|it|ru|tr|ar|id|th|vi)["']\s*:/g) }
+        { label: "内置语言切换", count: countMatches(content, /MLT_TextSwitch|MLT_ImageSwitch/g), kind: "direct" },
+        { label: "语言选择列表", count: countMatches(content, /\blanguages\s*:\s*\[[^\]]+\]/g), kind: "direct" },
+        { label: "跟随设备语言", count: countMatches(content, /navigator\.language|locale\s*:\s*\(?\s*navigator\.language/gi), kind: "direct" },
+        { label: "多种语言文案", count: countMatches(content, /["'](?:en|zh|ja|ko|de|fr|es|pt|it|ru|tr|ar|id|th|vi)["']\s*:/g), kind: "direct" },
+        { label: "可能会跟随设备语言", count: countMatches(content, /\bplayableres_zip\b/g), kind: "compressedCocos" }
       ].filter(item => item.count > 0);
       const knownEmbeddedHands = inspectKnownEmbeddedHandAssets(content);
       const ctaIconSignals = [
-        { label: "icon/logo 图标", count: countMatches(content, /\b(?:gameLogo|appLogo|appIcon|storeIcon|showLogo|logoImageUrl)\b/gi) },
-        { label: "CTA 按钮", count: countMatches(content, /\b(?:persistentCta|persistentCTA|ctaBtn|ctaButton|showPersistentCTA|Play Now|Install|Download)\b/gi) }
+        { label: "应用图标或 Logo", count: countMatches(content, /\b(?:gameLogo|appLogo|appIcon|storeIcon|showLogo|logoImageUrl)\b/gi) },
+        { label: "下载或安装按钮", count: countMatches(content, /\b(?:persistentCta|persistentCTA|ctaBtn|ctaButton|showPersistentCTA|Play Now|Install|Download)\b/gi) }
       ].filter(item => item.count > 0);
-      const guideSignals = [
-        { label: "hand/finger 手指相关", count: countMatches(content, /\b(?:handTip|handHint|finger|guideHand|tutorialHand|tapPulseHand|TutorialHandController|handScale|showHandHint|showHand|handEnabled|fingerHintEnabled|tutorialHandEnabled|guideHandEnabled|tapHandEnabled|pointerHandEnabled)\b/gi) },
-        { label: "通用引导相关逻辑", count: countMatches(content, /\b(?:guideEnabled|showGuide|showHint|hintEnabled|tutorialEnabled|showTutorial|pointerGuideEnabled|enableRoundArrowHead|enableArrowSameWidthAsLine|enableArcPolyline|enableTailSwing|enableEntryAnimation|enableEntryVideo)\b/gi) },
-        { label: "已识别的 Luna 内嵌手势贴图", count: knownEmbeddedHands.length }
+      const guideProfile = analyzeGuideProfile(content, knownEmbeddedHands);
+      const guideSignals = guideProfile.signals;
+      const watermarkSignals = [
+        { label: "水印相关内容", count: countMatches(content, /\b(?:watermark_d|dynamicWatermark|watermarkDynamic|watermarkLayer|watermarkLabel|watermarkText|showWatermark|watermarkEnabled|enableWatermark)\b/gi) },
+        { label: "可能包含动态水印", count: countMatches(content, /\bplayableres_zip\b/g) }
       ].filter(item => item.count > 0);
 
-      return { counters, redirects, storeLinks, audioSignals, directBackground, cssBlackCount, backVideoCount, dataVideoCount, hasCanvas, hasDataBlob, likelyTextureBackground, canvas2DBackgroundConfig, canvas2DTextConfig, textSignals, adaptiveLanguageSignals, ctaIconSignals, guideSignals, knownEmbeddedHands };
+      return { counters, redirects, storeLinks, audioSignals, directBackground, cssBlackCount, backVideoCount, dataVideoCount, hasCanvas, hasDataBlob, likelyTextureBackground, canvas2DBackgroundConfig, canvas2DTextConfig, textSignals, adaptiveLanguageSignals, ctaIconSignals, guideSignals, guideProfile, watermarkSignals, knownEmbeddedHands };
     }
 
     function makeFallbackAnalysis(content, error) {
@@ -1914,6 +2086,23 @@
         adaptiveLanguageSignals: [],
         ctaIconSignals: [],
         guideSignals: [],
+        guideProfile: {
+          signals: [],
+          directKeywordCount: 0,
+          activeFlagCount: 0,
+          directDomCount: 0,
+          lunaControllerCount: 0,
+          knownAssetCount: 0,
+          cocosCompressedCount: 0,
+          lunaCompressedCount: 0,
+          evalRuntimeCount: 0,
+          explicitBlockingCount: 0,
+          hasDirectEvidence: false,
+          hasCompressedContainer: false,
+          requiresPreview: false,
+          blockingCandidate: false
+        },
+        watermarkSignals: [],
         knownEmbeddedHands: [],
         analysisError: error && error.message ? error.message : String(error || "未知错误")
       };
@@ -1994,9 +2183,9 @@
           found++;
           fileFound++;
           fileCards.push(makeDetectCard(
-            "检测兼容提示",
-            "部分检测失败",
-            "完整检测发生异常，但基础检测结果仍会继续显示。错误：" + escapeHtml(a.analysisError),
+            "检测提醒",
+            "部分内容没有识别",
+            "有一部分内容没有看懂，但其他检测结果仍会继续显示。详细信息：" + escapeHtml(a.analysisError),
             "warn"
           ));
         }
@@ -2005,20 +2194,20 @@
           anyRedirect = true;
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("跳转平台", "可关闭", a.redirects.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), ""));
+          fileCards.push(makeDetectCard("自动跳转", "可阻止", a.redirects.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), ""));
         }
 
         if (a.counters.length) {
           anyCounters = true;
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("试玩次数/结束条件", "可延长", a.counters.map(x => `${escapeHtml(x.label)} ${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("<br>"), ""));
+          fileCards.push(makeDetectCard("试玩次数/结束条件", "可延长", a.counters.map(x => `${escapeHtml(x.label)}：发现 ${x.count} 处设置`).join("<br>"), ""));
         }
 
         if (a.storeLinks.length) {
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("商店链接", "可清空", a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
+          fileCards.push(makeDetectCard("商店链接", "可停用", a.storeLinks.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，"), "warn"));
         }
 
         if (a.ctaIconSignals && a.ctaIconSignals.length) {
@@ -2026,9 +2215,21 @@
           fileFound++;
           const ctaIconLabels = a.ctaIconSignals.map(x => escapeHtml(x.label) + " × " + x.count).join("、");
           fileCards.push(makeDetectCard(
-            "CTA / icon",
+            "应用图标和下载按钮",
             "可清理",
-            "检测到相关信号：" + ctaIconLabels + "<br>可分别使用“去掉 icon 图标”和“去掉 CTA 按钮”。",
+            "检测到相关内容：" + ctaIconLabels + "<br>可分别使用“去掉应用图标或 Logo”和“去掉下载/安装按钮”。",
+            ""
+          ));
+        }
+
+        if (a.watermarkSignals && a.watermarkSignals.length) {
+          found++;
+          fileFound++;
+          const watermarkLabels = a.watermarkSignals.map(x => escapeHtml(x.label) + " × " + x.count).join("、");
+          fileCards.push(makeDetectCard(
+            "动态水印",
+            "可处理",
+            "发现：" + watermarkLabels + "<br>勾选“去除动态水印”，即可去掉画面中会移动或变换位置的文字水印。",
             ""
           ));
         }
@@ -2037,11 +2238,21 @@
           found++;
           fileFound++;
           const guideLabels = a.guideSignals.map(x => escapeHtml(x.label) + " × " + x.count).join("、");
+          const guideProfile = a.guideProfile || {};
+          const hasDirectGuide = !!guideProfile.hasDirectEvidence;
+          const guideStatus = hasDirectGuide ? "可处理" : "需预览";
+          const guideTone = hasDirectGuide ? "" : "warn";
+          const guideAdvice = hasDirectGuide
+            ? "建议先勾选“移除引导手指”，隐藏提示点击或滑动的手指动画。"
+            : "发现游戏内部可能包含引导内容。勾选“移除引导手指”后，工具会尝试处理，请在预览中检查效果。";
+          const blockingAdvice = guideProfile.blockingCandidate
+            ? "<br>如果游戏仍被遮挡、暂停或无法操作，再勾选第二项重新生成。"
+            : "";
           fileCards.push(makeDetectCard(
-            "引导手指 / 引导逻辑",
-            "可处理",
-            "检测到相关信号：" + guideLabels + "<br>先使用低风险的“去掉引导手指”；若仍有其他引导元素，再尝试“关闭通用引导逻辑”并预览玩法是否正常。",
-            ""
+            "引导内容",
+            guideStatus,
+            "发现：" + guideLabels + "<br>" + guideAdvice + blockingAdvice,
+            guideTone
           ));
         }
 
@@ -2049,9 +2260,9 @@
           found++;
           fileFound++;
           fileCards.push(makeDetectCard(
-            "背景音乐/音频",
+            "背景音乐/声音",
             "可处理",
-            a.audioSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>可尝试“去掉背景音乐”保留玩法音效；如果必须完全无声，再使用“强制静音全部音频”。",
+            a.audioSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>可尝试“去掉背景音乐”保留玩法声音；如果必须完全无声，再使用“关闭全部声音”。",
             "warn"
           ));
         }
@@ -2060,10 +2271,10 @@
           found++;
           fileFound++;
           const parts = [];
-          if (a.directBackground.length) parts.push("检测到 Unity/相机背景字段：" + a.directBackground.map(x => `${escapeHtml(x.key)} = ${escapeHtml(x.values.join(" / "))}`).join("，"));
-          if (a.canvas2DBackgroundConfig) parts.push("检测到 Canvas 2D GameConfig 背景，现有背景功能可直接修改。");
-          if (a.cssBlackCount) parts.push("检测到 HTML/CSS 黑色背景 × " + a.cssBlackCount);
-          if (a.hasCanvas && !a.canvas2DBackgroundConfig) parts.push("检测到游戏画布，可尝试注入页面背景和 WebGL 清屏色。");
+          if (a.directBackground.length) parts.push("检测到可直接修改的游戏背景设置。");
+          if (a.canvas2DBackgroundConfig) parts.push("检测到可直接修改的背景图片或颜色。");
+          if (a.cssBlackCount) parts.push("检测到页面底色 × " + a.cssBlackCount);
+          if (a.hasCanvas && !a.canvas2DBackgroundConfig) parts.push("检测到游戏画面，可以先尝试普通背景修改；如果没有变化，再使用“尝试替换游戏内背景（谨慎）”。");
           const directBackgroundSupported = a.directBackground.length || a.canvas2DBackgroundConfig;
           fileCards.push(makeDetectCard("背景颜色", directBackgroundSupported ? "可直接改" : "可尝试", parts.join("<br>"), directBackgroundSupported ? "" : "warn"));
         }
@@ -2072,7 +2283,7 @@
           anyTextureBg = true;
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("场景背景贴图/材质", "谨慎尝试", "这个试玩像是把背景放在 Unity 资源包 `data.blob` 里，普通背景色可能改不到。贴图替换可能误伤玩法元素，请手动勾选并先看预览。", "warn"));
+          fileCards.push(makeDetectCard("游戏内背景", "谨慎尝试", "这个试玩的背景可能藏在游戏内部，普通背景功能不一定改得到。备用替换功能可能影响其他图片，请手动勾选并先看预览。", "warn"));
         }
 
         if (a.backVideoCount || a.dataVideoCount) {
@@ -2080,25 +2291,33 @@
           found++;
           fileFound++;
           const detail = a.backVideoCount
-            ? `检测到 backVideo 内嵌视频 × ${a.backVideoCount}，这类背景需要用“视频背景”功能处理。`
-            : `检测到内嵌视频资源 × ${a.dataVideoCount}，可能是视频背景或开场视频。`;
+            ? `检测到明确的视频背景 × ${a.backVideoCount}，可以使用“视频背景”功能处理。`
+            : `检测到视频 × ${a.dataVideoCount}，可能是背景，也可能是开场画面，请先预览确认。`;
           fileCards.push(makeDetectCard("视频背景", a.backVideoCount ? "可处理" : "需确认", detail, a.backVideoCount ? "" : "warn"));
         }
 
         found++;
         fileFound++;
         if (a.adaptiveLanguageSignals && a.adaptiveLanguageSignals.length) {
+          const directLanguageSignals = a.adaptiveLanguageSignals.filter(item => item.kind !== "compressedCocos");
+          const compressedCocosSignals = a.adaptiveLanguageSignals.filter(item => item.kind === "compressedCocos");
+          const languageLabels = a.adaptiveLanguageSignals
+            .map(x => `${escapeHtml(x.label)} × ${x.count}`)
+            .join("，");
+          const compressedOnly = compressedCocosSignals.length > 0 && directLanguageSignals.length === 0;
           fileCards.push(makeDetectCard(
-            "自适应多语言",
-            "疑似包含",
-            a.adaptiveLanguageSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>检测到语言切换或语言键，请结合预览确认是否会按系统语言自适应。",
+            "自动切换语言",
+            compressedOnly ? "可以修改" : "可能支持",
+            compressedOnly
+              ? "这个试玩可能会跟随设备语言切换文案。可以使用“固定显示语言”，生成后预览确认即可。"
+              : languageLabels + "<br>发现语言切换设置，请通过预览确认是否会跟随设备语言。",
             "neutral"
           ));
         } else {
           fileCards.push(makeDetectCard(
-            "自适应多语言",
-            "未包含",
-            "未检测到 MLT_TextSwitch / MLT_ImageSwitch、语言/地区参数或常见多语言键。这个试玩大概率没有内置自适应多语言。",
+            "自动切换语言",
+            "没有发现",
+            "没有发现内置语言切换或常见语言设置。这个试玩大概率不会自动跟随设备语言。",
             "neutral"
           ));
         }
@@ -2106,11 +2325,11 @@
         if (a.canvas2DTextConfig) {
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("文案/语言", "可处理", "检测到 Canvas 2D GameConfig 标题/副标题。可使用现有的“隐藏常见标题/文案字段”和“添加覆盖文案”。", ""));
+          fileCards.push(makeDetectCard("文案/语言", "可处理", "检测到可直接修改的标题或副标题。可以使用“隐藏常见标题/文案”和“添加覆盖文案”。", ""));
         } else if (a.textSignals.length) {
           found++;
           fileFound++;
-          fileCards.push(makeDetectCard("文案/语言", "需要拆资源", a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这类通常不是 DOM 文本，常见情况是多语言图集或 Unity 文本组件。", "neutral"));
+          fileCards.push(makeDetectCard("文案/语言", "需要单独处理素材", a.textSignals.map(x => `${escapeHtml(x.label)} × ${x.count}`).join("，") + "<br>这些文字可能藏在游戏画面或图片里，无法像普通网页文字一样直接修改，通常需要单独处理素材。", "neutral"));
         }
 
         cards.push(`
@@ -2246,25 +2465,36 @@
       return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
-    function patchBooleanConfig(content, keys, enabled) {
+    function trackBooleanReplacement(match, prefix, current, suffix, replacement, tracker) {
+      if (current === replacement) return match;
+      if (tracker) tracker.count = (tracker.count || 0) + 1;
+      return prefix + replacement + (suffix || "");
+    }
+
+    function patchBooleanConfig(content, keys, enabled, tracker) {
       const replacement = enabled ? "true" : "false";
       for (const key of keys) {
         const escaped = escapeForRegExp(key);
-        content = content.replace(new RegExp('((?:["\\\']?' + escaped + '["\\\']?)\\s*:\\s*)true', "g"), "$1" + replacement);
-        content = content.replace(new RegExp('((?:["\\\']?' + escaped + '["\\\']?)\\s*:\\s*)false', "g"), "$1" + replacement);
-        content = content.replace(new RegExp('("' + escaped + '"\\s*:\\["boolean",)(?:true|false)(\\])', "g"), "$1" + replacement + "$2");
+        content = content.replace(
+          new RegExp('((?:["\\\']?' + escaped + '["\\\']?)\\s*:\\s*)(true|false)', "g"),
+          (match, prefix, current) => trackBooleanReplacement(match, prefix, current, "", replacement, tracker)
+        );
+        content = content.replace(
+          new RegExp('("' + escaped + '"\\s*:\\["boolean",)(true|false)(\\])', "g"),
+          (match, prefix, current, suffix) => trackBooleanReplacement(match, prefix, current, suffix, replacement, tracker)
+        );
       }
       return content;
     }
 
-    function patchBooleanAssignments(content, keys, enabled) {
+    function patchBooleanAssignments(content, keys, enabled, tracker) {
       const replacement = enabled ? "true" : "false";
       const roots = "(?:window\\.)?(?:CustomGameData|GameConfig|gameConfig|config|LunaConfig|playableConfig)";
       for (const key of keys) {
         const escaped = escapeForRegExp(key);
         content = content.replace(
-          new RegExp('(\\b' + roots + '(?:\\.[A-Za-z_$][\\w$]*)*\\.' + escaped + '\\s*=\\s*)(?:true|false)', "g"),
-          "$1" + replacement
+          new RegExp('(\\b' + roots + '(?:\\.[A-Za-z_$][\\w$]*)*\\.' + escaped + '\\s*=\\s*)(true|false)', "g"),
+          (match, prefix, current) => trackBooleanReplacement(match, prefix, current, "", replacement, tracker)
         );
       }
       return content;
@@ -2277,7 +2507,7 @@
       const hasOverrides = /window\.playgroundOverrides\s*=\s*\{/.test(content);
       if (!hasOverrides) return { content, changed: false, mode: "none" };
 
-      const hasController = /"TutorialHandController"\s*:/.test(content);
+      const hasController = /["']?TutorialHandController["']?\s*:/.test(content);
       if (hasController) {
         if (scalePattern.test(content)) {
           scalePattern.lastIndex = 0;
@@ -2292,17 +2522,34 @@
         }
         return { content, changed: content !== original, mode: "patched" };
       }
+      return { content, changed: false, mode: "none" };
+    }
 
-      const emptyOverrides = /window\.playgroundOverrides\s*=\s*\{\s*\}/;
-      if (emptyOverrides.test(content)) {
-        content = content.replace(emptyOverrides, 'window.playgroundOverrides = {"TutorialHandController":{' + scaleValue + '}}');
-      } else {
-        content = content.replace(/(window\.playgroundOverrides\s*=\s*\{)/, '$1"TutorialHandController":{' + scaleValue + '},');
-      }
-      return { content, changed: content !== original, mode: "injected" };
+    function patchLunaCompressedRuntimeLoaders(content) {
+      let count = 0;
+      const runtimeLoaderPattern = /(decompressString\(\s*"(?:\\[\s\S]|[^"\\])*"\s*,\s*(?:true|false)\s*\)\.then\(\s*function\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{\s*window\.eval\(\s*)\2(\s*\)\s*;?\s*\}\s*\))/g;
+      content = content.replace(runtimeLoaderPattern, (match, prefix, codeName, suffix) => {
+        count++;
+        return prefix +
+          "(window.__codexGuideSourcePatch ? window.__codexGuideSourcePatch(" +
+          codeName +
+          ") : " +
+          codeName +
+          ")" +
+          suffix;
+      });
+      return { content, count };
     }
 
     function patchUiCleanupSource(content, options) {
+      const report = {
+        icon: { count: 0 },
+        cta: { count: 0 },
+        hand: { count: 0 },
+        watermark: { count: 0 },
+        blockingGuide: { count: 0 },
+        autoEndedGuide: { count: 0 }
+      };
       if (options.hideIcon) {
         const iconKeys = [
           "showLogo",
@@ -2312,8 +2559,8 @@
           "iconEnabled",
           "showAppIcon"
         ];
-        content = patchBooleanConfig(content, iconKeys, false);
-        content = patchBooleanAssignments(content, iconKeys, false);
+        content = patchBooleanConfig(content, iconKeys, false, report.icon);
+        content = patchBooleanAssignments(content, iconKeys, false, report.icon);
       }
       if (options.hideCta) {
         const ctaKeys = [
@@ -2326,8 +2573,8 @@
           "ctaEnabled",
           "tapRedirectEnabled"
         ];
-        content = patchBooleanConfig(content, ctaKeys, false);
-        content = patchBooleanAssignments(content, ctaKeys, false);
+        content = patchBooleanConfig(content, ctaKeys, false, report.cta);
+        content = patchBooleanAssignments(content, ctaKeys, false, report.cta);
       }
       if (options.removeHand) {
         const handKeys = [
@@ -2343,9 +2590,38 @@
           "tapHandEnabled",
           "pointerHandEnabled"
         ];
-        content = patchBooleanConfig(content, handKeys, false);
-        content = patchBooleanAssignments(content, handKeys, false);
-        content = content.replace(/\{\s*fn:\s*\(\)\s*=>\s*loadImg\(dom\.handTip,\s*GameConfig\.handImageUrl\)\s*\}/g, "{ fn: () => Promise.resolve() }");
+        content = patchBooleanConfig(content, handKeys, false, report.hand);
+        content = patchBooleanAssignments(content, handKeys, false, report.hand);
+        content = content.replace(
+          /\{\s*fn:\s*\(\)\s*=>\s*loadImg\(dom\.handTip,\s*GameConfig\.handImageUrl\)\s*\}/g,
+          match => {
+            report.hand.count++;
+            return "{ fn: () => Promise.resolve() }";
+          }
+        );
+        content = content.replace(
+          /([A-Za-z_$][\w$]*\.startGuide\s*=\s*function\(\)\s*\{)this\.finger\.active\s*=\s*!0\s*,\s*this\.node\.getChildByName\((["'])mask\2\)\.active\s*=\s*!0\s*,\s*this\.moveFinger\(\)\s*\}/g,
+          (match, start) => {
+            report.hand.count++;
+            report.autoEndedGuide.count++;
+            return start + "this.guideEnd&&setTimeout(this.guideEnd.bind(this),0)}";
+          }
+        );
+        content = content.replace(
+          /([A-Za-z_$][\w$]*\.emit\()([A-Za-z_$][\w$]*)\.StartGuide(\),)([A-Za-z_$][\w$]*)\.pauseConveyor\(\),\4\.canTouch\s*=\s*!0/g,
+          "$1$2.GuideEnd$3$4.resumeConveyor(),$4.canTouch=!0"
+        );
+      }
+      if (options.removeWatermark) {
+        const watermarkKeys = [
+          "showWatermark",
+          "watermarkEnabled",
+          "enableWatermark",
+          "dynamicWatermarkEnabled",
+          "showDynamicWatermark"
+        ];
+        content = patchBooleanConfig(content, watermarkKeys, false, report.watermark);
+        content = patchBooleanAssignments(content, watermarkKeys, false, report.watermark);
       }
       if (options.removeBroadGuide) {
         const broadGuideKeys = [
@@ -2355,18 +2631,22 @@
           "hintEnabled",
           "tutorialEnabled",
           "showTutorial",
-          "pointerGuideEnabled",
-          "enableRoundArrowHead",
-          "enableArrowSameWidthAsLine",
-          "enableArcPolyline",
-          "enableTailSwing",
-          "enableEntryAnimation",
-          "enableEntryVideo"
+          "pointerGuideEnabled"
         ];
-        content = patchBooleanConfig(content, broadGuideKeys, false);
-        content = patchBooleanAssignments(content, broadGuideKeys, false);
+        content = patchBooleanConfig(content, broadGuideKeys, false, report.blockingGuide);
+        content = patchBooleanAssignments(content, broadGuideKeys, false, report.blockingGuide);
       }
-      return content;
+      return {
+        content,
+        report: {
+          icon: report.icon.count,
+          cta: report.cta.count,
+          hand: report.hand.count,
+          watermark: report.watermark.count,
+          blockingGuide: report.blockingGuide.count,
+          autoEndedGuide: report.autoEndedGuide.count
+        }
+      };
     }
 
     function makeUiCleanupPatch(options) {
@@ -2406,23 +2686,32 @@
       const handSelectors = options.removeHand ? [
         "#handTip",
         "#handHint",
-        "#hand",
-        "#finger",
+        "#fingerHint",
         "#guideHand",
         "#tutorialHand",
+        "#tapHand",
+        "#pointerHand",
+        "#tutorialFinger",
+        "#guideFinger",
         ".hand-tip",
         ".hand-hint",
+        ".finger-hint",
         ".guide-hand",
         ".tutorial-hand",
-        ".finger",
-        "img[id*='hand' i]",
-        "img[class*='hand' i]",
-        "img[id*='finger' i]",
-        "img[class*='finger' i]",
-        "[id*='tutorialHand' i]",
-        "[class*='tutorial-hand' i]",
-        "[id*='guideHand' i]",
-        "[class*='guide-hand' i]"
+        "[id='handTip' i]",
+        "[id='handHint' i]",
+        "[id='fingerHint' i]",
+        "[id='guideHand' i]",
+        "[id='tutorialHand' i]",
+        "[id='tapHand' i]",
+        "[id='pointerHand' i]",
+        "[id='tutorialFinger' i]",
+        "[id='guideFinger' i]",
+        "[class~='hand-tip' i]",
+        "[class~='hand-hint' i]",
+        "[class~='finger-hint' i]",
+        "[class~='guide-hand' i]",
+        "[class~='tutorial-hand' i]"
       ] : [];
       const selectors = [...iconSelectors, ...ctaSelectors, ...handSelectors];
       const textMatchers = options.hideCta ? [
@@ -2471,7 +2760,38 @@ ${hideSelectors.join(",\n")} {
   var hideCta = ${options.hideCta ? "true" : "false"};
   var removeHand = ${options.removeHand ? "true" : "false"};
   var removeBroadGuide = ${options.removeBroadGuide ? "true" : "false"};
+  var compressedCocosGuide = ${options.guideProfile && options.guideProfile.cocosCompressedCount > 0 ? "true" : "false"};
+  var compressedLunaGuide = ${options.guideProfile && options.guideProfile.lunaCompressedCount > 0 ? "true" : "false"};
+  var hasLunaHandController = ${options.guideProfile && options.guideProfile.lunaControllerCount > 0 ? "true" : "false"};
   var selectorQuery = selectors.join(",");
+  var guideRuntimeStats = window.__codexGuideRuntimeStatsV137 || {
+    sourcePatches: 0,
+    assetNodes: 0,
+    sceneNodes: 0,
+    blockingGuides: 0
+  };
+  window.__codexGuideRuntimeStatsV137 = guideRuntimeStats;
+  var guideReportTimer = 0;
+  var exactCocosGuideHandled = false;
+  function scheduleGuideRuntimeReport(){
+    try {
+      if (guideReportTimer) clearTimeout(guideReportTimer);
+      guideReportTimer = setTimeout(function(){
+        guideReportTimer = 0;
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: "codex-guide-runtime-report-v137",
+            stats: {
+              sourcePatches: guideRuntimeStats.sourcePatches || 0,
+              assetNodes: guideRuntimeStats.assetNodes || 0,
+              sceneNodes: guideRuntimeStats.sceneNodes || 0,
+              blockingGuides: guideRuntimeStats.blockingGuides || 0
+            }
+          }, "*");
+        }
+      }, 30);
+    } catch(e) {}
+  }
   function hideElement(el){
     if (!el || !el.setAttribute || el.getAttribute("data-codex-ui-hidden") === "true") return;
     try {
@@ -2527,15 +2847,18 @@ ${hideSelectors.join(",\n")} {
     if (!obj) return;
     [
       "guideEnabled","showGuide","showHint","hintEnabled",
-      "tutorialEnabled","showTutorial","pointerGuideEnabled",
-      "enableRoundArrowHead","enableArrowSameWidthAsLine",
-      "enableArcPolyline","enableTailSwing","enableEntryAnimation","enableEntryVideo"
+      "tutorialEnabled","showTutorial","pointerGuideEnabled"
     ].forEach(function(key){ setBool(obj, key, false); });
   }
   function patchConfig(){
-    var cfg = window.GameConfig || window.gameConfig || window.config || null;
-    var custom = window.CustomGameData || null;
-    if (cfg) {
+    [
+      window.GameConfig,
+      window.gameConfig,
+      window.config,
+      window.LunaConfig,
+      window.playableConfig
+    ].forEach(function(cfg){
+      if (!cfg) return;
       if (hideIcon && cfg.ui) {
         ["showLogo","showGameLogo","logoEnabled","showIcon","iconEnabled","showAppIcon"].forEach(function(key){ setBool(cfg.ui, key, false); });
       }
@@ -2555,7 +2878,8 @@ ${hideSelectors.join(",\n")} {
         patchBroadGuideFlags(cfg.tutorial);
         patchBroadGuideFlags(cfg.hint);
       }
-    }
+    });
+    var custom = window.CustomGameData || null;
     if (custom) {
       if (removeHand) {
         patchHandFlags(custom);
@@ -2574,10 +2898,11 @@ ${hideSelectors.join(",\n")} {
     }
   }
   function patchLunaOverrides(){
-    if (!removeHand) return;
+    if (!removeHand || !hasLunaHandController) return;
     try {
-      var overrides = window.playgroundOverrides || (window.playgroundOverrides = {});
-      var controller = overrides.TutorialHandController || (overrides.TutorialHandController = {});
+      var overrides = window.playgroundOverrides;
+      var controller = overrides && overrides.TutorialHandController;
+      if (!controller) return;
       controller.handScale = ["vector3",0,0,0];
     } catch(e) {}
   }
@@ -2588,22 +2913,89 @@ ${hideSelectors.join(",\n")} {
       "showFinger","showGuideHand","scheduleGuideHand","showTutorialHand","showTapHand",
       "scheduleTapHand","startHandTutorial","playHandAnimation"
     ].forEach(function(name){
-      try { window[name] = function(){ return null; }; } catch(e) {}
+      try {
+        if (typeof window[name] === "function") window[name] = function(){ return null; };
+      } catch(e) {}
     });
   }
+  function normalizeGuideName(value){
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+  function getGuideParent(node){
+    return node && (node.parent || node._parent || node.parentEntity || null);
+  }
+  function hasGuideAncestor(node){
+    var parent = getGuideParent(node);
+    var depth = 0;
+    while (parent && depth++ < 8) {
+      var name = normalizeGuideName(parent.name);
+      if (/(?:guide|tutorial|hint|pointer|onboarding|helplayer|instruction)/.test(name)) return true;
+      if (/(?:bip|bone|skeleton|armature)/.test(name)) return false;
+      parent = getGuideParent(parent);
+    }
+    return false;
+  }
   function isGuideNode(node){
-    var name = String((node && node.name) || "");
-    return /hand|finger|tutorialhand|guidehand|taphand|handguide|fingerhint/i.test(name);
+    var rawName = String((node && node.name) || "");
+    var name = normalizeGuideName(rawName);
+    if (/^(?:handtip|handhint|fingerhint|tutorialhand|guidehand|taphand|handguide|pointerhand|tutorialfinger|guidefinger)$/.test(name)) return true;
+    if (/^finger[-_ ]\\d{3}$/i.test(rawName) && hasGuideAncestor(node)) return true;
+    if (/^(?:finger|hand|pointer)\\d*$/i.test(rawName) && hasGuideAncestor(node)) return true;
+    return false;
+  }
+  function nodeChildren(node){
+    var children = node && (node.children || node._children);
+    return children && typeof children.length === "number" ? children : [];
+  }
+  function disableOwnGuideRenderers(node){
+    var changed = false;
+    try {
+      var components = node && (node._components || node.components) || [];
+      for (var i = 0; i < components.length; i++) {
+        var component = components[i];
+        var typeName = String(
+          component && component.__classname__ ||
+          component && component.constructor && component.constructor.name ||
+          ""
+        );
+        if (!/(?:sprite|image|graphics|label|render|element)/i.test(typeName)) continue;
+        if ("enabled" in component && component.enabled !== false) {
+          component.enabled = false;
+          changed = true;
+        }
+      }
+    } catch(e) {}
+    return changed;
   }
   function hideGuideNode(node){
-    if (!isGuideNode(node)) return;
-    try { node.active = false; } catch(e) {}
-    try { node.opacity = 0; } catch(e) {}
+    if (exactCocosGuideHandled || !isGuideNode(node) || node.__codexGuideVisualHiddenV137) return false;
+    var children = nodeChildren(node);
+    var changed = disableOwnGuideRenderers(node);
+    if (!children.length) {
+      try {
+        if (node.active !== false) {
+          node.active = false;
+          changed = true;
+        }
+      } catch(e) {}
+      try {
+        if (typeof node.opacity === "number" && node.opacity !== 0) {
+          node.opacity = 0;
+          changed = true;
+        }
+      } catch(e) {}
+    }
+    if (changed) {
+      try { node.__codexGuideVisualHiddenV137 = true; } catch(e) {}
+      guideRuntimeStats.sceneNodes++;
+      scheduleGuideRuntimeReport();
+    }
+    return changed;
   }
   function patchCocosNodeApi(){
-    if (!removeHand) return;
+    if (!removeHand || exactCocosGuideHandled) return;
     try {
-      if (!window.cc || !cc.Node || !cc.Node.prototype || cc.Node.prototype.__codexGuidePatchV134) return;
+      if (!window.cc || !cc.Node || !cc.Node.prototype || cc.Node.prototype.__codexGuidePatchV137) return;
       var proto = cc.Node.prototype;
       var addChild = proto.addChild;
       if (typeof addChild === "function") {
@@ -2621,57 +3013,87 @@ ${hideSelectors.join(",\n")} {
           return result;
         };
       }
-      proto.__codexGuidePatchV134 = true;
+      proto.__codexGuidePatchV137 = true;
     } catch(e) {}
     try {
-      if (window.cc && typeof cc.instantiate === "function" && !cc.__codexInstantiateGuidePatchV134) {
+      if (window.cc && typeof cc.instantiate === "function" && !cc.__codexInstantiateGuidePatchV137) {
         var instantiate = cc.instantiate;
         cc.instantiate = function(){
           var node = instantiate.apply(this, arguments);
           hideGuideNode(node);
           return node;
         };
-        cc.__codexInstantiateGuidePatchV134 = true;
+        cc.__codexInstantiateGuidePatchV137 = true;
       }
     } catch(e) {}
   }
   function patchCocosGuideNodes(){
-    if (!removeHand) return;
+    if (!removeHand || exactCocosGuideHandled) return;
     try {
       if (!window.cc || !cc.director || !cc.director.getScene) return;
       var scene = cc.director.getScene();
       function walk(node){
         if (!node) return;
         hideGuideNode(node);
-        var children = node.children || [];
+        var children = nodeChildren(node);
         for (var i = 0; i < children.length; i++) walk(children[i]);
       }
       walk(scene);
     } catch(e) {}
   }
   function hidePlayCanvasGuideEntity(entity){
-    if (!isGuideNode(entity)) return;
-    try { entity.enabled = false; } catch(e) {}
-    try { if (entity.element) entity.element.opacity = 0; } catch(e) {}
-    try { if (entity.render) entity.render.enabled = false; } catch(e) {}
-    try { if (entity.model) entity.model.enabled = false; } catch(e) {}
+    if (!isGuideNode(entity) || entity.__codexGuideVisualHiddenV137) return false;
+    var children = nodeChildren(entity);
+    var changed = false;
+    try {
+      if (entity.element && entity.element.opacity !== 0) {
+        entity.element.opacity = 0;
+        changed = true;
+      }
+    } catch(e) {}
+    try {
+      if (entity.render && entity.render.enabled !== false) {
+        entity.render.enabled = false;
+        changed = true;
+      }
+    } catch(e) {}
+    try {
+      if (entity.model && entity.model.enabled !== false) {
+        entity.model.enabled = false;
+        changed = true;
+      }
+    } catch(e) {}
+    if (!children.length) {
+      try {
+        if (entity.enabled !== false) {
+          entity.enabled = false;
+          changed = true;
+        }
+      } catch(e) {}
+    }
+    if (changed) {
+      try { entity.__codexGuideVisualHiddenV137 = true; } catch(e) {}
+      guideRuntimeStats.sceneNodes++;
+      scheduleGuideRuntimeReport();
+    }
+    return changed;
   }
   function patchPlayCanvasGuideNodes(){
     if (!removeHand) return;
     try {
       var pcApp = window.app && (window.app.app || window.app);
       var root = pcApp && (pcApp.root || (pcApp.app && pcApp.app.root));
-      if (!root) return;
-      function walk(entity){
-        if (!entity) return;
-        hidePlayCanvasGuideEntity(entity);
-        var children = entity.children || [];
-        for (var i = 0; i < children.length; i++) walk(children[i]);
+      if (root) {
+        (function walk(entity){
+          if (!entity) return;
+          hidePlayCanvasGuideEntity(entity);
+          var children = nodeChildren(entity);
+          for (var i = 0; i < children.length; i++) walk(children[i]);
+        })(root);
       }
-      walk(root);
     } catch(e) {}
     try {
-      if (!window.pc || !pc.Entity || !pc.Entity.prototype || pc.Entity.prototype.__codexGuidePatchV134) return;
+      if (!window.pc || !pc.Entity || !pc.Entity.prototype || pc.Entity.prototype.__codexGuidePatchV137) return;
       var proto = pc.Entity.prototype;
       var addChild = proto.addChild;
       if (typeof addChild === "function") {
@@ -2681,7 +3103,234 @@ ${hideSelectors.join(",\n")} {
           return result;
         };
       }
-      proto.__codexGuidePatchV134 = true;
+      proto.__codexGuidePatchV137 = true;
+    } catch(e) {}
+  }
+  function patchRuntimeGuideSource(source){
+    if (!removeHand || typeof source !== "string") return source;
+    var original = source;
+    var completedBlockingGuide = false;
+    source = source.replace(
+      /([A-Za-z_$][\\w$]*\\.emit\\()([A-Za-z_$][\\w$]*)\\.StartGuide(\\),)([A-Za-z_$][\\w$]*)\\.pauseConveyor\\(\\),\\4\\.canTouch\\s*=\\s*!0/g,
+      function(match, emitStart, events, emitEnd, game){
+        completedBlockingGuide = true;
+        exactCocosGuideHandled = true;
+        return emitStart + events + ".GuideEnd" + emitEnd + game + ".resumeConveyor()," + game + ".canTouch=!0";
+      }
+    );
+    if (!exactCocosGuideHandled) {
+      source = source.replace(
+        /([A-Za-z_$][\\w$]*\\.startGuide\\s*=\\s*function\\(\\)\\s*\\{)this\\.finger\\.active\\s*=\\s*!0\\s*,\\s*this\\.node\\.getChildByName\\((["'])mask\\2\\)\\.active\\s*=\\s*!0\\s*,\\s*this\\.moveFinger\\(\\)\\s*\\}/g,
+        function(match, start){
+          completedBlockingGuide = true;
+          return start + "this.guideEnd&&setTimeout(this.guideEnd.bind(this),0)}";
+        }
+      );
+      source = source.replace(
+        /(\\.finger\\.active\\s*=\\s*)!0/g,
+        "$1!1"
+      );
+      source = source.replace(
+        /(\\.handTut(?:\\.gameObject)?\\.SetActive\\(\\s*)!0(\\s*\\))/g,
+        "$1!1$2"
+      );
+      source = source.replace(
+        /((?:[A-Za-z_$][\\w$]*(?:\\([^()]*\\))?)(?:\\.[A-Za-z_$][\\w$]*)*\\.HandTut)\\.gameObject\\.SetActive\\(\\s*!0\\s*\\)/g,
+        function(match, hand){
+          return "(" + hand + ".gameObject.SetActive(!0)," + hand + ".localScale=pc.Vec3.ZERO.clone())";
+        }
+      );
+      source = source.replace(
+        /((?:[A-Za-z_$][\\w$]*(?:\\([^()]*\\))?)(?:\\.[A-Za-z_$][\\w$]*)*\\.HandTut\\.localScale\\s*=\\s*)[A-Za-z_$][\\w$]*\\.\\$clone\\(\\)/g,
+        "$1pc.Vec3.ZERO.clone()"
+      );
+    }
+    if (source !== original) {
+      if (completedBlockingGuide) guideRuntimeStats.blockingGuides++;
+      guideRuntimeStats.sourcePatches++;
+      scheduleGuideRuntimeReport();
+    }
+    return source;
+  }
+  function isCconGuideVisualName(value){
+    var raw = String(value || "");
+    var normalized = normalizeGuideName(raw);
+    if (/^(?:handtip|handhint|fingerhint|tutorialhand|guidehand|taphand|handguide|pointerhand|tutorialfinger|guidefinger)$/.test(normalized)) return true;
+    return false;
+  }
+  function patchCconGuideNodes(root){
+    try {
+      if (!Array.isArray(root) || root.length < 6 || !Array.isArray(root[3]) || !Array.isArray(root[4])) return root;
+      var typeDefinitions = root[3];
+      var schemas = root[4];
+      function getNodeSchemaInfo(tag){
+        var schema = schemas[tag];
+        if (!Array.isArray(schema) || schema.length < 3) return null;
+        var definition = typeDefinitions[schema[0]];
+        if (!Array.isArray(definition) || definition[0] !== "cc.Node" || !Array.isArray(definition[1])) return null;
+        return { schema: schema, definition: definition, properties: schema.slice(1, -1) };
+      }
+      function disableNodeValue(value, info){
+        var propertyNames = info.definition[1];
+        var nameProperty = propertyNames.indexOf("_name");
+        var activeProperty = propertyNames.indexOf("_active");
+        var nameSlot = info.properties.indexOf(nameProperty);
+        if (nameSlot < 0 || !isCconGuideVisualName(value[nameSlot + 1])) return;
+        var propertyValues = {};
+        for (var index = 0; index < info.properties.length; index++) {
+          propertyValues[info.properties[index]] = value[index + 1];
+        }
+        var targetSchemaTag = -1;
+        if (activeProperty >= 0) {
+          var expectedProperties = info.properties.concat([activeProperty]).sort(function(a, b){ return a - b; }).join(",");
+          for (var schemaIndex = 0; schemaIndex < schemas.length; schemaIndex++) {
+            var candidate = schemas[schemaIndex];
+            if (!Array.isArray(candidate) || candidate[0] !== info.schema[0]) continue;
+            var candidateProperties = candidate.slice(1, -1);
+            if (candidateProperties.slice().sort(function(a, b){ return a - b; }).join(",") === expectedProperties) {
+              targetSchemaTag = schemaIndex;
+              break;
+            }
+          }
+        }
+        if (targetSchemaTag >= 0) {
+          var targetProperties = schemas[targetSchemaTag].slice(1, -1);
+          var replacement = [targetSchemaTag];
+          for (var propertyIndex = 0; propertyIndex < targetProperties.length; propertyIndex++) {
+            replacement.push(targetProperties[propertyIndex] === activeProperty ? false : propertyValues[targetProperties[propertyIndex]]);
+          }
+          value.splice.apply(value, [0, value.length].concat(replacement));
+          guideRuntimeStats.assetNodes++;
+        } else if (activeProperty >= 0 && info.properties.indexOf(activeProperty) >= 0) {
+          var activeSlot = info.properties.indexOf(activeProperty) + 1;
+          if (value[activeSlot] !== false) {
+            value[activeSlot] = false;
+            guideRuntimeStats.assetNodes++;
+          }
+        }
+      }
+      function walk(value){
+        if (!Array.isArray(value)) return;
+        var info = Number.isInteger(value[0]) ? getNodeSchemaInfo(value[0]) : null;
+        if (info) disableNodeValue(value, info);
+        for (var childIndex = 0; childIndex < value.length; childIndex++) {
+          if (Array.isArray(value[childIndex])) walk(value[childIndex]);
+        }
+      }
+      walk(root[5]);
+    } catch(e) {}
+    scheduleGuideRuntimeReport();
+    return root;
+  }
+  function isKnownLunaTutorialPointer(record, normalizedName){
+    if (normalizedName !== "pointer" || !Array.isArray(record.components)) return false;
+    var recordPath = normalizeGuideName(record.path || "");
+    var hasType29 = false;
+    var hasType33 = false;
+    var hasType23 = false;
+    var hasType18 = false;
+    var hasPointerController = false;
+    for (var i = 0; i < record.components.length; i++) {
+      var component = record.components[i];
+      if (!component || typeof component !== "object") continue;
+      if (component.type === 29) hasType29 = true;
+      if (component.type === 33) hasType33 = true;
+      if (component.type === 23) hasType23 = true;
+      if (component.type === 18) hasType18 = true;
+      if (component.type === 3 && component.class === 63) hasPointerController = true;
+    }
+    return (recordPath === "canvas" && hasType29 && hasType33 && hasType23) ||
+      (recordPath === "pointer" && hasType18 && hasPointerController);
+  }
+  function isLunaGuideRecord(record){
+    if (!record || !Array.isArray(record.data) || typeof record.data[0] !== "string") return false;
+    var name = normalizeGuideName(record.data[0]);
+    return /^(?:handtut\\d*|tutorialhand\\d*|guidehand\\d*|taphand\\d*|fingerhint\\d*)$/.test(name) ||
+      isKnownLunaTutorialPointer(record, name);
+  }
+  function patchLunaGuideRecords(root){
+    if (!root || typeof root !== "object") return root;
+    var stack = [root];
+    var visited = 0;
+    while (stack.length && visited++ < 200000) {
+      var value = stack.pop();
+      if (!value || typeof value !== "object") continue;
+      if (isLunaGuideRecord(value)) {
+        var changed = false;
+        if (value.enabled !== 0) {
+          value.enabled = 0;
+          changed = true;
+        }
+        if (Array.isArray(value.data) && value.data.length > 2 && value.data[2] !== 0) {
+          value.data[2] = 0;
+          changed = true;
+        }
+        if (Array.isArray(value.components)) {
+          var kept = value.components.filter(function(component){
+            return !(component && component.type === 9);
+          });
+          if (kept.length !== value.components.length) {
+            value.components = kept;
+            changed = true;
+          }
+        }
+        if (changed) guideRuntimeStats.assetNodes++;
+      }
+      if (Array.isArray(value)) {
+        for (var arrayIndex = 0; arrayIndex < value.length; arrayIndex++) {
+          if (value[arrayIndex] && typeof value[arrayIndex] === "object") stack.push(value[arrayIndex]);
+        }
+      } else {
+        Object.keys(value).forEach(function(key){
+          if (value[key] && typeof value[key] === "object") stack.push(value[key]);
+        });
+      }
+    }
+    scheduleGuideRuntimeReport();
+    return root;
+  }
+  function patchParsedGuideData(root){
+    if (!removeHand || !root || typeof root !== "object") return root;
+    if (compressedCocosGuide && Array.isArray(root)) patchCconGuideNodes(root);
+    if (compressedLunaGuide) patchLunaGuideRecords(root);
+    var stack = [root];
+    var visited = 0;
+    while (stack.length && visited++ < 200000) {
+      var value = stack.pop();
+      if (!value || typeof value !== "object") continue;
+      if (compressedCocosGuide && Array.isArray(value)) patchCconGuideNodes(value);
+      Object.keys(value).forEach(function(key){
+        var child = value[key];
+        if (typeof child === "string" && child.length > 80 && /(?:finger\\.active|HandTut|handTut|startGuide)/.test(child)) {
+          value[key] = patchRuntimeGuideSource(child);
+        } else if (child && typeof child === "object") {
+          stack.push(child);
+        }
+      });
+    }
+    return root;
+  }
+  function patchGuideJsonParsing(){
+    if (!removeHand || (!compressedCocosGuide && !compressedLunaGuide)) return;
+    try {
+      if (JSON.__codexGuideParsePatchedV137) return;
+      var originalParse = JSON.parse;
+      JSON.parse = function(text, reviver){
+        return patchParsedGuideData(originalParse.call(this, text, reviver));
+      };
+      JSON.__codexGuideParsePatchedV137 = true;
+    } catch(e) {}
+  }
+  function patchGuideEval(){
+    if (!removeHand || !compressedLunaGuide) return;
+    try {
+      window.__codexGuideSourcePatch = patchRuntimeGuideSource;
+      if (window.__codexGuideEvalPatchedV137) return;
+      var originalEval = window.eval;
+      window.eval = function(code){
+        return originalEval.call(window, window.__codexGuideSourcePatch ? window.__codexGuideSourcePatch(code) : code);
+      };
+      window.__codexGuideEvalPatchedV137 = true;
     } catch(e) {}
   }
   function sweepRuntime(){
@@ -2691,6 +3340,7 @@ ${hideSelectors.join(",\n")} {
     patchCocosNodeApi();
     patchCocosGuideNodes();
     patchPlayCanvasGuideNodes();
+    scheduleGuideRuntimeReport();
   }
   var pendingRoots = [];
   var flushScheduled = false;
@@ -2713,6 +3363,8 @@ ${hideSelectors.join(",\n")} {
     sweepRuntime();
     queueRoot(document.documentElement || document);
   }
+  patchGuideJsonParsing();
+  patchGuideEval();
   sweepRuntime();
   scanRoot(document);
   window.addEventListener("DOMContentLoaded", refresh);
@@ -2739,8 +3391,256 @@ ${hideSelectors.join(",\n")} {
       characterData: true
     });
   } catch(e) {}
-  [100, 300, 800, 1600, 3200, 6400].forEach(function(delay){
+  [100, 300, 800, 1600, 3200, 6400, 10000].forEach(function(delay){
     setTimeout(sweepRuntime, delay);
+  });
+})();
+<\/script>`;
+    }
+
+    function makeDynamicWatermarkPatch() {
+      return `<style id="codex-hide-dynamic-watermark">
+#watermark,
+#watermark_d,
+#dynamicWatermark,
+#watermarkLayer,
+#watermarkLabel,
+#watermarkText,
+.watermark,
+.watermark-d,
+.dynamic-watermark,
+.watermark-layer,
+.watermark-label,
+.watermark-text,
+[id="watermark" i],
+[id="watermark_d" i],
+[id="dynamicWatermark" i],
+[class~="watermark" i],
+[class~="dynamic-watermark" i],
+[data-watermark] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+</style><script id="codex-remove-dynamic-watermark">
+(function(){
+  if (window.__codexDynamicWatermarkPatchV135) return;
+  window.__codexDynamicWatermarkPatchV135 = true;
+  function normalizeName(value){
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+  function isWatermarkName(value){
+    return /^(?:watermark|watermarkd|dynamicwatermark|watermarkdynamic|watermarklabel|watermarktext|watermarklayer|movingwatermark|floatingwatermark)$/.test(normalizeName(value));
+  }
+  function hideDomElement(el){
+    if (!el || !el.setAttribute) return;
+    try {
+      var values = [
+        el.id || "",
+        typeof el.className === "string" ? el.className : "",
+        el.getAttribute("data-watermark") || ""
+      ];
+      var matched = values.some(function(value){
+        return String(value).split(/\\s+/).some(isWatermarkName);
+      });
+      if (!matched) return;
+      el.setAttribute("data-codex-watermark-hidden", "true");
+      el.setAttribute("aria-hidden", "true");
+      el.style.setProperty("display", "none", "important");
+      el.style.setProperty("visibility", "hidden", "important");
+      el.style.setProperty("opacity", "0", "important");
+      el.style.setProperty("pointer-events", "none", "important");
+    } catch(e) {}
+  }
+  function scanDom(root){
+    if (!root) return;
+    try {
+      if (root.nodeType === 1) hideDomElement(root);
+      if (root.querySelectorAll) {
+        Array.prototype.forEach.call(
+          root.querySelectorAll("[id],[class],[data-watermark]"),
+          hideDomElement
+        );
+      }
+    } catch(e) {}
+  }
+  function patchCconWatermarkNodes(root){
+    try {
+      if (!Array.isArray(root) || root.length < 6 || !Array.isArray(root[3]) || !Array.isArray(root[4])) return root;
+      var typeDefinitions = root[3];
+      var schemas = root[4];
+      function getNodeSchemaInfo(tag){
+        var schema = schemas[tag];
+        if (!Array.isArray(schema) || schema.length < 3) return null;
+        var definition = typeDefinitions[schema[0]];
+        if (!Array.isArray(definition) || definition[0] !== "cc.Node" || !Array.isArray(definition[1])) return null;
+        return { schema: schema, definition: definition, properties: schema.slice(1, -1) };
+      }
+      function walk(value){
+        if (!Array.isArray(value)) return;
+        var info = Number.isInteger(value[0]) ? getNodeSchemaInfo(value[0]) : null;
+        if (info) {
+          var propertyNames = info.definition[1];
+          var nameProperty = propertyNames.indexOf("_name");
+          var activeProperty = propertyNames.indexOf("_active");
+          var nameSlot = info.properties.indexOf(nameProperty);
+          if (nameSlot >= 0 && isWatermarkName(value[nameSlot + 1])) {
+            var propertyValues = {};
+            for (var index = 0; index < info.properties.length; index++) {
+              propertyValues[info.properties[index]] = value[index + 1];
+            }
+            propertyValues[nameProperty] = "codexWatermarkDisabled";
+            var targetSchemaTag = -1;
+            if (activeProperty >= 0) {
+              var expectedProperties = info.properties.concat([activeProperty]).sort(function(a, b){ return a - b; }).join(",");
+              for (var schemaIndex = 0; schemaIndex < schemas.length; schemaIndex++) {
+                var candidate = schemas[schemaIndex];
+                if (!Array.isArray(candidate) || candidate[0] !== info.schema[0]) continue;
+                var candidateProperties = candidate.slice(1, -1);
+                if (candidateProperties.slice().sort(function(a, b){ return a - b; }).join(",") === expectedProperties) {
+                  targetSchemaTag = schemaIndex;
+                  break;
+                }
+              }
+            }
+            if (targetSchemaTag >= 0) {
+              var targetProperties = schemas[targetSchemaTag].slice(1, -1);
+              var replacement = [targetSchemaTag];
+              for (var propertyIndex = 0; propertyIndex < targetProperties.length; propertyIndex++) {
+                replacement.push(targetProperties[propertyIndex] === activeProperty ? false : propertyValues[targetProperties[propertyIndex]]);
+              }
+              value.splice.apply(value, [0, value.length].concat(replacement));
+            } else {
+              if (activeProperty >= 0 && info.properties.indexOf(activeProperty) >= 0) {
+                value[info.properties.indexOf(activeProperty) + 1] = false;
+              }
+              var childrenProperty = propertyNames.indexOf("_children");
+              var componentsProperty = propertyNames.indexOf("_components");
+              var childrenSlot = info.properties.indexOf(childrenProperty);
+              var componentsSlot = info.properties.indexOf(componentsProperty);
+              if (childrenSlot >= 0) value[childrenSlot + 1] = [];
+              if (componentsSlot >= 0) value[componentsSlot + 1] = [];
+            }
+          }
+        }
+        for (var childIndex = 0; childIndex < value.length; childIndex++) {
+          if (Array.isArray(value[childIndex])) walk(value[childIndex]);
+        }
+      }
+      walk(root[5]);
+    } catch(e) {}
+    return root;
+  }
+  function patchJsonParsing(){
+    if (JSON.__codexWatermarkParsePatchedV135) return;
+    var originalParse = JSON.parse;
+    JSON.parse = function(text, reviver){
+      return patchCconWatermarkNodes(originalParse.call(this, text, reviver));
+    };
+    JSON.__codexWatermarkParsePatchedV135 = true;
+  }
+  function setFalse(obj, key){
+    try { if (obj && key in obj) obj[key] = false; } catch(e) {}
+  }
+  function patchConfig(){
+    [
+      window.GameConfig,
+      window.gameConfig,
+      window.config,
+      window.CustomGameData,
+      window.LunaConfig,
+      window.playableConfig
+    ].forEach(function(config){
+      if (!config) return;
+      [
+        "showWatermark",
+        "watermarkEnabled",
+        "enableWatermark",
+        "dynamicWatermarkEnabled",
+        "showDynamicWatermark"
+      ].forEach(function(key){ setFalse(config, key); });
+      if (config.ui) {
+        ["showWatermark","watermarkEnabled","enableWatermark"].forEach(function(key){ setFalse(config.ui, key); });
+      }
+    });
+  }
+  function hideEngineNode(node){
+    if (!node || !isWatermarkName(node.name)) return;
+    try { node.active = false; } catch(e) {}
+    try { node.enabled = false; } catch(e) {}
+    try { node.opacity = 0; } catch(e) {}
+    try { if (node.element) node.element.opacity = 0; } catch(e) {}
+    try { if (node.render) node.render.enabled = false; } catch(e) {}
+    try { if (node.model) node.model.enabled = false; } catch(e) {}
+  }
+  function patchCocos(){
+    try {
+      if (window.cc && cc.Node && cc.Node.prototype && !cc.Node.prototype.__codexWatermarkPatchV135) {
+        var prototype = cc.Node.prototype;
+        var addChild = prototype.addChild;
+        if (typeof addChild === "function") {
+          prototype.addChild = function(child){
+            var result = addChild.apply(this, arguments);
+            hideEngineNode(child);
+            return result;
+          };
+        }
+        prototype.__codexWatermarkPatchV135 = true;
+      }
+      if (window.cc && cc.director && cc.director.getScene) {
+        var scene = cc.director.getScene();
+        (function walk(node){
+          if (!node) return;
+          hideEngineNode(node);
+          var children = node.children || [];
+          for (var index = 0; index < children.length; index++) walk(children[index]);
+        })(scene);
+      }
+    } catch(e) {}
+  }
+  function patchPlayCanvas(){
+    try {
+      var app = window.app && (window.app.app || window.app);
+      var root = app && (app.root || (app.app && app.app.root));
+      if (root) {
+        (function walk(entity){
+          if (!entity) return;
+          hideEngineNode(entity);
+          var children = entity.children || [];
+          for (var index = 0; index < children.length; index++) walk(children[index]);
+        })(root);
+      }
+    } catch(e) {}
+  }
+  function sweep(){
+    patchConfig();
+    patchCocos();
+    patchPlayCanvas();
+    scanDom(document);
+  }
+  patchJsonParsing();
+  sweep();
+  window.addEventListener("DOMContentLoaded", sweep);
+  window.addEventListener("load", sweep);
+  window.addEventListener("luna:build", sweep);
+  window.addEventListener("luna:start", sweep);
+  window.addEventListener("luna:started", sweep);
+  try {
+    new MutationObserver(function(records){
+      records.forEach(function(record){
+        Array.prototype.forEach.call(record.addedNodes || [], scanDom);
+        if (record.type === "attributes") hideDomElement(record.target);
+      });
+    }).observe(document.documentElement || document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["id","class","data-watermark"]
+    });
+  } catch(e) {}
+  [100, 300, 800, 1600, 3200, 6400].forEach(function(delay){
+    setTimeout(sweep, delay);
   });
 })();
 <\/script>`;
@@ -3875,12 +4775,14 @@ word-break:normal;
 
     function transform(content) {
       const stats = [];
+      let guideStaticHits = 0;
+      let guideAutoEnded = 0;
 
       if (optCounters.checked) {
         for (const item of counterPatterns) {
           const before = content;
           content = content.replace(item.re, item.replacement);
-          if (content !== before) stats.push("次数已延长");
+          if (content !== before) stats.push("试玩次数：已延长");
         }
       }
 
@@ -3889,32 +4791,81 @@ word-break:normal;
         content = content
           .replace(/iosLink:"[^"]*"/g, 'iosLink:"about:blank"')
           .replace(/androidLink:"[^"]*"/g, 'androidLink:"about:blank"');
-        if (content !== before) stats.push("商店链接已清空");
+        if (content !== before) stats.push("商店链接：已清空");
       }
 
       content = removePatchById(content, "codex-hide-playable-ui");
       content = removePatchById(content, "codex-disable-cta-hand-ui");
+      content = removePatchById(content, "codex-hide-dynamic-watermark");
+      content = removePatchById(content, "codex-remove-dynamic-watermark");
+      const guideAssetsBeforePatch = inspectKnownEmbeddedHandAssets(content);
+      const guideProfile = analyzeGuideProfile(content, guideAssetsBeforePatch);
       const uiCleanupOptions = {
         hideIcon: optRemoveIcon.checked,
         hideCta: optRemoveCta.checked,
         removeHand: optRemoveHandGuide.checked,
-        removeBroadGuide: optRemoveBroadGuide.checked
+        removeWatermark: optRemoveDynamicWatermark.checked,
+        removeBroadGuide: optRemoveBroadGuide.checked,
+        guideProfile
       };
-      if (uiCleanupOptions.hideIcon || uiCleanupOptions.hideCta || uiCleanupOptions.removeHand || uiCleanupOptions.removeBroadGuide) {
+      if (uiCleanupOptions.hideIcon || uiCleanupOptions.hideCta || uiCleanupOptions.removeHand || uiCleanupOptions.removeWatermark || uiCleanupOptions.removeBroadGuide) {
         let lunaHandResult = { content, changed: false, mode: "none" };
         let embeddedHandResult = { content, count: 0, ids: [] };
+        let sourceCleanupResult = {
+          content,
+          report: { icon: 0, cta: 0, hand: 0, watermark: 0, blockingGuide: 0, autoEndedGuide: 0 }
+        };
         if (uiCleanupOptions.removeHand) {
           lunaHandResult = patchLunaTutorialHandOverrides(content);
           content = lunaHandResult.content;
           embeddedHandResult = replaceKnownEmbeddedHandAssets(content);
           content = embeddedHandResult.content;
+          if (guideProfile.lunaCompressedCount > 0) {
+            content = patchLunaCompressedRuntimeLoaders(content).content;
+          }
         }
-        content = patchUiCleanupSource(content, uiCleanupOptions);
-        content = injectIntoHead(content, makeUiCleanupPatch(uiCleanupOptions));
-        if (uiCleanupOptions.hideIcon) stats.push("icon 图标已隐藏");
-        if (uiCleanupOptions.hideCta) stats.push("CTA 按钮已隐藏");
-        if (uiCleanupOptions.removeHand) stats.push("引导手指已处理");
-        if (uiCleanupOptions.removeBroadGuide) stats.push("通用引导逻辑已关闭");
+        sourceCleanupResult = patchUiCleanupSource(content, uiCleanupOptions);
+        content = sourceCleanupResult.content;
+        if (uiCleanupOptions.hideIcon || uiCleanupOptions.hideCta || uiCleanupOptions.removeHand || uiCleanupOptions.removeBroadGuide) {
+          content = injectIntoHead(content, makeUiCleanupPatch(uiCleanupOptions));
+        }
+        if (uiCleanupOptions.removeWatermark) {
+          content = injectIntoHead(content, makeDynamicWatermarkPatch());
+        }
+        if (uiCleanupOptions.hideIcon) stats.push("应用图标：已隐藏");
+        if (uiCleanupOptions.hideCta) stats.push("下载/安装按钮：已隐藏");
+        if (uiCleanupOptions.removeHand) {
+          const confirmedGuideHits =
+            sourceCleanupResult.report.hand +
+            embeddedHandResult.count +
+            (lunaHandResult.changed ? 1 : 0);
+          guideStaticHits = confirmedGuideHits;
+          guideAutoEnded = sourceCleanupResult.report.autoEndedGuide;
+          if (confirmedGuideHits > 0) {
+            if (guideProfile.hasCompressedContainer) {
+              stats.push("引导手指：已处理 " + confirmedGuideHits + " 处，待预览");
+            } else {
+              stats.push("引导手指：已处理 " + confirmedGuideHits + " 处");
+            }
+            if (guideAutoEnded > 0) {
+              stats.push("防卡住：已让 " + guideAutoEnded + " 段引导正常结束");
+            }
+          } else if (guideProfile.hasCompressedContainer) {
+            stats.push("引导手指：已尝试处理，待预览");
+          } else {
+            stats.push("引导手指：未找到明确目标，待预览");
+          }
+        }
+        if (uiCleanupOptions.removeWatermark) stats.push("动态水印：已移除");
+        if (uiCleanupOptions.removeBroadGuide) {
+          if (sourceCleanupResult.report.blockingGuide > 0) {
+            stats.push("其他引导：已处理 " + sourceCleanupResult.report.blockingGuide + " 处");
+          } else if (guideProfile.blockingCandidate) {
+            stats.push("其他引导：已尝试跳过，待预览");
+          } else {
+            stats.push("其他引导：未找到可安全跳过的内容");
+          }
+        }
       }
 
       content = removePatchById(content, "codex-remove-bgm-audio");
@@ -3925,11 +4876,11 @@ word-break:normal;
         const blockSingleAudioBgm = false;
         content = injectIntoHead(content, makeRemoveBgmPatch(forceAllAudio, blockSingleAudioBgm));
         if (forceAllAudio) {
-          stats.push("全部音频已强制静音");
+          stats.push("声音：已全部关闭");
         } else if (blockSingleAudioBgm) {
-          stats.push("已按单音频 BGM 模式拦截背景音乐，未改动音频资源");
+          stats.push("背景音乐：已尝试关闭");
         } else {
-          stats.push("已注入背景音乐拦截，未改动音频资源，玩法音效尽量保留");
+          stats.push("背景音乐：已尝试关闭");
         }
       }
 
@@ -3966,44 +4917,44 @@ word-break:normal;
           content = patchCssFallbackBackgrounds(content, color, false);
         }
         stats.push(canvas2DBackgroundPatch.changed
-          ? (useTexture ? "Canvas 2D 背景图片已修改" : "Canvas 2D 背景颜色已修改")
-          : (optTextureReplace.checked ? "背景/贴图替换已启用" : (useTexture ? "背景图片已修改（兼容模式）" : "背景颜色已修改")));
+          ? (useTexture ? "游戏背景：已换图" : "游戏背景：已换色")
+          : (optTextureReplace.checked ? "游戏内背景：已启用替换" : (useTexture ? "背景：已换图" : "背景：已换色")));
       }
 
       if (optVideoBackground.checked) {
         if (videoAction === "remove") {
           const patched = patchBackVideo(content, null);
           content = patched.content;
-          stats.push(patched.changed ? "背景已移除" : "未找到 backVideo 背景");
+          stats.push(patched.changed ? "视频背景：已移除" : "视频背景：未找到");
         } else if (videoAction === "replaceVideo") {
           if (videoDataUrl) {
             const patched = patchBackVideo(content, videoDataUrl);
             content = patched.content;
-            stats.push(patched.changed ? "视频背景已替换为新视频" : "未找到 backVideo 视频背景");
+            stats.push(patched.changed ? "视频背景：已换成新视频" : "视频背景：未找到");
           } else {
-            stats.push("未选择新视频，视频背景未替换");
+            stats.push("视频背景：未选择新视频");
           }
         } else if (videoAction === "replaceImage") {
           if (textureDataUrl) {
             const patched = patchBackVideo(content, null);
             content = patched.content;
-            stats.push(patched.changed ? "视频背景已改用图片背景" : "未找到 backVideo 视频背景");
+            stats.push(patched.changed ? "视频背景：已换成图片" : "视频背景：未找到");
           } else {
-            stats.push("未选择背景图片，视频背景未替换");
+            stats.push("视频背景：未选择图片");
           }
         } else if (videoAction === "replaceColor") {
           const patched = patchBackVideo(content, null);
           content = patched.content;
-          stats.push(patched.changed ? "视频背景已改用纯色背景" : "未找到 backVideo 视频背景");
+          stats.push(patched.changed ? "视频背景：已换成纯色" : "视频背景：未找到");
         } else {
-          stats.push("视频背景已保留");
+          stats.push("视频背景：已保留");
         }
       }
 
       if (optForceLanguage.checked) {
         content = removePatchById(content, "codex-force-language");
         content = injectIntoHead(content, makeLanguagePatch(languageSelect.value));
-        stats.push("语言已强制为 " + languageSelect.value);
+        stats.push("显示语言：" + languageSelect.value);
       }
 
       content = removePatchById(content, "codex-text-mask");
@@ -4016,28 +4967,28 @@ word-break:normal;
         const unityTextChanged = before !== content;
         const canvas2DTextPatch = patchCanvas2DGameConfigTextVisibility(content);
         content = canvas2DTextPatch.content;
-        if (unityTextChanged && canvas2DTextPatch.changed) stats.push("文案字段已透明化，Canvas 标题/副标题已隐藏");
-        else if (canvas2DTextPatch.changed) stats.push("Canvas 标题/副标题已隐藏");
-        else stats.push(unityTextChanged ? "文案字段已透明化" : "未找到可隐藏的文案字段");
+        if (unityTextChanged && canvas2DTextPatch.changed) stats.push("标题和文案：已隐藏");
+        else if (canvas2DTextPatch.changed) stats.push("标题和副标题：已隐藏");
+        else stats.push(unityTextChanged ? "文案：已隐藏" : "文案：未找到可安全隐藏的内容");
       }
 
       if (optTextMask.checked) {
         content = injectBeforeBody(content, makeTextMaskPatch(overlaySize.value, textMaskColor.value, textMaskHeight.value));
-        stats.push("顶部旧文案遮罩已添加");
+        stats.push("旧文案遮罩：已添加");
       }
 
       if (optOverlayText.checked && overlayText.value.trim()) {
         content = injectBeforeBody(content, makeOverlayTextPatch(overlayText.value.trim(), overlayColor.value, overlaySize.value, optCenterTextInMask.checked));
-        stats.push("覆盖文案已添加");
+        stats.push("覆盖文案：已添加");
       }
 
       if (optRedirect.checked) {
         content = removePatchById(content, "codex-disable-playable-redirects");
         content = injectIntoHead(content, makeRuntimePatch());
-        stats.push("跳转已拦截");
+        stats.push("自动跳转：已关闭");
       }
 
-      return { content, stats: [...new Set(stats)] };
+      return { content, stats: [...new Set(stats)], guideStaticHits, guideAutoEnded };
     }
 
     function outputName(name) {
@@ -4149,6 +5100,7 @@ word-break:normal;
 
     function clearPreview() {
       if (recordingPreviewActive) closeRecordingPreview();
+      activePreviewIndex = -1;
       previewTitle.textContent = "预览窗口";
       previewFrame.removeAttribute("src");
       previewFrame.hidden = true;
@@ -4167,6 +5119,7 @@ word-break:normal;
         clearPreview();
         return;
       }
+      activePreviewIndex = index;
       previewTitle.textContent = "预览: " + item.name;
       previewFrame.src = item.url;
       previewFrame.hidden = false;
@@ -4178,6 +5131,46 @@ word-break:normal;
       recordLandscapePreviewBtn.dataset.url = item.url;
       recordLandscapePreviewBtn.dataset.name = item.name;
       addLog("正在预览: " + item.name);
+    }
+
+    function stopPreviewInstance(frame) {
+      if (!frame) return;
+      try {
+        const frameDocument = frame.contentDocument;
+        if (frameDocument) {
+          frameDocument.querySelectorAll("audio,video").forEach(media => {
+            try {
+              media.muted = true;
+              media.pause();
+            } catch (error) {}
+          });
+        }
+      } catch (error) {}
+      try {
+        if (frame.contentWindow && typeof frame.contentWindow.stop === "function") {
+          frame.contentWindow.stop();
+        }
+      } catch (error) {}
+      frame.src = "about:blank";
+      frame.removeAttribute("src");
+    }
+
+    function suspendStandardPreviewForRecording() {
+      standardPreviewSuspendedForRecording = activePreviewIndex >= 0 && !previewFrame.hidden;
+      if (!standardPreviewSuspendedForRecording) return;
+      stopPreviewInstance(previewFrame);
+      previewFrame.hidden = true;
+    }
+
+    function restoreStandardPreviewAfterRecording() {
+      const shouldRestore = standardPreviewSuspendedForRecording;
+      standardPreviewSuspendedForRecording = false;
+      if (!shouldRestore || activePreviewIndex < 0) return;
+      const item = outputs[activePreviewIndex];
+      if (!item) return;
+      previewFrame.src = item.url;
+      previewFrame.hidden = false;
+      previewEmpty.hidden = true;
     }
 
     function setPreviewMode(mode) {
@@ -4257,13 +5250,14 @@ word-break:normal;
       recordingPreview.hidden = true;
       recordingPreview.classList.remove("controls-hidden");
       setRecordingCursorHidden(false);
-      recordingPreviewFrame.removeAttribute("src");
+      stopPreviewInstance(recordingPreviewFrame);
       recordingPreviewFrame.removeAttribute("data-url");
       recordingViewport.removeAttribute("style");
       recordingPreviewFrame.removeAttribute("style");
       document.body.classList.remove("recording-mode");
       enterRecordingFullscreenBtn.disabled = false;
       enterRecordingFullscreenBtn.textContent = "进入全屏";
+      restoreStandardPreviewAfterRecording();
     }
 
     function closeRecordingPreview() {
@@ -4310,7 +5304,7 @@ word-break:normal;
     function restartRecordingPreview() {
       const url = recordingPreviewFrame.dataset.url;
       if (!url) return;
-      recordingPreviewFrame.removeAttribute("src");
+      stopPreviewInstance(recordingPreviewFrame);
       window.setTimeout(() => {
         if (recordingPreviewActive) recordingPreviewFrame.src = url;
       }, 0);
@@ -4318,10 +5312,12 @@ word-break:normal;
     }
 
     function openRecordingPreview(mode) {
+      if (recordingPreviewActive) return;
       const landscape = mode === "landscape";
       const sourceButton = landscape ? recordLandscapePreviewBtn : recordPreviewBtn;
       const url = sourceButton.dataset.url;
       if (!url) return;
+      suspendStandardPreviewForRecording();
       activeRecordingAspect = landscape ? "16:9" : "9:16";
       activeRecordingWidth = landscape ? LANDSCAPE_RECORDING_WIDTH : PORTRAIT_RECORDING_WIDTH;
       activeRecordingHeight = landscape ? LANDSCAPE_RECORDING_HEIGHT : PORTRAIT_RECORDING_HEIGHT;
@@ -4356,6 +5352,12 @@ word-break:normal;
       return true;
     }
 
+    function resultStatTone(text) {
+      const value = String(text);
+      if (value === "未应用修改") return "neutral";
+      return /待预览|已尝试|未找到|未选择/.test(value) ? "warn" : "";
+    }
+
     function renderOutputs() {
       if (!outputs.length) {
         resultList.innerHTML = '<div class="result-card"><div class="meta">还没有生成文件。</div></div>';
@@ -4366,7 +5368,7 @@ word-break:normal;
         <div class="result-card">
           <div class="file-name">${escapeHtml(item.sourceName)}</div>
           <div class="meta">输出: ${escapeHtml(item.name)} · ${(item.size / 1024).toFixed(1)} KB</div>
-          <div style="margin:8px 0">${item.stats.map(x => `<span class="badge">${escapeHtml(x)}</span>`).join(" ")}</div>
+          <div style="margin:8px 0">${item.stats.map(x => `<span class="badge ${resultStatTone(x)}">${escapeHtml(x)}</span>`).join(" ")}</div>
           <div class="result-actions">
             <button class="secondary preview-btn" type="button" data-index="${index}">预览</button>
             <a class="download" href="${item.url}" download="${escapeHtml(item.name)}">下载</a>
@@ -4406,7 +5408,11 @@ word-break:normal;
             name: outputName(item.file.name),
             size: blob.size,
             url,
-            stats: result.stats.length ? result.stats : ["未应用修改"]
+            stats: result.stats.length ? result.stats : ["未应用修改"],
+            guideStaticHits: result.guideStaticHits || 0,
+            guideAutoEnded: result.guideAutoEnded || 0,
+            runtimeGuideHits: 0,
+            runtimeBlockingGuides: 0
           });
           setOperationStatus("已生成 " + (index + 1) + "/" + inputs.length + " 个文件", (index + 1) / inputs.length * 100);
           addLog("已生成: " + outputName(item.file.name));
@@ -4484,7 +5490,7 @@ word-break:normal;
       if (inputs.length) {
         renderDetection();
       } else {
-        detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div></div>';
+        detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示自动跳转、试玩次数、水印、按钮、引导、背景和文案等可修改内容。</div></div>';
         detectCount.textContent = "0 项";
         updateGenerateAvailability();
       }
@@ -4690,6 +5696,30 @@ word-break:normal;
       });
     });
 
+    function bindLinkedSettings(panel, option) {
+      if (!panel || !option) return;
+      const sync = () => {
+        const inactive = !option.checked;
+        panel.classList.toggle("is-inactive", inactive);
+        panel.title = inactive ? "调整这里的设置会自动启用上方功能" : "";
+      };
+      const activate = () => {
+        if (option.checked) return;
+        option.checked = true;
+        option.dispatchEvent(new Event("change", { bubbles: true }));
+      };
+      panel.addEventListener("pointerdown", activate, true);
+      panel.addEventListener("focusin", activate, true);
+      panel.addEventListener("input", activate);
+      panel.addEventListener("change", activate);
+      option.addEventListener("change", sync);
+      sync();
+    }
+
+    bindLinkedSettings(languageSettingsPanel, optForceLanguage);
+    bindLinkedSettings(overlaySettingsPanel, optOverlayText);
+    bindLinkedSettings(textMaskSettingsPanel, optTextMask);
+
     function switchSettingsTab(tabName) {
       document.querySelectorAll(".settings-tab").forEach(button => {
         const active = button.dataset.settingsTab === tabName;
@@ -4714,10 +5744,61 @@ word-break:normal;
       settingsShell.addEventListener("change", invalidateFromSettings);
     }
 
+    function clearAllModificationOptions() {
+      const hadSelections = modificationOptions.some(option => option && option.checked);
+      modificationOptions.forEach(option => {
+        if (option) option.checked = false;
+      });
+      clearVideoBgMode();
+      modificationOptions.forEach(option => {
+        if (option) option.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      updateBackgroundModeUI();
+      updateGenerateAvailability();
+      return hadSelections;
+    }
+
+    clearSettingsBtn.addEventListener("click", () => {
+      const changed = clearAllModificationOptions();
+      showToast(changed ? "已取消全部修改项。" : "当前没有勾选修改项。", changed ? "success" : "neutral");
+    });
+
     generateBtn.addEventListener("click", generate);
 
     document.querySelectorAll(".viewport-btn").forEach(button => {
       button.addEventListener("click", () => setPreviewMode(button.dataset.mode));
+    });
+
+    window.addEventListener("message", event => {
+      const data = event && event.data;
+      if (!data || data.type !== "codex-guide-runtime-report-v137") return;
+      const fromPreview = previewFrame.contentWindow && event.source === previewFrame.contentWindow;
+      const fromRecording = recordingPreviewFrame.contentWindow && event.source === recordingPreviewFrame.contentWindow;
+      if ((!fromPreview && !fromRecording) || activePreviewIndex < 0) return;
+      const item = outputs[activePreviewIndex];
+      if (!item) return;
+      const runtimeStats = data.stats || {};
+      const sourcePatches = Math.max(0, Number(runtimeStats.sourcePatches) || 0);
+      const assetNodes = Math.max(0, Number(runtimeStats.assetNodes) || 0);
+      const sceneNodes = Math.max(0, Number(runtimeStats.sceneNodes) || 0);
+      const blockingGuides = Math.max(0, Number(runtimeStats.blockingGuides) || 0);
+      const runtimeHits = sourcePatches + assetNodes + sceneNodes;
+      if (!runtimeHits && !blockingGuides) return;
+      item.runtimeGuideHits = Math.max(item.runtimeGuideHits || 0, runtimeHits);
+      item.runtimeBlockingGuides = Math.max(item.runtimeBlockingGuides || 0, blockingGuides);
+      item.stats = item.stats.filter(text =>
+        !String(text).startsWith("预览运行时命中") &&
+        !String(text).startsWith("预览中确认已处理") &&
+        !String(text).startsWith("预览已正常结束阻塞式手指教程") &&
+        !String(text).startsWith("预览中已正常结束") &&
+        !String(text).startsWith("引导手指：") &&
+        !String(text).startsWith("防卡住：")
+      );
+      const totalGuideHits = (item.guideStaticHits || 0) + item.runtimeGuideHits;
+      const totalBlockingGuides = (item.guideAutoEnded || 0) + item.runtimeBlockingGuides;
+      if (totalGuideHits) item.stats.push("引导手指：已处理 " + totalGuideHits + " 处");
+      if (totalBlockingGuides) item.stats.push("防卡住：已让 " + totalBlockingGuides + " 段引导正常结束");
+      renderOutputs();
     });
 
     resultList.addEventListener("click", event => {
@@ -4780,7 +5861,7 @@ word-break:normal;
       activeInputIndex = -1;
       clearOutputs();
       renderFiles();
-      detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示跳转、次数、CTA/引导、背景、文案/语言等可修改点。</div></div>';
+      detectList.innerHTML = '<div class="detect-card"><div class="detail">导入 HTML 后，这里会显示自动跳转、试玩次数、水印、按钮、引导、背景和文案等可修改内容。</div></div>';
       detectCount.textContent = "0 项";
       updateGenerateAvailability();
     });
