@@ -823,6 +823,21 @@
       vertical-align: 1px;
     }
 
+    .option .feature-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #e9f7ef;
+      color: #18794e;
+      font-size: 11px;
+      font-style: normal;
+      font-weight: 800;
+      line-height: 1.2;
+      vertical-align: 1px;
+    }
+
     .option span {
       color: var(--muted);
       line-height: 1.45;
@@ -911,6 +926,23 @@
       flex: 0 0 auto;
       margin-top: 2px;
       min-width: 0;
+    }
+
+    .video-feature-callout {
+      display: grid;
+      gap: 4px;
+      padding: 10px 12px;
+      border: 1px solid #b9ddc8;
+      border-radius: 8px;
+      background: #f0fbf5;
+      color: #215c3d;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .video-feature-callout strong {
+      color: #155f37;
+      font-size: 14px;
     }
 
     .linked-settings {
@@ -1218,9 +1250,9 @@
     <div class="topbar">
       <div class="topbar-left">
       <h1>试玩 HTML 参数修改工具</h1>
-      <a class="guide-link" href="https://docs.google.com/document/d/1xNLcIFyjhWeA7XH_vPIXB7QEdugwDgzqidzzwdqjemc/edit" target="_blank" rel="noopener noreferrer">使用说明</a>
+      <a class="guide-link" href="https://docs.google.com/document/d/1N2JvuvVUywZDKVhTxuvjpYEXqrjCW9cOZMUBVEm1M5U/edit" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.3.8 · 先检测，少量修改，生成后先预览</div>
+      <div class="version">Ray · v1.4.0 · 先检测，少量修改，生成后先预览</div>
     </div>
 
     <div class="operation-status" id="operationStatus" role="status" aria-live="polite" hidden>
@@ -1394,17 +1426,21 @@
               </label>
               <label class="option">
                 <input id="optVideoBackground" type="checkbox">
-                <span><strong>处理视频背景</strong>如果试玩背景是一段视频，可以将它移除，或替换成颜色、图片或新视频。</span>
+                <span><strong>更换成视频 / 处理原视频 <em class="feature-badge">v1.4 新功能</em></strong>无论原背景是图片、纯色还是视频，都可以直接换成新视频；原背景是视频时，也可以移除或改成纯色、图片。</span>
               </label>
               <div class="operation-panel">
+                <div class="video-feature-callout">
+                  <strong>图片背景也能直接换视频</strong>
+                  <span>选择下方“换成新视频”，再上传 MP4 或 WebM。工具会自动隐藏原图片背景并添加循环视频层。</span>
+                </div>
                 <div class="control-row">
-                  <label>处理类型</label>
+                  <label>目标背景</label>
                   <div>
                     <div class="segmented wrap video-action-group">
-                      <label><input type="radio" name="videoBgMode" value="remove" checked>移除视频背景</label>
-                      <label><input type="radio" name="videoBgMode" value="replaceColor">替换纯色</label>
-                      <label><input type="radio" name="videoBgMode" value="replaceImage">替换图片</label>
-                      <label><input type="radio" name="videoBgMode" value="replaceVideo">替换视频</label>
+                      <label><input type="radio" name="videoBgMode" value="remove" checked>仅移除原视频</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceColor">改成纯色</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceImage">改成图片</label>
+                      <label><input type="radio" name="videoBgMode" value="replaceVideo">换成新视频（支持图片背景）</label>
                     </div>
                   </div>
                 </div>
@@ -2290,7 +2326,7 @@
           if (a.directBackground.length) parts.push("检测到可直接修改的游戏背景设置。");
           if (a.canvas2DBackgroundConfig) parts.push("检测到可直接修改的背景图片或颜色。");
           if (a.cssBlackCount) parts.push("检测到页面底色 × " + a.cssBlackCount);
-          if (a.hasCanvas && !a.canvas2DBackgroundConfig) parts.push("检测到游戏画面，可以先尝试普通背景修改；如果没有变化，再使用“尝试替换游戏内背景（谨慎）”。");
+          if (a.hasCanvas && !a.canvas2DBackgroundConfig) parts.push("检测到游戏画面，可以先尝试普通背景修改；如果没有变化，再使用“尝试替换游戏内背景（谨慎）”。如需改成视频，请在“背景”页选择“更换成视频 / 处理原视频”。");
           const directBackgroundSupported = a.directBackground.length || a.canvas2DBackgroundConfig;
           fileCards.push(makeDetectCard("背景颜色", directBackgroundSupported ? "可直接改" : "可尝试", parts.join("<br>"), directBackgroundSupported ? "" : "warn"));
         }
@@ -2307,7 +2343,7 @@
           found++;
           fileFound++;
           const detail = a.backVideoCount
-            ? `检测到明确的视频背景 × ${a.backVideoCount}，可以使用“视频背景”功能处理。`
+            ? `检测到明确的视频背景 × ${a.backVideoCount}，可以使用“更换成视频 / 处理原视频”功能处理。`
             : `检测到视频 × ${a.dataVideoCount}，可能是背景，也可能是开场画面，请先预览确认。`;
           fileCards.push(makeDetectCard("视频背景", a.backVideoCount ? "可处理" : "需确认", detail, a.backVideoCount ? "" : "warn"));
         }
@@ -3709,8 +3745,9 @@ ${hideSelectors.join(",\n")} {
 
     function makeBackgroundPatch(mode, color, texture, transparentCanvas) {
       const useTexture = mode === "texture" && !!texture;
-      const pageBaseColor = useTexture ? "#020614" : color;
-      const canvasBackground = (useTexture || transparentCanvas) ? "transparent" : color;
+      const useVideo = mode === "video";
+      const pageBaseColor = useVideo ? "transparent" : (useTexture ? "#020614" : color);
+      const canvasBackground = (useTexture || useVideo || transparentCanvas) ? "transparent" : color;
       const textureGroupRule = useTexture ? `
 html,
 body,
@@ -3832,7 +3869,7 @@ canvas:not(#codex-background-helper-canvas) {
     }
     function makeWebGLBackgroundPatch(mode, color, texture, transparentCanvas) {
       const useTexture = mode === "texture" && !!texture;
-      const useTransparentClear = useTexture || transparentCanvas;
+      const useTransparentClear = useTexture || mode === "video" || transparentCanvas;
       const baseColor = useTexture ? "#000000" : color;
       const rgb = hexToRgb01(baseColor);
       if (useTransparentClear) {
@@ -4425,7 +4462,7 @@ word-break:normal;
         replace("backgroundImage", "null", stringOrNull);
         replace("backgroundImageLandscape", "null", stringOrNull);
         replace("backgroundGradient", "null", arrayOrNull);
-        replace("backgroundColor", JSON.stringify(color), stringOrNull);
+        replace("backgroundColor", JSON.stringify(mode === "video" ? "transparent" : color), stringOrNull);
       }
       return { content, changed };
     }
@@ -4532,6 +4569,108 @@ word-break:normal;
         content = content.replace(pattern, "$1" + value);
       }
       return { content, changed: content !== before };
+    }
+
+    function makeVideoBackgroundPatch(videoDataUrl) {
+      return `<style id="codex-video-background-style">
+#codex-video-background {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  display: block !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  background: #000 !important;
+}
+#unity-container,
+#unityContainer,
+#gameContainer,
+#game-container,
+#canvas-wrap,
+#application,
+#app,
+.webgl-content,
+.game-container,
+.playable-container {
+  z-index: 1 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+</style><script id="codex-video-background-script">
+(function(){
+  if (window.__codexVideoBackgroundV140) return;
+  window.__codexVideoBackgroundV140 = true;
+  var source = ${JSON.stringify(videoDataUrl)};
+  var timer = 0;
+  function start(video){
+    try {
+      var playback = video && video.play && video.play();
+      if (playback && typeof playback.catch === "function") playback.catch(function(){});
+    } catch(e) {}
+  }
+  function configure(video){
+    try {
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.defaultMuted = true;
+      video.volume = 0;
+      video.playsInline = true;
+      video.disablePictureInPicture = true;
+      video.setAttribute("autoplay", "");
+      video.setAttribute("loop", "");
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.setAttribute("preload", "auto");
+      video.setAttribute("aria-hidden", "true");
+      if (video.getAttribute("src") !== source) {
+        video.setAttribute("src", source);
+        try { video.load(); } catch(e) {}
+      }
+      start(video);
+    } catch(e) {}
+  }
+  function ensureVideo(){
+    try {
+      if (!document.body) return null;
+      var video = document.getElementById("codex-video-background");
+      if (!video) {
+        video = document.createElement("video");
+        video.id = "codex-video-background";
+        document.body.insertBefore(video, document.body.firstChild || null);
+      } else if (video.parentNode !== document.body) {
+        document.body.insertBefore(video, document.body.firstChild || null);
+      }
+      configure(video);
+      return video;
+    } catch(e) { return null; }
+  }
+  function resume(){ start(ensureVideo()); }
+  ensureVideo();
+  window.addEventListener("DOMContentLoaded", resume);
+  window.addEventListener("load", resume);
+  window.addEventListener("luna:start", resume);
+  window.addEventListener("luna:started", resume);
+  document.addEventListener("pointerdown", resume, { once: true, capture: true });
+  document.addEventListener("touchstart", resume, { once: true, capture: true, passive: true });
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) resume(); });
+  try {
+    new MutationObserver(function(){ ensureVideo(); }).observe(document.documentElement || document, { childList: true, subtree: true });
+  } catch(e) {}
+  var attempts = 0;
+  timer = setInterval(function(){
+    ensureVideo();
+    attempts++;
+    if (attempts > 160) clearInterval(timer);
+  }, 100);
+})();
+<\/script>`;
     }
 
     function makeRemoveBgmPatch(forceAll, blockSingleAudioBgm) {
@@ -4981,9 +5120,24 @@ word-break:normal;
       const videoNeedsImageBackground = videoAction === "replaceImage" && !!textureDataUrl;
       const videoNeedsColorBackground = videoAction === "replaceColor";
       const videoImageMissing = videoAction === "replaceImage" && !textureDataUrl;
+      let nativeVideoReplacement = { content, changed: false };
+      let videoNeedsInjectedBackground = false;
+      const hadInjectedVideoBackground = /id=["']codex-video-background-(?:style|script)["']/.test(content);
 
-      if ((optBackground.checked && !videoImageMissing) || videoNeedsImageBackground || videoNeedsColorBackground) {
-        const mode = videoNeedsImageBackground ? "texture" : (videoNeedsColorBackground ? "color" : getBgMode());
+      if (optVideoBackground.checked) {
+        content = removePatchById(content, "codex-video-background-style");
+        content = removePatchById(content, "codex-video-background-script");
+        if (videoAction === "replaceVideo" && videoDataUrl) {
+          nativeVideoReplacement = patchBackVideo(content, videoDataUrl);
+          content = nativeVideoReplacement.content;
+          videoNeedsInjectedBackground = !nativeVideoReplacement.changed;
+        }
+      }
+
+      if ((optBackground.checked && !videoImageMissing) || videoNeedsImageBackground || videoNeedsColorBackground || videoNeedsInjectedBackground) {
+        const mode = videoNeedsInjectedBackground
+          ? "video"
+          : (videoNeedsImageBackground ? "texture" : (videoNeedsColorBackground ? "color" : getBgMode()));
         const color = bgColor.value;
         const useTexture = mode === "texture" && !!textureDataUrl;
         const canvas2DBackgroundPatch = patchCanvas2DGameConfigBackground(content, mode, color, textureDataUrl);
@@ -4994,11 +5148,14 @@ word-break:normal;
         content = removePatchById(content, "codex-force-webgl-background");
         content = removePatchById(content, "codex-replace-bg-texture");
         content = content.replace(/<script\s+data-background-safe-webgl-patch[\s\S]*?<\/script>/g, "");
-        const useTransparentCanvas = videoNeedsColorBackground;
+        const useTransparentCanvas = videoNeedsColorBackground || videoNeedsInjectedBackground;
         let injection = makeBackgroundPatch(mode, color, textureDataUrl, useTransparentCanvas) + makeWebGLBackgroundPatch(mode, color, textureDataUrl, useTransparentCanvas);
         if (optTextureReplace.checked) injection += makeTextureReplacementPatch(mode, color, textureDataUrl);
         content = injectIntoHead(content, injection);
-        if (mode === "texture" && textureDataUrl) {
+        if (mode === "video") {
+          content = patchUnityCameraBackgroundTransparent(content);
+          content = patchCssFallbackBackgrounds(content, "#000000", true);
+        } else if (mode === "texture" && textureDataUrl) {
           // 图片背景使用“页面背景 + 透明 WebGL 相机”的兼容模式，只改相机背景，不再泛改 backgroundColor，避免误伤瓶子/液体材质。
           content = patchUnityCameraBackgroundTransparent(content);
         } else if (useTransparentCanvas) {
@@ -5009,21 +5166,28 @@ word-break:normal;
           content = patchUnityBackgroundColor(content, color, false);
           content = patchCssFallbackBackgrounds(content, color, false);
         }
-        stats.push(canvas2DBackgroundPatch.changed
-          ? (useTexture ? "游戏背景：已换图" : "游戏背景：已换色")
-          : (optTextureReplace.checked ? "游戏内背景：已启用替换" : (useTexture ? "背景：已换图" : "背景：已换色")));
+        if (videoNeedsInjectedBackground) {
+          stats.push("原图片/纯色背景：已隐藏");
+        } else {
+          stats.push(canvas2DBackgroundPatch.changed
+            ? (useTexture ? "游戏背景：已换图" : "游戏背景：已换色")
+            : (optTextureReplace.checked ? "游戏内背景：已启用替换" : (useTexture ? "背景：已换图" : "背景：已换色")));
+        }
       }
 
       if (optVideoBackground.checked) {
         if (videoAction === "remove") {
           const patched = patchBackVideo(content, null);
           content = patched.content;
-          stats.push(patched.changed ? "视频背景：已移除" : "视频背景：未找到");
+          stats.push((patched.changed || hadInjectedVideoBackground) ? "视频背景：已移除" : "视频背景：未找到");
         } else if (videoAction === "replaceVideo") {
           if (videoDataUrl) {
-            const patched = patchBackVideo(content, videoDataUrl);
-            content = patched.content;
-            stats.push(patched.changed ? "视频背景：已换成新视频" : "视频背景：未找到");
+            if (nativeVideoReplacement.changed) {
+              stats.push("视频背景：已换成新视频");
+            } else {
+              content = injectIntoHead(content, makeVideoBackgroundPatch(videoDataUrl));
+              stats.push("背景：已换成新视频（通用视频层）");
+            }
           } else {
             stats.push("视频背景：未选择新视频");
           }
@@ -5031,14 +5195,14 @@ word-break:normal;
           if (textureDataUrl) {
             const patched = patchBackVideo(content, null);
             content = patched.content;
-            stats.push(patched.changed ? "视频背景：已换成图片" : "视频背景：未找到");
+            stats.push((patched.changed || hadInjectedVideoBackground) ? "视频背景：已换成图片" : "视频背景：未找到");
           } else {
             stats.push("视频背景：未选择图片");
           }
         } else if (videoAction === "replaceColor") {
           const patched = patchBackVideo(content, null);
           content = patched.content;
-          stats.push(patched.changed ? "视频背景：已换成纯色" : "视频背景：未找到");
+          stats.push((patched.changed || hadInjectedVideoBackground) ? "视频背景：已换成纯色" : "视频背景：未找到");
         } else {
           stats.push("视频背景：已保留");
         }
@@ -5701,7 +5865,23 @@ word-break:normal;
       }
     });
 
+    function activateOrdinaryBackgroundFromColor() {
+      const colorMode = document.querySelector('input[name="bgMode"][value="color"]');
+      if (colorMode) colorMode.checked = true;
+      if (!optBackground.checked) {
+        optBackground.checked = true;
+        optBackground.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        updateBackgroundModeUI();
+        syncActiveVideoModeFromBackground();
+      }
+    }
+
+    bgColor.addEventListener("pointerdown", activateOrdinaryBackgroundFromColor);
+    bgColor.addEventListener("focus", activateOrdinaryBackgroundFromColor);
+    bgColor.addEventListener("change", activateOrdinaryBackgroundFromColor);
     bgColor.addEventListener("input", () => {
+      activateOrdinaryBackgroundFromColor();
       bgPreview.style.backgroundColor = bgColor.value;
     });
 
@@ -5754,11 +5934,18 @@ word-break:normal;
     }
 
     document.querySelectorAll('input[name="bgMode"]').forEach(input => {
-      input.addEventListener("change", () => {
-        optBackground.checked = true;
+      const activateBackgroundMode = () => {
+        if (!optBackground.checked) {
+          optBackground.checked = true;
+          optBackground.dispatchEvent(new Event("change", { bubbles: true }));
+          return;
+        }
         updateBackgroundModeUI();
         syncActiveVideoModeFromBackground();
-      });
+      };
+      input.addEventListener("change", activateBackgroundMode);
+      // 已选中的单选项再次点击时不会触发 change；click 用于确保“纯色”也能自动启用普通背景。
+      input.addEventListener("click", activateBackgroundMode);
     });
 
     optBackground.addEventListener("change", () => {
