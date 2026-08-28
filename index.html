@@ -1252,7 +1252,7 @@
       <h1>试玩 HTML 参数修改工具</h1>
       <a class="guide-link" href="https://docs.google.com/document/d/1N2JvuvVUywZDKVhTxuvjpYEXqrjCW9cOZMUBVEm1M5U/edit" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.4.0 · 先检测，少量修改，生成后先预览</div>
+      <div class="version">Ray · v1.4.1 · 先检测，少量修改，生成后先预览</div>
     </div>
 
     <div class="operation-status" id="operationStatus" role="status" aria-live="polite" hidden>
@@ -3194,6 +3194,15 @@ ${hideSelectors.join(",\n")} {
     if (!removeHand || typeof source !== "string") return source;
     var original = source;
     var completedBlockingGuide = false;
+    if (
+      source.indexOf('Bridge.define("GuideUI"') >= 0 &&
+      source.indexOf("GuideHand.SetActive(!0)") >= 0
+    ) {
+      source = source.replace(
+        /(ShowGuide:function\\(\\)\\s*\\{)this\\.showingGuide\\s*=\\s*!0\\s*,\\s*this\\.GuideHand\\.SetActive\\(\\s*!0\\s*\\)(\\s*\\})/g,
+        "$1this.HideGuide();return$2"
+      );
+    }
     if (source.indexOf('Bridge.define("GuidePanel"') >= 0) {
       var guidePanelOriginal = source;
       source = source
