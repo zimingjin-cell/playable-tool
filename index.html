@@ -1275,7 +1275,7 @@
       <h1>试玩 HTML 参数修改工具</h1>
       <a class="guide-link" href="https://docs.google.com/document/d/1N2JvuvVUywZDKVhTxuvjpYEXqrjCW9cOZMUBVEm1M5U/edit" target="_blank" rel="noopener noreferrer">使用说明</a>
       </div>
-      <div class="version">Ray · v1.4.2 · 先检测，少量修改，生成后先预览</div>
+      <div class="version">Ray · v1.4.3 · 先检测，少量修改，生成后先预览</div>
     </div>
 
     <aside class="usage-notice" aria-labelledby="usageNoticeTitle">
@@ -1393,7 +1393,7 @@
               </label>
               <label class="option">
                 <input id="optRemoveCta" type="checkbox">
-                <span><strong>去掉下载/安装按钮</strong>隐藏 Play Now、Install、Download 等下载或安装按钮，并关闭相关点击入口。</span>
+                <span><strong>去掉下载/安装按钮</strong>隐藏 Play Now、Install、Download 等下载或安装按钮，并关闭相关点击入口；支持部分游戏画面内的下载按钮。</span>
               </label>
               <label class="option">
                 <input id="optRemoveDynamicWatermark" type="checkbox">
@@ -2131,7 +2131,8 @@
       const knownEmbeddedHands = inspectKnownEmbeddedHandAssets(content);
       const ctaIconSignals = [
         { label: "应用图标或 Logo", count: countMatches(content, /\b(?:gameLogo|appLogo|appIcon|storeIcon|showLogo|logoImageUrl)\b/gi) },
-        { label: "下载或安装按钮", count: countMatches(content, /\b(?:persistentCta|persistentCTA|ctaBtn|ctaButton|showPersistentCTA|Play Now|Install|Download)\b/gi) }
+        { label: "游戏画面可能含内置按钮（需预览）", count: /LunaUnity\.Application/.test(content) && /\bdecompressString\s*\(/.test(content) ? 1 : 0 },
+        { label: "下载或安装按钮", count: countMatches(content, /\b(?:persistentCta|persistentCTA|ctaBtn|ctaButton|showPersistentCTA|Play Now|Install|Download|Start Now|BtnStart)\b/gi) }
       ].filter(item => item.count > 0);
       const guideProfile = analyzeGuideProfile(content, knownEmbeddedHands);
       const guideSignals = guideProfile.signals;
@@ -2613,18 +2614,53 @@
       return { content, changed: false, mode: "none" };
     }
 
+    // Only treat a controller as a CTA when its entire Start method binds a store action.
+    // A button named Start/Play can also start gameplay, so its name/text is not evidence.
+    function patchCanvasCtaSource(source) {
+      const controllers = [];
+      if (typeof source !== "string") return { content: source, controllers, count: 0 };
+      const storeButtonController = /(Bridge\.define\("([A-Za-z_$][\w.$]*)",\{inherits:\[UnityEngine\.MonoBehaviour\],methods:\{Start:function\(\)\{)this\.GetComponent\(UnityEngine\.UI\.Button\)\.onClick\.AddListener\((?:StoreUtils\.OpenStore|Luna\.Unity\.Playable\.InstallFullGame)\);?(\}\}\}\))/g;
+      const content = source.replace(storeButtonController, (match, prefix, name, suffix) => {
+        controllers.push(name);
+        return prefix + "this.gameObject.SetActive(false)" + suffix;
+      });
+      return { content, controllers, count: controllers.length };
+    }
+
+    function makeCanvasCtaCleanupPatch() {
+      return `<script id="codex-disable-canvas-cta-ui">
+(function(){
+  var patchSource = ${patchCanvasCtaSource.toString()};
+  var stats = window.__codexCanvasCtaStatsV143 = { sourceControllers: 0, controllers: [] };
+  window.__codexCtaSourcePatch = function(source){
+    var result = patchSource(source);
+    if (result.count) {
+      stats.sourceControllers += result.count;
+      result.controllers.forEach(function(name){
+        if (stats.controllers.indexOf(name) < 0) stats.controllers.push(name);
+      });
+    }
+    return result.content;
+  };
+})();
+<\/script>`;
+    }
+
     function patchLunaCompressedRuntimeLoaders(content) {
       let count = 0;
+      function patchedArgument(codeName) {
+        const guideCode = "(window.__codexGuideSourcePatch ? window.__codexGuideSourcePatch(" + codeName + ") : " + codeName + ")";
+        return "(window.__codexCtaSourcePatch ? window.__codexCtaSourcePatch(" + guideCode + ") : " + guideCode + ")";
+      }
+      // Upgrade files already processed by older hand-removal versions as well.
+      content = content.replace(
+        /window\.eval\(\s*\(window\.__codexGuideSourcePatch\s*\?\s*window\.__codexGuideSourcePatch\(([A-Za-z_$][\w$]*)\)\s*:\s*\1\)\s*\)/g,
+        (match, codeName) => { count++; return "window.eval(" + patchedArgument(codeName) + ")"; }
+      );
       const runtimeLoaderPattern = /(decompressString\(\s*"(?:\\[\s\S]|[^"\\])*"\s*,\s*(?:true|false)\s*\)\.then\(\s*function\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{\s*window\.eval\(\s*)\2(\s*\)\s*;?\s*\}\s*\))/g;
       content = content.replace(runtimeLoaderPattern, (match, prefix, codeName, suffix) => {
         count++;
-        return prefix +
-          "(window.__codexGuideSourcePatch ? window.__codexGuideSourcePatch(" +
-          codeName +
-          ") : " +
-          codeName +
-          ")" +
-          suffix;
+        return prefix + patchedArgument(codeName) + suffix;
       });
       return { content, count };
     }
@@ -2662,6 +2698,9 @@
           "ctaEnabled",
           "tapRedirectEnabled"
         ];
+        const canvasCtaResult = patchCanvasCtaSource(content);
+        content = canvasCtaResult.content;
+        report.cta.count += canvasCtaResult.count;
         content = patchBooleanConfig(content, ctaKeys, false, report.cta);
         content = patchBooleanAssignments(content, ctaKeys, false, report.cta);
       }
@@ -5062,6 +5101,7 @@ word-break:normal;
 
       content = removePatchById(content, "codex-hide-playable-ui");
       content = removePatchById(content, "codex-disable-cta-hand-ui");
+      content = removePatchById(content, "codex-disable-canvas-cta-ui");
       content = removePatchById(content, "codex-hide-dynamic-watermark");
       content = removePatchById(content, "codex-remove-dynamic-watermark");
       const guideAssetsBeforePatch = inspectKnownEmbeddedHandAssets(content);
@@ -5086,14 +5126,17 @@ word-break:normal;
           content = lunaHandResult.content;
           embeddedHandResult = replaceKnownEmbeddedHandAssets(content);
           content = embeddedHandResult.content;
-          if (guideProfile.lunaCompressedCount > 0) {
-            content = patchLunaCompressedRuntimeLoaders(content).content;
-          }
+        }
+        if (uiCleanupOptions.hideCta || (uiCleanupOptions.removeHand && guideProfile.lunaCompressedCount > 0)) {
+          content = patchLunaCompressedRuntimeLoaders(content).content;
         }
         sourceCleanupResult = patchUiCleanupSource(content, uiCleanupOptions);
         content = sourceCleanupResult.content;
         if (uiCleanupOptions.hideIcon || uiCleanupOptions.hideCta || uiCleanupOptions.removeHand || uiCleanupOptions.removeBroadGuide) {
           content = injectIntoHead(content, makeUiCleanupPatch(uiCleanupOptions));
+        }
+        if (uiCleanupOptions.hideCta) {
+          content = injectIntoHead(content, makeCanvasCtaCleanupPatch());
         }
         if (uiCleanupOptions.removeWatermark) {
           content = injectIntoHead(content, makeDynamicWatermarkPatch());
